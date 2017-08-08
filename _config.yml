@@ -3,6 +3,7 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
+=======
 title: 学习笔记
 subtitle: 
 description: 记录学习中的点点滴滴
@@ -12,6 +13,7 @@ timezone:
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
+=======
 url: https://konnase.github.io
 root: /
 permalink: :year/:month/:day/:title/
@@ -72,12 +74,14 @@ pagination_dir: page
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
+=======
 theme: jacman
 stylus: true
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
+=======
   type: git
   repo: https://github.com/konnase/konnase.github.io.git
   branch: master
