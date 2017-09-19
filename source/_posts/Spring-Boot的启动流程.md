@@ -95,3 +95,4 @@ public ConfigurableApplicationContext run(String... args) {
 5. 回到run方法内，prepareContext方法将listeners、environment、applicationArguments、banner等重要组件与上下文对象关联
 
 6. 接下来的refreshContext(context)方法(初始化方法如下)将是实现spring-boot-starter-*(mybatis、redis等)自动化配置的关键，包括spring.factories的加载，bean的实例化等核心工作。
+   
