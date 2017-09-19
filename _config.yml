@@ -79,5 +79,5 @@ stylus: true
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
   type: git
-  repo: https://github.com/konnase/konnase.github.io.git
+  repo: git@github.com:konnase/konnase.github.io.git
   branch: master
