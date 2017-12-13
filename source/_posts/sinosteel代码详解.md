@@ -251,3 +251,233 @@ queryStandards方法前面加上了@RequiresAuthorization注解，看一下@Requ
 
 **总结一下**：@RequiresAuthorization注解是通过切面来实现的，用户在浏览器访问/queryStandards时，该切面便会执行，完成权限控制。
 
+## shiro注解授权源码实现
+### 授权流程
+概括的说，shiro在实现注解授权时采用的是Spring AOP的方式。
+从com.sinosteel.framework.config.shiro.ShiroConfig开始，该类用@Configuration注解，表示为一个Spring IoC容器，往IoC容器中加入一个Bean
+```java
+@Bean
+public AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor(SecurityManager securityManager)
+{
+	AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor = new AuthorizationAttributeSourceAdvisor();
+	authorizationAttributeSourceAdvisor.setSecurityManager(securityManager);
+	return authorizationAttributeSourceAdvisor;
+}
+```
+AuthorizationAttributeSourceAdvisor继承自StaticMethodMatcherPointcutAdvisor，StaticMethodMatcherPointcutAdvisor为静态方法匹配器切点定义的切面，默认情况下，匹配所有的目标类；继承自PointcutAdvisor，代表具有切点的切面，它包含Advice和Pointcut两个类，这样我们就可以通过类、方法名以及方法方位等信息灵活地定义切面的连接点，提供更具适用性的切面。将shiro的securityManager传入AuthorizationAttributeSourceAdvisor中。
+AuthorizationAttributeSourceAdvisor类定义了一个切面，如下：
+```java
+public class AuthorizationAttributeSourceAdvisor extends StaticMethodMatcherPointcutAdvisor {
+
+    private static final Logger log = LoggerFactory.getLogger(AuthorizationAttributeSourceAdvisor.class);
+
+    private static final Class<? extends Annotation>[] AUTHZ_ANNOTATION_CLASSES =
+            new Class[] {
+                    RequiresPermissions.class, RequiresRoles.class,
+                    RequiresUser.class, RequiresGuest.class, RequiresAuthentication.class
+            };
+
+    protected SecurityManager securityManager = null;
+
+    /**
+     * Create a new AuthorizationAttributeSourceAdvisor.
+     */
+    public AuthorizationAttributeSourceAdvisor() {
+        **setAdvice**(new AopAllianceAnnotationsAuthorizingMethodInterceptor());
+    }
+
+    public SecurityManager getSecurityManager() {
+        return securityManager;
+    }
+
+    public void setSecurityManager(org.apache.shiro.mgt.SecurityManager securityManager) {
+        this.securityManager = securityManager;
+    }
+
+    /**
+     * Returns <tt>true</tt> if the method has any Shiro annotations, false otherwise.
+     * The annotations inspected are:
+     * <ul>
+     * <li>{@link org.apache.shiro.authz.annotation.RequiresAuthentication RequiresAuthentication}</li>
+     * <li>{@link org.apache.shiro.authz.annotation.RequiresUser RequiresUser}</li>
+     * <li>{@link org.apache.shiro.authz.annotation.RequiresGuest RequiresGuest}</li>
+     * <li>{@link org.apache.shiro.authz.annotation.RequiresRoles RequiresRoles}</li>
+     * <li>{@link org.apache.shiro.authz.annotation.RequiresPermissions RequiresPermissions}</li>
+     * </ul>
+     *
+     * @param method      the method to check for a Shiro annotation
+     * @param targetClass the class potentially declaring Shiro annotations
+     * @return <tt>true</tt> if the method has a Shiro annotation, false otherwise.
+     * @see org.springframework.aop.MethodMatcher#matches(java.lang.reflect.Method, Class)
+     */
+    public boolean matches(Method method, Class targetClass) {
+        Method m = method;
+
+        if ( isAuthzAnnotationPresent(m) ) {
+            return true;
+        }
+
+        //The 'method' parameter could be from an interface that doesn't have the annotation.
+        //Check to see if the implementation has it.
+        if ( targetClass != null) {
+            try {
+                m = targetClass.getMethod(m.getName(), m.getParameterTypes());
+                if ( isAuthzAnnotationPresent(m) ) {
+                    return true;
+                }
+            } catch (NoSuchMethodException ignored) {
+                //default return value is false.  If we can't find the method, then obviously
+                //there is no annotation, so just use the default return value.
+            }
+        }
+
+        return false;
+    }
+
+    private boolean isAuthzAnnotationPresent(Method method) {
+        for( Class<? extends Annotation> annClass : AUTHZ_ANNOTATION_CLASSES ) {
+            Annotation a = AnnotationUtils.findAnnotation(method, annClass);
+            if ( a != null ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+}
+```
+AuthorizationAttributeSourceAdvisor类中的setAdvice方法，传入一个Advice（通知）。查看AopAllianceAnnotationsAuthorizingMethodInterceptor的继承关系发现该类继承自org.aopalliance.aop.Advice和org.apache.shiro.aop.MethodInterceptor
+![image](/img/inherit_aopmethod_interceptor.png)
+AopAllianceAnnotationsAuthorizingMethodInterceptor的方法如下：
+```java
+public AopAllianceAnnotationsAuthorizingMethodInterceptor() {
+    List<AuthorizingAnnotationMethodInterceptor> interceptors =
+            new ArrayList<AuthorizingAnnotationMethodInterceptor>(5);
+
+    //use a Spring-specific Annotation resolver - Spring's AnnotationUtils is nicer than the
+    //raw JDK resolution process.
+    AnnotationResolver resolver = new SpringAnnotationResolver();
+    //we can re-use the same resolver instance - it does not retain state:
+    interceptors.add(new RoleAnnotationMethodInterceptor(resolver));
+    interceptors.add(new PermissionAnnotationMethodInterceptor(resolver));
+    interceptors.add(new AuthenticatedAnnotationMethodInterceptor(resolver));
+    interceptors.add(new UserAnnotationMethodInterceptor(resolver));
+    interceptors.add(new GuestAnnotationMethodInterceptor(resolver));
+
+    setMethodInterceptors(interceptors);
+}
+```
+可以看到，这里添加了5个AuthorizingAnnotationMethodInterceptor，分别对应@RequiresRoles注解权限、@RequiresPermissions注解权限、@RequiresAuthentication注解权限、@RequiresUser注解权限和@RequiresGuest注解权限。这里以@RequiresPermissions为例展开讨论。
+PermissionAnnotationMethodInterceptor内部构造器：
+```java
+public PermissionAnnotationMethodInterceptor(AnnotationResolver resolver) {
+    super( new PermissionAnnotationHandler(), resolver);
+}
+```
+上面代码new一个PermissionAnnotationHandler对象。然后PermissionAnnotationHandler对象的构造器设置annotationClass = RequiresPermissions.class，如下
+```java
+public PermissionAnnotationHandler() {
+    super(RequiresPermissions.class);
+}
+```
+这样PermissionAnnotationMethodInterceptor就设置好了，回到AopAllianceAnnotationsAuthorizingMethodInterceptor方法拦截器中，代理对象的方法被调用时触发回调方法invoke()，调用父类AuthorizingMethodInterceptor的invoke()方法，如下：
+```java
+public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+        assertAuthorized(methodInvocation);
+        return methodInvocation.proceed();
+    }
+```
+
+
+### @RequiresPermissions的实现
+授权处理过程 
+认证通过后接受 Shiro 授权检查，授权验证时，需要判断当前角色是否拥有该权限。只有授权通过，才可以访问受保护 URL 对应的资源，否则跳转到“未经授权页面”。在sinosteel中，自定义com.sinosteel.framework.core.auth.StatelessAuthorizingRealm类，当访问被@RequiresPermissions注解的方法时，会先执行StatelessAuthorizingRealm.doGetAuthorizationInfo()进行授权。该方法代码如下：
+```java
+@Override
+    protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) 
+    {
+    	String username = (String) principals.getPrimaryPrincipal();
+    	SimpleAuthorizationInfo authorizationInfo = new SimpleAuthorizationInfo();
+    	
+    	JSONObject userInfoJson = CacheUtil.getUserInfoJson(username);
+    	if(userInfoJson == null)
+    	{
+    		User user = userRepository.findByUsername(username);  
+        	if(user == null)
+        	{
+                return null;
+            }
+        	
+        	userInfoJson = CacheUtil.saveUserInfoCache(user);
+    	}
+    	
+    	JSONArray rolesJsonArray = userInfoJson.getJSONArray("roles");
+    	for(int i = 0; i < rolesJsonArray.size(); i++)
+    	{
+    		String roleString = rolesJsonArray.getString(i);
+    		authorizationInfo.addRole(roleString);
+    	}
+    	
+    	JSONArray functionsJsonArray = userInfoJson.getJSONArray("functions");
+    	for(int i = 0; i < functionsJsonArray.size(); i++)
+    	{
+    		String functionString = functionsJsonArray.getString(i);
+    		authorizationInfo.addStringPermission(functionString);
+    	}
+
+    	return authorizationInfo;
+    }
+```
+首先通过principals参数获取username，然后通过username得到该用户的详细信息。接着将该用户的角色和权限信息加入到authorizationInfo中，返回给调用方。shiro内部获取到authorizationInfo之后即可判断用户是否有权限访问响应的资源。
+在com.sinosteel.framework.config.shiro.ShiroConfig类中，定义了一个Spring IoC容器，配置了securityManager，并配置securityManager的subjectFactory（用于产生subject，setSessionCreationEnabled(false)，表示不创建会话，将web应用做成无会话的），sessionManager（会话管理）和realm（就是自定义的com.sinosteel.framework.core.auth.StatelessAuthorizingRealm）。
+还定义了StatelessAccessControlFilter，根据当前请求上下文信息每次请求时都要登录的认证过滤器，重写onAccessDenied方法：
+```java
+@Override
+    protected boolean onAccessDenied(ServletRequest request, ServletResponse response) throws Exception 
+    {
+    	String clientDigest = request.getParameter("clientDigest");
+    	String username = request.getParameter("username");
+
+    	StatelessAuthenticationToken token = new StatelessAuthenticationToken(username, clientDigest);
+    	
+    	try 
+    	{
+    		getSubject(request, response).login(token);
+    		return true;
+    	} 
+    	catch (Exception e) 
+    	{
+    		e.printStackTrace();
+    		onLoginFail(response);
+           
+    		return false;
+    	}
+    }
+```
+客户端在验证时，除了发送用户名和密码外，还需要发送使用基于散列的消息认证码生成的消息摘要，StatelessAccessControlFilter收到验证请求后，根据username和消息摘要生成无状态的token，并交由StatelessAuthorizingRealm进行验证。StatelessAuthorizingRealm的doGetAuthenticationInfo方法
+```java
+@Override
+    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException 
+    {	
+    	StatelessAuthenticationToken statelessToken = (StatelessAuthenticationToken)token;
+    	String username = (String)statelessToken.getPrincipal();
+    	
+    	JSONObject userInfoJson = CacheUtil.getUserInfoJson(username);
+    	if(userInfoJson == null)
+    	{ 	
+    		User user = userRepository.findByUsername(username);  
+        	if(user == null)
+        	{
+                return null;
+            }
+        	
+        	userInfoJson = CacheUtil.saveUserInfoCache(user);
+    	}
+    	
+    	String serverDigest = HmacSHA256Util.digest(getKey(username), userInfoJson.getString("password"));
+
+    	SimpleAuthenticationInfo authenticationInfo = new SimpleAuthenticationInfo(username, serverDigest, getName());
+    	return authenticationInfo;
+    }
+```
+此处首先根据客户端传入的用户名获取相应的密钥，然后使用密钥对请求参数生成服务器端的消息摘要serverDigest；然后生成authenticationInfo，返回给调用方，与客户端的消息摘要进行匹配；如果匹配，说明是合法客户端传入的，则login成功；否则是非法的。
