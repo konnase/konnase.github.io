@@ -1,7 +1,7 @@
 ---
 title: sinosteel @RequiresPermissions注解实现流程
 date: 2017-11-25 14:41:00
-tags: [spring, aop, annotation, interceptor]
+tags: [spring, aop, annotation, interceptor, shiro]
 ---
 
 [Github代码仓库](https://github.com/DimitriZhao/sinosteel.git)
@@ -9,7 +9,7 @@ tags: [spring, aop, annotation, interceptor]
 ## shiro注解授权源码实现
 ### 授权流程
 概括的说，shiro在实现注解授权时采用的是Spring AOP的方式。
-从com.sinosteel.framework.config.shiro.ShiroConfig开始，该类用@Configuration注解，表示为一个Spring IoC容器，往IoC容器中加入两个Bean
+在Controller里面的相关方法上添加@RequiresPermissions()注解，Shiro即可自动调用AuthorizationAttributeSourceAdvisor进行AOP操作。从自定义的com.sinosteel.framework.config.shiro.ShiroConfig类开始，该类用@Configuration注解，表示为一个Spring IoC容器，往IoC容器中加入两个Bean
 ```java
 @Bean
 public AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor(SecurityManager securityManager)
@@ -306,6 +306,7 @@ getAuthorizationInfo(principals)方法是获取对象拥有的权限信息，如
             log.trace("Retrieving AuthorizationInfo for principals [" + principals + "]");
         }
 
+        //查缓存，如果有AuthorizationInfo则返回
         Cache<Object, AuthorizationInfo> cache = getAvailableAuthorizationCache();
         if (cache != null) {
             if (log.isTraceEnabled()) {

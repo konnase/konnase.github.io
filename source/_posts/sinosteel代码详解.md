@@ -1,7 +1,7 @@
 ---
 title: sinosteel代码详解
 date: 2017-11-10 14:55:14
-tags: [spring, annotation, aspect, hibernate, mybatis]
+tags: [spring, annotation, aspect, hibernate, mybatis, shiro]
 ---
 
 [Github代码仓库](https://github.com/DimitriZhao/sinosteel.git)
@@ -215,7 +215,7 @@ queryStandards方法前面加上了@RequiresAuthorization注解，看一下@Requ
 
 进入filterData方法：
 遍历dataJsonArrary，对每一个查询到的Standard结果，获取创建该Standard的用户的ID，即createdUserID，并取得该用户所在的组织的ID，即authorizedOrganizationIds。判断queryScope（删除和修改操作对应的是deleteScope和editScope）的值：
-```
+```java
     //控制query权限
 	switch(queryScope)
 	{
@@ -388,47 +388,6 @@ public Object invoke(MethodInvocation methodInvocation) throws Throwable {
     }
 ```
 
-
-### @RequiresPermissions的实现
-授权处理过程 
-认证通过后接受 Shiro 授权检查，授权验证时，需要判断当前角色是否拥有该权限。只有授权通过，才可以访问受保护 URL 对应的资源，否则跳转到“未经授权页面”。在sinosteel中，自定义com.sinosteel.framework.core.auth.StatelessAuthorizingRealm类，当访问被@RequiresPermissions注解的方法时，会先执行StatelessAuthorizingRealm.doGetAuthorizationInfo()进行授权。该方法代码如下：
-```java
-@Override
-    protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) 
-    {
-    	String username = (String) principals.getPrimaryPrincipal();
-    	SimpleAuthorizationInfo authorizationInfo = new SimpleAuthorizationInfo();
-    	
-    	JSONObject userInfoJson = CacheUtil.getUserInfoJson(username);
-    	if(userInfoJson == null)
-    	{
-    		User user = userRepository.findByUsername(username);  
-        	if(user == null)
-        	{
-                return null;
-            }
-        	
-        	userInfoJson = CacheUtil.saveUserInfoCache(user);
-    	}
-    	
-    	JSONArray rolesJsonArray = userInfoJson.getJSONArray("roles");
-    	for(int i = 0; i < rolesJsonArray.size(); i++)
-    	{
-    		String roleString = rolesJsonArray.getString(i);
-    		authorizationInfo.addRole(roleString);
-    	}
-    	
-    	JSONArray functionsJsonArray = userInfoJson.getJSONArray("functions");
-    	for(int i = 0; i < functionsJsonArray.size(); i++)
-    	{
-    		String functionString = functionsJsonArray.getString(i);
-    		authorizationInfo.addStringPermission(functionString);
-    	}
-
-    	return authorizationInfo;
-    }
-```
-首先通过principals参数获取username，然后通过username得到该用户的详细信息。接着将该用户的角色和权限信息加入到authorizationInfo中，返回给调用方。shiro内部获取到authorizationInfo之后即可判断用户是否有权限访问响应的资源。
 在com.sinosteel.framework.config.shiro.ShiroConfig类中，定义了一个Spring IoC容器，配置了securityManager，并配置securityManager的subjectFactory（用于产生subject，setSessionCreationEnabled(false)，表示不创建会话，将web应用做成无会话的），sessionManager（会话管理）和realm（就是自定义的com.sinosteel.framework.core.auth.StatelessAuthorizingRealm）。
 还定义了StatelessAccessControlFilter，根据当前请求上下文信息每次请求时都要登录的认证过滤器，重写onAccessDenied方法：
 ```java

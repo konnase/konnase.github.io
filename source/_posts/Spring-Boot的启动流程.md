@@ -4,10 +4,23 @@ date: 2017-07-25 15:23:07
 tags: [spring boot,spring]
 ---
 
+写在前面。
+```xml
+<parent>
+
+    <groupId>org.springframework.boot</groupId>
+
+    <artifactId>spring-boot-starter-parent</artifactId>
+
+    <version>1.4.1.RELEASE</version>
+
+</parent> 
+```
+这个是spring boot 父节点依赖,引入这个之后相关的引入就不需要添加version配置，spring boot会自动选择最合适的版本进行添加。
 
 # 1. 程序启动入口
 
-```
+```java
 @SpringBootApplication
 public class WeatherApplication {
 
@@ -22,7 +35,7 @@ public class WeatherApplication {
 
 <!--more-->
 
-```
+```java
 @RestController
 public class WeatherController {
 
@@ -37,7 +50,7 @@ public class WeatherController {
 
 该方法位于org.framework.boot.SpringApplication类中：
 
-```
+```java
 public static ConfigurableApplicationContext run(Object source, String... args) {
     return run(new Object[] { source }, args);
 }
