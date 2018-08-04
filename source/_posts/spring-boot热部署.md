@@ -2,6 +2,7 @@
 title: spring-boot热部署
 date: 2018-01-20 16:27:03
 tags: [spring boot, hot deploy]
+categories: JAVA
 ---
 
 ## spring-boot热部署

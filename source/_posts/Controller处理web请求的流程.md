@@ -2,6 +2,7 @@
 title: Controller处理web请求的流程
 date: 2018-03-17 15:57:39
 tags: [spring, controller, dispatcherservlet]
+categories: JAVA
 ---
 
 ## Dispatcher Servlet是怎样被调用的？
@@ -109,7 +110,7 @@ protected void initStrategies(ApplicationContext context) {
     initFlashMapManager(context);
 }
 ```
-initStrategies方法初始化很多策略，包括handlerMapping、handlerAdapter等，如果从bean容器中找不到相关策略，则采用缺省的策略，即spring-webmvc jar包的文件org.springframework.web.servlet.DispatcherServlet.properties中的缺省值。如下：
+initStrategies方法初始化很多策略，包括handlerMapping、handlerAdapter等，如果从bean容器中找不到相关策略，则采用缺省的策略，即spring-webmvc jar包的文件org.springframework.web.servlet.DispatcherServlet.properties中的缺省值。如下：
 ```xml
 # Default implementation classes for DispatcherServlet's strategy interfaces.
 # Used as fallback when no matching beans are found in the DispatcherServlet context.

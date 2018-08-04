@@ -2,6 +2,7 @@
 title: sinosteel代码详解
 date: 2017-11-10 14:55:14
 tags: [spring, annotation, aspect, hibernate, mybatis, shiro]
+categories: JAVA
 ---
 
 [Github代码仓库](https://github.com/DimitriZhao/sinosteel.git)

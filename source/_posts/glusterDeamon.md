@@ -2,6 +2,7 @@
 title: glusterDeamon
 date: 2017-07-07 15:50:48
 tags: [glusterfs,install]
+categories: System
 ---
 
 ## connection failed check if gluster deamon is running
@@ -21,5 +22,8 @@ tags: [glusterfs,install]
 	sudo apt-get update
 	sudo apt-get install glusterfs-server
 
+## mount 出错
+查看/var/log/glusterfs/export.log出现：failed to get the port number for remote subvolume. Please run 'gluster volume status' on server to see if brick process is running
+执行`gluster volume status`发现本机Brick的TCP Port没有分配，即volume没有启起来，执行`gluster volume vol-name start force`即可
 * * *
 

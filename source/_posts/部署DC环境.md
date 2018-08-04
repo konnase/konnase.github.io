@@ -2,6 +2,7 @@
 title: 部署DC环境
 date: 2018-03-29 15:12:49
 tags: [docker, mesos, marathon, zookeeper, glusterfs, calico, docker registry]
+categories: Resource Management
 ---
 
 # 基础环境搭建
@@ -124,7 +125,7 @@ tags: [docker, mesos, marathon, zookeeper, glusterfs, calico, docker registry]
       agent2: echo 3 > /var/lib/zookeeper/myid
       ```
 
-  - 修改zookeeper文件：
+  - 修改zookeeper文件：
     ```bash
     # 备份zoo.cfg文件
     cp /etc/zookeeper/conf/zoo.cfg /etc/zookeeper/conf/zoo.cfg.bak
@@ -277,7 +278,7 @@ yum install etcd -y
 
 - 修改/usr/lib/systemd/system/etcd.service:
   ```bash
-  所有四个节点：
+  所有四个节点：
   [Unit]
   Description=Etcd Server
   After=network.target
@@ -333,7 +334,7 @@ yum install etcd -y
   ETCD_ENDPOINTS=http://master1:2379 calicoctl node run --node-image=master1:5000/calico/node:v2.6.8
   ```
   
-  检查calico/node是否运行：
+  检查calico/node是否运行：
   ```bash
   # docker ps
   CONTAINER ID  IMAGE                        COMMAND         CREATED        STATUS       PORTS     NAMES
@@ -460,7 +461,7 @@ EOF
     /etc/docker/registry/config.yml为上一步创建的config.yml
   - 执行`curl -X POST http://master1:8080/v2/apps -d@registry.json -H "Conten-type:application/json"`即在marathon上启动docker registry。
   - 测试registry是否创建成功
-    - `docker tag busybox master1:5000/busybox`
+    - `docker tag busybox master1:5000/busybox`
     - `docker push master1:5000/busybox`
     - 在agent1上执行：`docker pull master1:5000/busybox`成功。
   

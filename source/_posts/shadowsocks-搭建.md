@@ -2,6 +2,7 @@
 title: shadowsocks 搭建
 date: 2018-01-04 14:03:41
 tags: [shadowsocks, switchyomege, chrome]
+categories: System
 ---
 ## switchyOmega+shadowsocks+chrome科学上网
 

@@ -2,6 +2,7 @@
 title: win10 ubuntu子系统的学习心得
 date: 2017-07-23 15:08:48
 tags: [ubuntu in win10,configuraton]
+categories: System
 ---
 
 ## Ubuntu子系统的文件存放位置

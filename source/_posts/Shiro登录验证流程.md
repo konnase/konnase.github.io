@@ -2,6 +2,7 @@
 title: Shiro登录验证流程
 date: 2018-03-19 15:14:13
 tags: [shiro, authentication]
+categories: JAVA
 ---
 
 # Shiro登录验证的实现和验证流程
@@ -26,7 +27,7 @@ tags: [shiro, authentication]
 
 ### 配置文件ShiroConfig
 
-本篇博客以sinosteel代码分析。以上用到的核心类在com.sinosteel.framework.config.shiro包下面实现了。首先看com.sinosteel.framework.config.shiro.ShiroConfig类，其中ShiroFilterFactoryBean和DefaultWebSecurityManager这两项是在Spring中引入Shiro的基本配置，前者用于配置过滤器的过滤规则，后者用于生成全局的securitymanager。该类将核心类都注册到IoC容器中。：
+本篇博客以sinosteel代码分析。以上用到的核心类在com.sinosteel.framework.config.shiro包下面实现了。首先看com.sinosteel.framework.config.shiro.ShiroConfig类，其中ShiroFilterFactoryBean和DefaultWebSecurityManager这两项是在Spring中引入Shiro的基本配置，前者用于配置过滤器的过滤规则，后者用于生成全局的securitymanager。该类将核心类都注册到IoC容器中。：
 ```java
 @Configuration
 public class ShiroConfig 
@@ -122,7 +123,7 @@ public class ShiroConfig
     	return statelessAuthcFilter;
     }
 
-    //定义切面，最后这两个Bean是用于权限控制的，不是用于登录验证，这里可以不看
+    //定义切面，最后这两个Bean是用于权限控制的，不是用于登录验证，这里可以不看
     @Bean
     public AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor(SecurityManager securityManager)
     {
@@ -279,7 +280,7 @@ public class StatelessAuthorizingRealm extends AuthorizingRealm
 }
 
 ```
-至此，登录验证就实现了。总结一下，首先引入Shiro基本配置，然后编写StatelessDefaultSubjectFactory类，用以生产subject；配置无状态web登录；编写消息摘要算法用以消息加密和StatelessAuthenticationToken用以存储用户名和摘要；编写StatelessAccessControlFilter实现对登录请求的过滤，编写StatelessAuthorizingRealm获取token并生成服务端token，用于shiro认证。
+至此，登录验证就实现了。总结一下，首先引入Shiro基本配置，然后编写StatelessDefaultSubjectFactory类，用以生产subject；配置无状态web登录；编写消息摘要算法用以消息加密和StatelessAuthenticationToken用以存储用户名和摘要；编写StatelessAccessControlFilter实现对登录请求的过滤，编写StatelessAuthorizingRealm获取token并生成服务端token，用于shiro认证。
 
 
 
@@ -357,7 +358,7 @@ public void login(AuthenticationToken token) throws AuthenticationException {
 /**
     * First authenticates the {@code AuthenticationToken} argument, and if successful, constructs a
     * {@code Subject} instance representing the authenticated account's identity.
-    如果构造成功则返回一个Subject实例代表作为已经验证的用户的凭证
+    如果构造成功则返回一个Subject实例代表作为已经验证的用户的凭证
     * <p/>
     * Once constructed, the {@code Subject} instance is then {@link #bind bound} to the application for
     * subsequent access before being returned to the caller.
@@ -390,7 +391,7 @@ public Subject login(Subject subject, AuthenticationToken token) throws Authenti
     return loggedIn;
 }
 ```
-接着继续执行authenticate(token)方法，返回一个AuthenticationInfo，从这里可以看出，这个AuthenticationInfo肯定是要从我们自定义的StatelessAuthorizingRealm里面取得。我们一步一步分析，authenticate(token)方法如下：
+接着继续执行authenticate(token)方法，返回一个AuthenticationInfo，从这里可以看出，这个AuthenticationInfo肯定是要从我们自定义的StatelessAuthorizingRealm里面取得。我们一步一步分析，authenticate(token)方法如下：
 ```java
 /**
     * Delegates to the wrapped {@link org.apache.shiro.authc.Authenticator Authenticator} for authentication.

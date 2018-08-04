@@ -2,6 +2,7 @@
 title: Maven学习笔记
 date: 2017-11-05 12:59:16
 tags: [maven,spring]
+categories: JAVA
 ---
 
 ## TheNEXUS Maven By Example

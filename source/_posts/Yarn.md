@@ -2,6 +2,7 @@
 title: Yarn
 date: 2018-05-11 16:05:57
 tags: [yarn, scheduling]
+categories: Resource Management
 ---
 
 # Yarn

@@ -2,6 +2,7 @@
 title: cgroups
 date: 2018-05-13 14:00:30
 tags: [cgroups]
+categories: Resource Management
 ---
 
 # Cgroups

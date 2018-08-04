@@ -2,6 +2,7 @@
 title: sinosteel @RequiresPermissions注解实现流程
 date: 2017-11-25 14:41:00
 tags: [spring, aop, annotation, interceptor, shiro]
+categories: JAVA
 ---
 
 [Github代码仓库](https://github.com/DimitriZhao/sinosteel.git)
