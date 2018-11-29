@@ -2,7 +2,7 @@
 title: Shiro登录验证流程
 date: 2018-03-19 15:14:13
 tags: [shiro, authentication]
-categories: JAVA
+categories: java
 ---
 
 # Shiro登录验证的实现和验证流程

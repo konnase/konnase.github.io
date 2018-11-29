@@ -2,7 +2,7 @@
 title: Controller处理web请求的流程
 date: 2018-03-17 15:57:39
 tags: [spring, controller, dispatcherservlet]
-categories: JAVA
+categories: java
 ---
 
 ## Dispatcher Servlet是怎样被调用的？

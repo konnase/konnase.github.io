@@ -448,7 +448,7 @@ math:
   # Default(true) will load mathjax/katex script on demand
   # That is it only render those page who has 'mathjax: true' in Front Matter.
   # If you set it to false, it will load mathjax/katex srcipt EVERY PAGE.
-  per_page: true
+  per_page: false
 
   engine: mathjax
   #engine: katex
@@ -660,13 +660,13 @@ rating:
 # Show number of visitors to each article.
 # You can visit https://leancloud.cn get AppID and AppKey.
 leancloud_visitors:
-  enable: false
-  app_id: #<app_id>
-  app_key: #<app_key>
+  enable: true
+  app_id: 4eWkLSMGt6tz8ORW13zIeHyC-gzGzoHsz
+  app_key: el1f3eAjBDU7IWfM2JtfaHKg
   # Dependencies: https://github.com/theme-next/hexo-leancloud-counter-security
   # If you don't care about security in lc counter and just want to use it directly
   # (without hexo-leancloud-counter-security plugin), set the `security` to `false`.
-  security: true
+  security: false
   betterPerformance: false
 
 # Another tool to show number of visitors to each article.

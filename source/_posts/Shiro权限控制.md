@@ -2,7 +2,7 @@
 title: Shiro权限控制
 date: 2017-11-15 19:05:10
 tags: [shiro, authorization]
-categories: JAVA
+categories: java
 ---
 
 ## shiro实现访问权限控制和用户身份认证

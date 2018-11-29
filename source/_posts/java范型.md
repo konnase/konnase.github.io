@@ -2,7 +2,7 @@
 title: java范型
 date: 2017-11-13 14:57:28
 tags: [java, generic type, ]
-categories: JAVA
+categories: java
 ---
 
 ## self-bounded type

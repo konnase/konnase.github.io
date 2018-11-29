@@ -2,7 +2,7 @@
 title: Spring相关知识
 date: 2017-07-24 11:50:56
 tags: [spring,annotation,spring mvc]
-categories: JAVA
+categories: java
 ---
 
 ## 传统MVC控制器与RESTful Web Service控制器的不同

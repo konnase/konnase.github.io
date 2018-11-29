@@ -11,6 +11,7 @@ tags: [hexo]
 
 在执行完：```node install -g hexo```后，不要执行```hexo init```，进入到blog文件夹，执行`git init`，创建git仓库，执行`git remote add origin git@github.com:konnase/konnase.github.io.git`添加原来的环境所在的远程git仓库，执行`git pull origin hexo:master`将远程的仓库拉取到本地，执行`npm install`安装hexo相关环境。到此，即可无缝使用原来的hexo环境了。
 
+next主题的\_config.yml文件复制到source/\_data/next.yml，方便保存配置信息，因为next主题我是不会提交到git仓库中去保存的。
 ### next主题使用latex
 ```
 sudo npm uninstall hexo-renderer-marked

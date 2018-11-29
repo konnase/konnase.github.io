@@ -1,5 +1,5 @@
 ---
-title: glusterDeamon
+title: glusterDaemon
 date: 2017-07-07 15:50:48
 tags: [glusterfs,install]
 categories: System
