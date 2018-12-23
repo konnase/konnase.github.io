@@ -20,3 +20,6 @@ k8s的有两步调度策略
 ## Serviceaccount
 一个角色拥有指定的资源权限（可以访问k8s里面的哪些资源，如pods、sercices等）和功能权限（CRUD），通过将RoleBinding将一个role绑定到某个serviceaccount上，即可让资源可通过serviceaccount来访问。关系图如下：
 ![image](/img/resource--role.png)
+
+## NodeStatus
+在所有的 zones 都不健康（也即集群中没有健康 node）的极端情况下，node controller 将假设 master 的连接出了某些问题，它将停止所有删除动作直到一些连接恢复
