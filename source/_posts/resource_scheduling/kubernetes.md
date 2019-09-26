@@ -24,3 +24,7 @@ k8s的有两步调度策略
 
 ## NodeStatus
 在所有的 zones 都不健康（也即集群中没有健康 node）的极端情况下，node controller 将假设 master 的连接出了某些问题，它将停止所有删除动作直到一些连接恢复
+
+## containerd 架构
+[https://containerd.io/](https://containerd.io/)
+![architecture](/img/architecture.png)

@@ -28,3 +28,6 @@ $ tmux list-sessions
 # detach the currently attached session. ctrl-b + d means press key combination ctrl-b, then release the key combination, and then press key d
 $ tmux detach (ctrl-b + d)
 ```
+
+### 网络
+linux刚安装系统如果上不了网，检查`/etc/sysconfig/network-scripts/`下面的网卡是否挂载，尝试`ifup eth0`，这里的eth0表示网卡名称

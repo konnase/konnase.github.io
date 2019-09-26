@@ -6,7 +6,7 @@ tags: [deep learnig, scheduling]
 mathjax: true
 ---
 
-# 分布式机器学习相关会议
+## 分布式机器学习相关会议
 - 各大机器学习会议上（NIPS， ICML，ICLR）
 - 各大系统会议上（SOSP，OSDI，ATC，EuroSys，SoCC）
 - 应用对应的顶级会议上（CVPR，KDD）
@@ -23,46 +23,6 @@ mathjax: true
 - 微软的Adam
 
 <!--more-->
-
-## 神经网络相关内容
-
-### 神经网络
-- 多层神经网络需要非线性映射。如果全连接层没有非线性部分，只有线性部分，那么计算之后，线性的多层神经网络其实可以转换成一层的神经网络。故加入非线性层，多层神经网络才有意义。
-- 为防止使用sigmoid激活函数可能导致的梯度消失问题，激活函数一般取relu函数
-
-### 提高验证准确性的方法
-- 增加数据集：Adding more data augmentations often reduces the gap between training and validation accuracy. Data augmentation could be reduced in epochs closer to the end.
-- 初始学习率设置大一点：Start with a large learning rate and keep it large for a long time. For example, in CIFAR10, you could keep the learning rate at 0.1 for the first 200 epochs and then reduce it to 0.01.
-- batch size不能太大：Do not use a batch size that is too large, especially batch size >> number of classes.
-  - batch\_size增大，会使训练速度加快，不过太大会导致learning rate不好调，因为lr和batch size之间不是线性关系
-  - batch\_size太小，模型训练的慢
-
-### Data Augmentation
-人工增加训练集的大小，包括反射(image reflection)、平移(translation)、旋转(rotation)、加噪声等方法从已有的数据中创造一批新的数据
-
-### Batch Normalization
-CNN网络在训练的过程中，前一层的参数变化影响着后面层的变化（因为前面层的输出是后面的输入），而且这种影响会随着网络深度的增加而不断放大。在CNN训练时，绝大多数都采用mini-batch使用随机梯度下降算法进行训练，那么随着输入数据的不断变化，以及网络中参数不断调整，网络的各层输入数据的分布则会不断变化，那么各层在训练的过程中就需要不断的改变以适应这种新的数据分布，从而造成网络训练困难，难以拟合的问题。 
-
-BatchNorm的目的是将每一层的输入数据进行归一化(normalization)，使得每一层的数据分布是稳定的--均值0方差1，增加两个可学习的参数 β 和 γ ，对数据进行缩放和平移，从而达到加速训练的目的
-
-### momentum
-用来加速训练过程的。引入momentum后，采用如下公式：
-```
-    v = mu * v - learning_rate * dw
-    w = w + v
-```
-v初始为0，mu是一个超参数，一般设置为0.9。这样理解：如果上一次v和这一次的负梯度方向是相同的，则w下降的幅度会加大，从而使收敛的速度加快；反之，w下降的幅度会减小，收敛的速度减慢。
-
-### Softmax函数
-即归一化指数函数，Softmax函数将向量等比例压缩到[0,1]之间，且保证所有元素之和为1。在多分类问题中用作输出层。
-$$ softmax(i) = \frac{e^i}{\sum_{j}e^j} $$
-
-向量里面的每个元素都可能取到，只是取到的概率由softmax函数求出的值给出。
-
-在做反向传播的时候，也很方便，只需将softmax算出来的类别向量对应的真正结果的那一维减一就可以了。比如通过若干层的计算，最后得到的某个训练样本的向量的分数是[ 1, 5, 3 ],那softmax计算出来的概率就是$[\frac{e^1}{e^1 + e^3 + e^5},\frac{e^5}{e^1 + e^3 + e^5},\frac{e^3}{e^1 + e^3 + e^5}]=[ 0.015, 0.866, 0.117 ]$，如果这个样本正确的分类是第二个的话，那么计算出来的偏导就是$[ 0.015, 0.866 - 1, 0.117 ] = [ 0.015, -0.134, 0.117 ]$，然后根据这个偏导做反向传播，更新参数值。
-
-### resnet模型
-![](/img/resnet_params.png)
 
 ## 分布式机器学习的研究领域
 
@@ -116,6 +76,7 @@ $ \theta(t+1) = \theta(t) - \alpha * \Delta(\theta(t),D_p(t)) $
 
   ![allreduce](/img/pscl_fig_2_allreduce.png)
   ![allreduce](/img/pscl_fig_4_allreduce.png)
+  ![allreduce](/img/pscl_fig_5_allreduce.png)
 
   Process 1-4上面分别由4个chunk
   - scatter reduce: 执行完N-1步之后，每个Process上都会有一个完整的chunk（比如Process 4上包含了c\_11, c\_21, c\_31和c\_41，即所有进程的chunk 1）
@@ -134,8 +95,28 @@ $ \theta(t+1) = \theta(t) - \alpha * \Delta(\theta(t),D_p(t)) $
 ### 多任务调度
 深度学习作业都是运行时间较长的作业，所以一般一个timeslot都会比较大，比如可能40 min或者1 hour
 
+### 深度学习集群的异构性
+每个深度学习集群包括多个infiniband区域，每个infiniband又由多个机架（rack）组成。不同的机架上可能会安装有不同的加速设备（比如GPU、TPU、FPGA等）。这些加速设备可能会有一个PCIe接口，更进一步，可能会使用不同供应商特制的连接技术进行交互。这些设备或是直接与CPU连接，或是通过PCIe交换机与CPU连接。
+资源管理系统使用configuration set来描述设备类型、一个server上的设备拓扑和一个infiniband区域内的网络拓扑，scheduler使用bitmap获取设备资源用量以及表达资源请求量。
+
+#### 单个训练作业的性能
+单个job，如果拥有多个GPU，将job打包的越紧密，训练效果会越好。不过有些模型（如inception V3）可以忍受较为松散的packing
+
+#### 多个训练作业间的干扰
+深度学习作业依赖于GPU做计算加速，但是它还是要通过PCIe总线与CPU频繁的通信。因此，在同一server上的多个jobs之间会存在干扰。不同jobs放置的越近，干扰越大，则性能下降得更多
+![inter_job_inference](/img/inter_job_inference.png)
+
+#### 解决方案
+job scheduler利用资源抽象视图，在调度的时候考虑数据本地性和设备拓扑结构。集群空闲时，将jobs分散到集群中来避免干扰；集群高负荷时，将jobs pack得更紧凑，来给多GPU的jobs腾出空间
+
+### CPU的重要性
+在GPU训练中，CPU也扮演者重要的角色，下图说明CPU对训练性能的影响
+![cpu_demand_to_reach_max_perf](/img/cpu_demand_to_reach_max_perf.png)
+
+像Tensorflow会将GPU上的计算和CPU上的数据处理overlap起来，这样使得：如果GPU分配的好，即计算很快，那么CPU的用量将会很高
+
 ## 参考文献
 - [张昊的知乎专栏](https://zhuanlan.zhihu.com/p/30976469)
-- [深度学习--Batch Normalization 算法介绍](https://blog.csdn.net/lhanchao/article/details/70308092)
-- [Softmax的理解和应用](https://blog.csdn.net/superCally/article/details/54234115)
-- [technologies behind distributed deep learning allreduce](https://preferredresearch.jp/2018/07/10/technologies-behind-distributed-deep-learning-allreduce/)
+- [technologies behind distributed deep learning allreduce]distributed(https://preferredresearch.jp/2018/07/10/technologies-behind--deep-learning-allreduce/)
+- [All you need to know about scheduling deep learning jobs](https://www.sigops.org/src/srcsosp2017/sosp17src-final35.pdf)
+- [Scheduling CPU for GPU-based Deep Learning Jobs](https://dl.acm.org/citation.cfm?id=3275445)
