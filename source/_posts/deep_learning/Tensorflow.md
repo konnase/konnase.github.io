@@ -5,16 +5,7 @@ date: 2018-12-20 10:48:39
 tags: [deep learnig, tensorflow]
 mathjax: true
 ---
-<!-- TOC -->
 
-- [1. 模型](#1-%E6%A8%A1%E5%9E%8B)
-    - [1.1. Graph and Session](#11-graph-and-session)
-        - [1.1.1. 概念](#111-%E6%A6%82%E5%BF%B5)
-    - [1.2. 数据并行](#12-%E6%95%B0%E6%8D%AE%E5%B9%B6%E8%A1%8C)
-        - [1.2.1. in-graph replication](#121-in-graph-replication)
-        - [1.2.2. between-graph replication](#122-between-graph-replication)
-
-<!-- /TOC -->
 # 1. 模型
 ## 1.1. Graph and Session
 在分布式参数服务器架构训练中，`tf.train.replica_device_setter(ps_tasks=3)`可以用来指定将tf.Variable的放置位置，比如：
