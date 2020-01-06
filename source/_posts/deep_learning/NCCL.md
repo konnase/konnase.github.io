@@ -95,13 +95,13 @@ root@9a417caaf03b:~/nccl-tests# ./build/all_reduce_perf -b 8 -e 128M -f 2 -g 8
 
 ### ncclAllReduce是如何进行GPU间通信的？
 按照ring的形式还是tree的形式？查看[gtc 2017 nccl 2.0 report](http://on-demand.gputechconf.com/gtc/2017/presentation/s7155-jeaugey-nccl.pdf)，其中描述了nccl使用ring的形式在GPU之间交换数据，如下图：
-![](img/deep_learning/nccl-move-data-using-ring.jpg)
+![](/img/deep_learning/nccl-move-data-using-ring.jpg)
 同时，nccl 2.0在单线程调用多device时增加了手动调用的verb ncclGroupStart/ncclGroupEnd
-![](img/deep_learning/nccl2.0-group-device-call.jpg)
+![](/img/deep_learning/nccl2.0-group-device-call.jpg)
 可以看看知乎上的一个回答，介绍[nccl的设计和实验](https://www.zhihu.com/question/63219175)
 
 在nccl 2.4中引入了double binary trees，见[nccl2.4介绍文档](https://devblogs.nvidia.com/massively-scale-deep-learning-training-nccl-2-4/)，从效果来看延迟改善了不少，如下图：
-![](img/deep_learning/Summit-Latency.png)
+![](/img/deep_learning/Summit-Latency.png)
 double binary trees有待进一步研究
 
 ### ncclAllReduce是如何构造一条带宽最大的环？

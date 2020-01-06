@@ -11,6 +11,7 @@ mathjax: true
 ### 神经网络
 - 多层神经网络需要非线性映射。如果全连接层没有非线性部分，只有线性部分，那么计算之后，线性的多层神经网络其实可以转换成一层的神经网络。故加入非线性层，多层神经网络才有意义。
 - 为防止使用sigmoid激活函数可能导致的梯度消失问题，激活函数一般取relu函数
+- 每个神经元都是由输入图片（或者语音等）和该神经元所在层的前面所有层的连接矩阵（如卷积核）决定的，所以一个神经元其实就是一个变量，而连接矩阵是一组固定的权值，输入图片的不同会使该神经元输出不同的值。因此模型才能预测不同的图片所属的不同分类。我们保存的模型其实主要就是模型的连接矩阵，这也是神经网络训练过程中需要学习的
 
 ### 提高验证准确性的方法
 - 增加数据集：Adding more data augmentations often reduces the gap between training and validation accuracy. Data augmentation could be reduced in epochs closer to the end.

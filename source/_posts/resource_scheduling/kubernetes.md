@@ -28,3 +28,12 @@ k8s的有两步调度策略
 ## containerd 架构
 [https://containerd.io/](https://containerd.io/)
 ![architecture](/img/architecture.png)
+
+## 存储拓扑调度
+在k8s中，存储是以PVC-StorageClass-PV的形式产生的，而存储的调度和pod的调度是两个并行的操作（前者由PV controller调度，后者由scheduler调度），所以两个并行独立的调度过程就很可能导致最终的存储访问不满足nodeAffinity的需求（比如pod和PV分别被调度到两个不同的region，而这两个region不能互相访问存储）。为了解决这个问题，k8s使用了存储拓扑调度，即将PV和PVC的binding操作和动态创建PV的操作做了delay，delay到pod调度结果出来之后，再去做这两个操作。使得最终选择的node既满足pod的计算资源需求，又满足pod的PV的nodeAffinity需求。需求对一些组件进行改动：
+1. PV controller需求支持延迟binding
+2. 动态生成PV的组件。pod调度结果出来之后，根据pod的拓扑信息动态创建PV
+3. kube-scheduler：在选择node的时候考虑计算资源的同时，需要考虑pod对存储的需求，即看选择的node是否能满足和PVC匹配的PV的nodeAffinity需求。
+动态创建PV的拓扑限制需要保证两方面：一是动态创建出来的存储要能被这个可用区访问；二是调度器在选择node的时候，要落在这个可用区内。
+
+k8s中支持使用Snapshot来进行存储快照，持久化卷
