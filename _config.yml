@@ -113,3 +113,11 @@ deploy:
   type: git
   repo: git@github.com:konnase/konnase.github.io.git
   branch: master
+
+# leancloud counter
+leancloud_counter_security:
+  enable_sync: true
+  app_id: iiWVTMTERRQ2WJd5heGT8XYr-gzGzoHsz
+  app_key: 9t8v39uaLv5hdfC1udYVLOok
+  username: # Will be asked while deploying if is left blank
+  password: # Recommmended to be left blank. Will be asked while deploying if is left blank
