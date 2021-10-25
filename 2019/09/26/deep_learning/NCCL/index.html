@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"konnase.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":true},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="NCCL概念NVIDIA Collective Communication Library是一个GPU拓扑感知的，提供了多GPU collective通信的库。 NCCL只能支持到8张GPU的深度学习训练（参见） 开发者文档nccl2.3 在nccl2.4介绍文档中提到NCCL的All Reduce操作被用于百度ring-all-reduce和Horovod这两个使用ring的分布式训练框架中来获">
+<meta property="og:type" content="article">
+<meta property="og:title" content="NCCL">
+<meta property="og:url" content="https://konnase.github.io/2019/09/26/deep_learning/NCCL/index.html">
+<meta property="og:site_name" content="Konnase Lee">
+<meta property="og:description" content="NCCL概念NVIDIA Collective Communication Library是一个GPU拓扑感知的，提供了多GPU collective通信的库。 NCCL只能支持到8张GPU的深度学习训练（参见） 开发者文档nccl2.3 在nccl2.4介绍文档中提到NCCL的All Reduce操作被用于百度ring-all-reduce和Horovod这两个使用ring的分布式训练框架中来获">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://konnase.github.io/img/deep_learning/nccl-move-data-using-ring.jpg">
+<meta property="og:image" content="https://konnase.github.io/img/deep_learning/nccl2.0-group-device-call.jpg">
+<meta property="og:image" content="https://konnase.github.io/img/deep_learning/Summit-Latency.png">
+<meta property="article:published_time" content="2019-09-26T04:25:39.000Z">
+<meta property="article:modified_time" content="2021-10-25T02:59:15.949Z">
+<meta property="article:author" content="Konnase Lee">
+<meta property="article:tag" content="deep learnig">
+<meta property="article:tag" content="all reduce">
+<meta property="article:tag" content="NCCL">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://konnase.github.io/img/deep_learning/nccl-move-data-using-ring.jpg">
+
+<link rel="canonical" href="https://konnase.github.io/2019/09/26/deep_learning/NCCL/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>NCCL | Konnase Lee</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Konnase Lee</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://konnase.github.io/2019/09/26/deep_learning/NCCL/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Konnase Lee">
+      <meta itemprop="description" content="There is no ending to learn">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Konnase Lee">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          NCCL
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-09-26 12:25:39" itemprop="dateCreated datePublished" datetime="2019-09-26T12:25:39+08:00">2019-09-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2021-10-25 10:59:15" itemprop="dateModified" datetime="2021-10-25T10:59:15+08:00">2021-10-25</time>
+              </span>
+
+          
+            <span id="/2019/09/26/deep_learning/NCCL/" class="post-meta-item leancloud_visitors" data-flag-title="NCCL" title="Views">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="NCCL"><a href="#NCCL" class="headerlink" title="NCCL"></a>NCCL</h1><h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><p>NVIDIA Collective Communication Library是一个GPU拓扑感知的，提供了多GPU collective通信的库。</p>
+<p>NCCL只能支持到8张GPU的深度学习训练（<a target="_blank" rel="noopener" href="https://docs.nvidia.com/deeplearning/sdk/introduction/index.html#introduction">参见</a>）</p>
+<p>开发者文档<a target="_blank" rel="noopener" href="https://devblogs.nvidia.com/scaling-deep-learning-training-nccl/">nccl2.3</a></p>
+<p>在<a target="_blank" rel="noopener" href="https://devblogs.nvidia.com/massively-scale-deep-learning-training-nccl-2-4/">nccl2.4介绍文档</a>中提到NCCL的All Reduce操作被用于百度ring-all-reduce和Horovod这两个使用ring的分布式训练框架中来获取GPU之间的full bandwidth。但同时提到ring的缺点是随着GPU数目的增长，延迟也成线性增加。<strong>为什么延迟会呈线性增加？</strong>，很简单，因为每个GPU每次发送完一个chunk就必须等下一个chunk从另一张GPU发过来，整个过程（包括reduce scatter和all gather）总共需要发送2(n-1)次，则延时为2(n-1)的倍数。见<a target="_blank" rel="noopener" href="https://images.nvidia.com/events/sc15/pdfs/NCCL-Woolley.pdf">NCCL collective示意图</a></p>
+<h2 id="性能测试"><a href="#性能测试" class="headerlink" title="性能测试"></a>性能测试</h2><p>编译NVIDIA官方<a target="_blank" rel="noopener" href="https://github.com/NVIDIA/nccl-tests">nccl-tests</a>，在8张Tesla V100 GPU机器上测试，GPU机器的拓扑如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">root@9a417caaf03b:~/nccl-tests<span class="comment"># nvidia-smi topo -m</span></span><br><span class="line">	GPU0	GPU1	GPU2	GPU3	GPU4	GPU5	GPU6	GPU7	CPU Affinity</span><br><span class="line">GPU0	 X 	NV1	NV1	NV2	SYS	SYS	NV2	SYS	0-95</span><br><span class="line">GPU1	NV1	 X 	NV2	NV1	SYS	SYS	SYS	NV2	0-95</span><br><span class="line">GPU2	NV1	NV2	 X 	NV2	NV1	SYS	SYS	SYS	0-95</span><br><span class="line">GPU3	NV2	NV1	NV2	 X 	SYS	NV1	SYS	SYS	0-95</span><br><span class="line">GPU4	SYS	SYS	NV1	SYS	 X 	NV2	NV1	NV2	0-95</span><br><span class="line">GPU5	SYS	SYS	SYS	NV1	NV2	 X 	NV2	NV1	0-95</span><br><span class="line">GPU6	NV2	SYS	SYS	SYS	NV1	NV2	 X 	NV1	0-95</span><br><span class="line">GPU7	SYS	NV2	SYS	SYS	NV2	NV1	NV1	 X 	0-95</span><br><span class="line"></span><br><span class="line">Legend:</span><br><span class="line"></span><br><span class="line">  X    = Self</span><br><span class="line">  SYS  = Connection traversing PCIe as well as the SMP interconnect between NUMA nodes (e.g., QPI/UPI)</span><br><span class="line">  NODE = Connection traversing PCIe as well as the interconnect between PCIe Host Bridges within a NUMA node</span><br><span class="line">  PHB  = Connection traversing PCIe as well as a PCIe Host Bridge (typically the CPU)</span><br><span class="line">  PXB  = Connection traversing multiple PCIe switches (without traversing the PCIe Host Bridge)</span><br><span class="line">  PIX  = Connection traversing a single PCIe switch</span><br><span class="line">  NV<span class="comment">#  = Connection traversing a bonded set of # NVLinks</span></span><br></pre></td></tr></table></figure>
+<p>执行nccl-tests里面的<code>all_reduce_perf</code>性能测试，如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">root@9a417caaf03b:~/nccl-tests<span class="comment"># ./build/all_reduce_perf -b 8 -e 128M -f 2 -g 8</span></span><br><span class="line"><span class="comment"># nThread 1 nGpus 8 minBytes 8 maxBytes 134217728 step: 2(factor) warmup iters: 5 iters: 20 validation: 1</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Using devices</span></span><br><span class="line"><span class="comment">#   Rank  0 Pid    746 on 9a417caaf03b device  0 [0x4f] Tesla V100-SXM2-16GB</span></span><br><span class="line"><span class="comment">#   Rank  1 Pid    746 on 9a417caaf03b device  1 [0x50] Tesla V100-SXM2-16GB</span></span><br><span class="line"><span class="comment">#   Rank  2 Pid    746 on 9a417caaf03b device  2 [0x5f] Tesla V100-SXM2-16GB</span></span><br><span class="line"><span class="comment">#   Rank  3 Pid    746 on 9a417caaf03b device  3 [0x60] Tesla V100-SXM2-16GB</span></span><br><span class="line"><span class="comment">#   Rank  4 Pid    746 on 9a417caaf03b device  4 [0xb1] Tesla V100-SXM2-16GB</span></span><br><span class="line"><span class="comment">#   Rank  5 Pid    746 on 9a417caaf03b device  5 [0xb2] Tesla V100-SXM2-16GB</span></span><br><span class="line"><span class="comment">#   Rank  6 Pid    746 on 9a417caaf03b device  6 [0xdb] Tesla V100-SXM2-16GB</span></span><br><span class="line"><span class="comment">#   Rank  7 Pid    746 on 9a417caaf03b device  7 [0xdc] Tesla V100-SXM2-16GB</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#                                                     out-of-place                       in-place</span></span><br><span class="line"><span class="comment">#       size         count    type   redop     time   algbw   busbw  error     time   algbw   busbw  error</span></span><br><span class="line"><span class="comment">#        (B)    (elements)                     (us)  (GB/s)  (GB/s)            (us)  (GB/s)  (GB/s)</span></span><br><span class="line">           8             2   <span class="built_in">float</span>     sum    48.46    0.00    0.00  1e-07    48.17    0.00    0.00  1e-07</span><br><span class="line">          16             4   <span class="built_in">float</span>     sum    48.61    0.00    0.00  6e-08    49.16    0.00    0.00  6e-08</span><br><span class="line">          32             8   <span class="built_in">float</span>     sum    48.48    0.00    0.00  6e-08    48.14    0.00    0.00  6e-08</span><br><span class="line">          64            16   <span class="built_in">float</span>     sum    48.92    0.00    0.00  6e-08    48.50    0.00    0.00  6e-08</span><br><span class="line">         128            32   <span class="built_in">float</span>     sum    48.13    0.00    0.00  6e-08    48.25    0.00    0.00  6e-08</span><br><span class="line">         256            64   <span class="built_in">float</span>     sum    48.47    0.01    0.01  6e-08    48.50    0.01    0.01  6e-08</span><br><span class="line">         512           128   <span class="built_in">float</span>     sum    48.56    0.01    0.02  6e-08    48.29    0.01    0.02  6e-08</span><br><span class="line">        1024           256   <span class="built_in">float</span>     sum    48.88    0.02    0.04  2e-07    48.83    0.02    0.04  2e-07</span><br><span class="line">        2048           512   <span class="built_in">float</span>     sum    49.40    0.04    0.07  2e-07    49.15    0.04    0.07  2e-07</span><br><span class="line">        4096          1024   <span class="built_in">float</span>     sum    49.13    0.08    0.15  2e-07    48.97    0.08    0.15  2e-07</span><br><span class="line">        8192          2048   <span class="built_in">float</span>     sum    49.14    0.17    0.29  2e-07    49.25    0.17    0.29  2e-07</span><br><span class="line">       16384          4096   <span class="built_in">float</span>     sum    50.35    0.33    0.57  2e-07    49.77    0.33    0.58  2e-07</span><br><span class="line">       32768          8192   <span class="built_in">float</span>     sum    51.06    0.64    1.12  2e-07    50.78    0.65    1.13  2e-07</span><br><span class="line">       65536         16384   <span class="built_in">float</span>     sum    52.78    1.24    2.17  2e-07    52.64    1.24    2.18  2e-07</span><br><span class="line">      131072         32768   <span class="built_in">float</span>     sum    56.56    2.32    4.06  2e-07    55.63    2.36    4.12  2e-07</span><br><span class="line">      262144         65536   <span class="built_in">float</span>     sum    60.26    4.35    7.61  2e-07    59.48    4.41    7.71  2e-07</span><br><span class="line">      524288        131072   <span class="built_in">float</span>     sum    61.48    8.53   14.92  2e-07    61.34    8.55   14.96  2e-07</span><br><span class="line">     1048576        262144   <span class="built_in">float</span>     sum    89.27   11.75   20.56  2e-07    88.45   11.85   20.75  2e-07</span><br><span class="line">     2097152        524288   <span class="built_in">float</span>     sum    119.6   17.53   30.68  2e-07    116.7   17.97   31.45  2e-07</span><br><span class="line">     4194304       1048576   <span class="built_in">float</span>     sum    147.4   28.45   49.79  2e-07    145.1   28.91   50.59  2e-07</span><br><span class="line">     8388608       2097152   <span class="built_in">float</span>     sum    203.8   41.16   72.03  2e-07    204.0   41.12   71.97  2e-07</span><br><span class="line">    16777216       4194304   <span class="built_in">float</span>     sum    324.1   51.77   90.59  2e-07    325.7   51.51   90.14  2e-07</span><br><span class="line">    33554432       8388608   <span class="built_in">float</span>     sum    550.8   60.92  106.62  2e-07    553.3   60.64  106.12  2e-07</span><br><span class="line">    67108864      16777216   <span class="built_in">float</span>     sum    992.7   67.60  118.30  2e-07    995.0   67.45  118.04  2e-07</span><br><span class="line">   134217728      33554432   <span class="built_in">float</span>     sum   1818.8   73.80  129.14  2e-07   1821.9   73.67  128.92  2e-07</span><br><span class="line"><span class="comment"># Out of bounds values : 0 OK</span></span><br><span class="line"><span class="comment"># Avg bus bandwidth    : 25.9598</span></span><br><span class="line"><span class="comment">#</span></span><br></pre></td></tr></table></figure>
+<p>128/(1817*10^(-6))/1024</p>
+<h2 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h2><h3 id="ncclAllReduce是如何进行GPU间通信的？"><a href="#ncclAllReduce是如何进行GPU间通信的？" class="headerlink" title="ncclAllReduce是如何进行GPU间通信的？"></a>ncclAllReduce是如何进行GPU间通信的？</h3><p>按照ring的形式还是tree的形式？查看<a target="_blank" rel="noopener" href="http://on-demand.gputechconf.com/gtc/2017/presentation/s7155-jeaugey-nccl.pdf">gtc 2017 nccl 2.0 report</a>，其中描述了nccl使用ring的形式在GPU之间交换数据，如下图：<br><img src="/img/deep_learning/nccl-move-data-using-ring.jpg"><br>同时，nccl 2.0在单线程调用多device时增加了手动调用的verb ncclGroupStart/ncclGroupEnd<br><img src="/img/deep_learning/nccl2.0-group-device-call.jpg"><br>可以看看知乎上的一个回答，介绍<a target="_blank" rel="noopener" href="https://www.zhihu.com/question/63219175">nccl的设计和实验</a></p>
+<p>在nccl 2.4中引入了double binary trees，见<a target="_blank" rel="noopener" href="https://devblogs.nvidia.com/massively-scale-deep-learning-training-nccl-2-4/">nccl2.4介绍文档</a>，从效果来看延迟改善了不少，如下图：<br><img src="/img/deep_learning/Summit-Latency.png"><br>double binary trees有待进一步研究</p>
+<h3 id="ncclAllReduce是如何构造一条带宽最大的环？"><a href="#ncclAllReduce是如何构造一条带宽最大的环？" class="headerlink" title="ncclAllReduce是如何构造一条带宽最大的环？"></a>ncclAllReduce是如何构造一条带宽最大的环？</h3><p>NCCL中有一个环境变量<code>NCCL_RINGS</code>可以用来覆盖NCCL构造的GPU环，见<a target="_blank" rel="noopener" href="https://docs.nvidia.com/deeplearning/sdk/nccl-developer-guide/docs/env.html#nccl-rings">NCCL_RINGS</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/deep-learnig/" rel="tag"># deep learnig</a>
+              <a href="/tags/all-reduce/" rel="tag"># all reduce</a>
+              <a href="/tags/NCCL/" rel="tag"># NCCL</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/08/30/system_management/%E5%AE%B9%E5%99%A8%E7%BD%91%E7%BB%9C/" rel="prev" title="容器网络">
+      <i class="fa fa-chevron-left"></i> 容器网络
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/01/03/deep_learning/%E5%8F%82%E6%95%B0%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%9E%B6%E6%9E%84/" rel="next" title="参数服务器架构">
+      参数服务器架构 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#NCCL"><span class="nav-number">1.</span> <span class="nav-text">NCCL</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5"><span class="nav-number">1.1.</span> <span class="nav-text">概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95"><span class="nav-number">1.2.</span> <span class="nav-text">性能测试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%9D%E8%80%83"><span class="nav-number">1.3.</span> <span class="nav-text">思考</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ncclAllReduce%E6%98%AF%E5%A6%82%E4%BD%95%E8%BF%9B%E8%A1%8CGPU%E9%97%B4%E9%80%9A%E4%BF%A1%E7%9A%84%EF%BC%9F"><span class="nav-number">1.3.1.</span> <span class="nav-text">ncclAllReduce是如何进行GPU间通信的？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ncclAllReduce%E6%98%AF%E5%A6%82%E4%BD%95%E6%9E%84%E9%80%A0%E4%B8%80%E6%9D%A1%E5%B8%A6%E5%AE%BD%E6%9C%80%E5%A4%A7%E7%9A%84%E7%8E%AF%EF%BC%9F"><span class="nav-number">1.3.2.</span> <span class="nav-text">ncclAllReduce是如何构造一条带宽最大的环？</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Konnase Lee</p>
+  <div class="site-description" itemprop="description">There is no ending to learn</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">42</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">56</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/konnase" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;konnase" rel="noopener" target="_blank"><i class="github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:konnase123@gmail.com" title="E-Mail → mailto:konnase123@gmail.com" rel="noopener" target="_blank"><i class="envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/u/3833522360" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;3833522360" rel="noopener" target="_blank"><i class="weibo fa-fw"></i>Weibo</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Konnase Lee</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+
+
+
+
+
+
+<script>
+  (function() {
+    function leancloudSelector(url) {
+      url = encodeURI(url);
+      return document.getElementById(url).querySelector('.leancloud-visitors-count');
+    }
+
+    function addCount(Counter) {
+      var visitors = document.querySelector('.leancloud_visitors');
+      var url = decodeURI(visitors.id);
+      var title = visitors.dataset.flagTitle;
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length > 0) {
+            var counter = results[0];
+            leancloudSelector(url).innerText = counter.time + 1;
+            Counter('put', '/classes/Counter/' + counter.objectId, { time: { '__op': 'Increment', 'amount': 1 } })
+              .catch(error => {
+                console.error('Failed to save visitor count', error);
+              });
+          } else {
+              leancloudSelector(url).innerText = 'Counter not initialized! More info at console err msg.';
+              console.error('ATTENTION! LeanCloud counter has security bug, see how to solve it here: https://github.com/theme-next/hexo-leancloud-counter-security. \n However, you can still use LeanCloud without security, by setting `security` option to `false`.');
+            
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    function showTime(Counter) {
+      var visitors = document.querySelectorAll('.leancloud_visitors');
+      var entries = [...visitors].map(element => {
+        return decodeURI(element.id);
+      });
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url: { '$in': entries } })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          for (let url of entries) {
+            let target = results.find(item => item.url === url);
+            leancloudSelector(url).innerText = target ? target.time : 0;
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    let { app_id, app_key, server_url } = {"enable":true,"app_id":"iiWVTMTERRQ2WJd5heGT8XYr-gzGzoHsz","app_key":"9t8v39uaLv5hdfC1udYVLOok","server_url":null,"security":true};
+    function fetchData(api_server) {
+      var Counter = (method, url, data) => {
+        return fetch(`${api_server}/1.1${url}`, {
+          method,
+          headers: {
+            'X-LC-Id'     : app_id,
+            'X-LC-Key'    : app_key,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+      };
+      if (CONFIG.page.isPost) {
+        if (CONFIG.hostname !== location.hostname) return;
+        addCount(Counter);
+      } else if (document.querySelectorAll('.post-title-link').length >= 1) {
+        showTime(Counter);
+      }
+    }
+
+    let api_server = app_id.slice(-9) !== '-MdYXbMMI' ? server_url : `https://${app_id.slice(0, 8).toLowerCase()}.api.lncldglobal.com`;
+
+    if (api_server) {
+      fetchData(api_server);
+    } else {
+      fetch('https://app-router.leancloud.cn/2/route?appId=' + app_id)
+        .then(response => response.json())
+        .then(({ api_server }) => {
+          fetchData('https://' + api_server);
+        });
+    }
+  })();
+</script>
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

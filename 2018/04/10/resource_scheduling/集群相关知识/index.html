@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"konnase.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":true},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Marathon应用重启 重启方式：marathon会根据mesos发送过来的offer把该服务在任意一台服务器上重启，故引入两个问题： 如果这个服务是有状态的，那么它再次在另外的机器上启动之后，怎么恢复它的状态？Marathon支持本地的持久化卷来解决这个问题 如果这个服务之前作为其他服务的后端，或者有外部的客户端和它进行通信，那么当他启动到别的机器上之后，IP地址发生了变化，那么其他服务和外部">
+<meta property="og:type" content="article">
+<meta property="og:title" content="集群相关知识">
+<meta property="og:url" content="https://konnase.github.io/2018/04/10/resource_scheduling/%E9%9B%86%E7%BE%A4%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86/index.html">
+<meta property="og:site_name" content="Konnase Lee">
+<meta property="og:description" content="Marathon应用重启 重启方式：marathon会根据mesos发送过来的offer把该服务在任意一台服务器上重启，故引入两个问题： 如果这个服务是有状态的，那么它再次在另外的机器上启动之后，怎么恢复它的状态？Marathon支持本地的持久化卷来解决这个问题 如果这个服务之前作为其他服务的后端，或者有外部的客户端和它进行通信，那么当他启动到别的机器上之后，IP地址发生了变化，那么其他服务和外部">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://konnase.github.io/img/https_process.png">
+<meta property="og:image" content="https://konnase.github.io/img/http_request.png">
+<meta property="article:published_time" content="2018-04-10T08:38:55.000Z">
+<meta property="article:modified_time" content="2021-10-25T02:59:15.959Z">
+<meta property="article:author" content="Konnase Lee">
+<meta property="article:tag" content="marathon">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://konnase.github.io/img/https_process.png">
+
+<link rel="canonical" href="https://konnase.github.io/2018/04/10/resource_scheduling/%E9%9B%86%E7%BE%A4%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>集群相关知识 | Konnase Lee</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Konnase Lee</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://konnase.github.io/2018/04/10/resource_scheduling/%E9%9B%86%E7%BE%A4%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Konnase Lee">
+      <meta itemprop="description" content="There is no ending to learn">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Konnase Lee">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          集群相关知识
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-04-10 16:38:55" itemprop="dateCreated datePublished" datetime="2018-04-10T16:38:55+08:00">2018-04-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2021-10-25 10:59:15" itemprop="dateModified" datetime="2021-10-25T10:59:15+08:00">2021-10-25</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Resource-Management/" itemprop="url" rel="index"><span itemprop="name">Resource Management</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/04/10/resource_scheduling/%E9%9B%86%E7%BE%A4%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86/" class="post-meta-item leancloud_visitors" data-flag-title="集群相关知识" title="Views">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Marathon"><a href="#Marathon" class="headerlink" title="Marathon"></a>Marathon</h1><h2 id="应用重启"><a href="#应用重启" class="headerlink" title="应用重启"></a>应用重启</h2><ul>
+<li>重启方式：marathon会根据mesos发送过来的offer把该服务在任意一台服务器上重启，故引入两个问题：<ul>
+<li>如果这个服务是有状态的，那么它再次在另外的机器上启动之后，怎么恢复它的状态？Marathon支持本地的持久化卷来解决这个问题</li>
+<li>如果这个服务之前作为其他服务的后端，或者有外部的客户端和它进行通信，那么当他启动到别的机器上之后，IP地址发生了变化，那么其他服务和外部的客户端改怎么和新的服务进行通信？Marathon支持Service Discovery的方式来解决这个问题</li>
+</ul>
+</li>
+<li>提供沙箱机制来管理每个应用的实例</li>
+<li>Rolling Upgrade的支持：即应用程序新版本发布后可以在不中断服务的情况下升级到新版本</li>
+<li>支持高可用：只需要启动多个Marathon的服务并且指定一个相同的Zookeeper路径，Zookeeper会提供多个Marathon服务之间的Leader选举。并且用户可以在Marathon的非leader节点上操作，而不是像Mesos那样会跳转到leader节点</li>
+</ul>
+<h2 id="Marathon-lb"><a href="#Marathon-lb" class="headerlink" title="Marathon-lb"></a>Marathon-lb</h2><p>Marathon-lb是个基于HAProxy的快速代理和负载均衡。它能为基于TCP和HTTP协议的应用提供代理和负载均衡，此外还支持SSL、健康检查、HTTP压缩、Lua脚本等特性。Marathon-lb通过Marathon的EventBus可以自动获取Marathon上每个应用的信息，并且能够为每组应用生成HAProxy配置。不同于通过域名机制来发现服务的Mesos-DNS，Marathon-lb是通过servicePort服务端口来发现服务外，另外，还可以通过VHOST来访问服务。</p>
+<ul>
+<li>问题：Marathon通过一个json配置文件启动两个Nginx服务的instance，此时只生成一个marathon-lb的servicePort？并且通过这一个servicePort可以访问两个Nginx服务吗？<ul>
+<li>只生成一个servicePort，通过这个servicePort可以访问这两个Nginx服务，marathon-lb为这两个Nginx服务生成HAProxy配置，通过HAProxy来实现负载均衡，应用层–http层的负载均衡</li>
+</ul>
+</li>
+</ul>
+<span id="more"></span>
+
+<h1 id="计算机网络"><a href="#计算机网络" class="headerlink" title="计算机网络"></a>计算机网络</h1><h2 id="SNAT"><a href="#SNAT" class="headerlink" title="SNAT"></a>SNAT</h2><p>私网中的主机请求外网时，在可以连接外网的主机上修改请求的源IP地址，起到隐藏私网主机的作用，如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -t nat -A POSTROUTING -s 10.1.1.0/24 -j SNAT --to-source 公网IP</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>-t nat</code>表示修改nat表</li>
+<li><code>-A POSTROUTING</code>表示将SNAT规则加入到POSTROUTING链中，SNAT只存在于POSTROUTING和INPUT链中。POSTROUTING是iptables中报文发出去的最后一个关卡，故确保报文发出去之前修改源IP地址。</li>
+<li><code>-s 10.1.1.0/24 --to-source 公网IP</code>表示将来自内网10.1.1.0/24网段的请求的源IP地址改为公司内部可以出外网的IP<br>如果外网IP时动态的，则使用MASQUERADE：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -t nat -A POSTROUTING -s 10.1.1.0/24 -o eth0 -j MASQUERADE</span><br></pre></td></tr></table></figure>
+<code>-o eth0 -j MASQUERADE</code>表示将内网中来自10.1.1.0/24网段的请求的源IP地址指向网卡eth0对应的IP地址，起到一个IP地址的动态装换</li>
+</ul>
+<h2 id="DNAT"><a href="#DNAT" class="headerlink" title="DNAT"></a>DNAT</h2><p>公网中的主机请求内网中的主机上的服务的时候，可以在能出外网的主机上修改请求的目的IP地址，即可使外网访问内网的服务：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -t nat -I PREROUTING -d 公网IP -p tcp --dport 公网端口 -j DNAT --to-destination 私网IP:端口号</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>-I PREROUTING</code>表示将DNAT规则加入PREROUTING链中，DNAT只存在于PREROUTING和OUTPUT链中。PREROUTING是在路由器路由之前，如果不在这儿修改目的IP地址，则路由器会根据原来的IP地址转发该报文</li>
+<li><code>-d 公网IP -p tcp --dport 公网端口 --to-destination 私网IP:端口号</code>公网主机首先向公司可以出外网的IP地址请求，这里表示将此IP地址的tcp的公网端口改为内网:端口。</li>
+</ul>
+<h2 id="HTTPS通信"><a href="#HTTPS通信" class="headerlink" title="HTTPS通信"></a>HTTPS通信</h2><p>过程如图：<br><img src="/img/https_process.png" alt="image"></p>
+<ul>
+<li>浏览器发送https连接请求</li>
+<li>服务器向客户端返回证书</li>
+<li>浏览器生成一串随机数，用证书加密，发送给服务器端。该随机数用作之后通信的对称秘钥</li>
+<li>服务器使用私钥对浏览器发送过来的加密的数据进行解密，拿到对称秘钥，并使用该对称秘钥加密一段握手消息发送给浏览器</li>
+<li>浏览器使用对称秘钥解密握手消息，并使用该对称秘钥加密ACK通知服务器通信已建立</li>
+<li>之后浏览器和服务器之间的通信的数据就是用浏览器之前生成的那串随机对称秘钥并利用对称加密算法进行加密</li>
+</ul>
+<h2 id="HTTP请求消息"><a href="#HTTP请求消息" class="headerlink" title="HTTP请求消息"></a>HTTP请求消息</h2><p><img src="/img/http_request.png" alt="image"></p>
+<h3 id="状态码"><a href="#状态码" class="headerlink" title="状态码"></a>状态码</h3><p>状态代码有三位数字组成，第一个数字定义了响应的类别，共分五种类别:<br>1xx：指示信息–表示请求已接收，继续处理<br>2xx：成功–表示请求已被成功接收、理解、接受<br>3xx：重定向–要完成请求必须进行更进一步的操作<br>4xx：客户端错误–请求有语法错误或请求无法实现<br>5xx：服务器端错误–服务器未能实现合法的请求</p>
+<h2 id="参考文献："><a href="#参考文献：" class="headerlink" title="参考文献："></a>参考文献：</h2><ul>
+<li><a target="_blank" rel="noopener" href="http://geek.csdn.net/news/detail/89370">Marathon的主要功能</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/felix_yujing/article/details/52081524">关于Marathon-lb</a></li>
+<li>RaphetS 链接：<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/80e25cb1d81a">https://www.jianshu.com/p/80e25cb1d81a</a> 來源：简书 简书著作权归作者所有，任何形式的转载都请联系作者获得授权并注明出处。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/marathon/" rel="tag"># marathon</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/04/10/system_management/Haproxy/" rel="prev" title="Haproxy">
+      <i class="fa fa-chevron-left"></i> Haproxy
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/04/12/%E6%95%B0%E6%8D%AE%E9%99%8D%E7%BB%B4%E7%AE%97%E6%B3%95/" rel="next" title="数据降维算法">
+      数据降维算法 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Marathon"><span class="nav-number">1.</span> <span class="nav-text">Marathon</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E9%87%8D%E5%90%AF"><span class="nav-number">1.1.</span> <span class="nav-text">应用重启</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Marathon-lb"><span class="nav-number">1.2.</span> <span class="nav-text">Marathon-lb</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C"><span class="nav-number">2.</span> <span class="nav-text">计算机网络</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#SNAT"><span class="nav-number">2.1.</span> <span class="nav-text">SNAT</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DNAT"><span class="nav-number">2.2.</span> <span class="nav-text">DNAT</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTPS%E9%80%9A%E4%BF%A1"><span class="nav-number">2.3.</span> <span class="nav-text">HTTPS通信</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP%E8%AF%B7%E6%B1%82%E6%B6%88%E6%81%AF"><span class="nav-number">2.4.</span> <span class="nav-text">HTTP请求消息</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E7%A0%81"><span class="nav-number">2.4.1.</span> <span class="nav-text">状态码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE%EF%BC%9A"><span class="nav-number">2.5.</span> <span class="nav-text">参考文献：</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Konnase Lee</p>
+  <div class="site-description" itemprop="description">There is no ending to learn</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">42</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">56</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/konnase" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;konnase" rel="noopener" target="_blank"><i class="github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:konnase123@gmail.com" title="E-Mail → mailto:konnase123@gmail.com" rel="noopener" target="_blank"><i class="envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/u/3833522360" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;3833522360" rel="noopener" target="_blank"><i class="weibo fa-fw"></i>Weibo</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Konnase Lee</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+
+
+
+
+
+
+<script>
+  (function() {
+    function leancloudSelector(url) {
+      url = encodeURI(url);
+      return document.getElementById(url).querySelector('.leancloud-visitors-count');
+    }
+
+    function addCount(Counter) {
+      var visitors = document.querySelector('.leancloud_visitors');
+      var url = decodeURI(visitors.id);
+      var title = visitors.dataset.flagTitle;
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length > 0) {
+            var counter = results[0];
+            leancloudSelector(url).innerText = counter.time + 1;
+            Counter('put', '/classes/Counter/' + counter.objectId, { time: { '__op': 'Increment', 'amount': 1 } })
+              .catch(error => {
+                console.error('Failed to save visitor count', error);
+              });
+          } else {
+              leancloudSelector(url).innerText = 'Counter not initialized! More info at console err msg.';
+              console.error('ATTENTION! LeanCloud counter has security bug, see how to solve it here: https://github.com/theme-next/hexo-leancloud-counter-security. \n However, you can still use LeanCloud without security, by setting `security` option to `false`.');
+            
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    function showTime(Counter) {
+      var visitors = document.querySelectorAll('.leancloud_visitors');
+      var entries = [...visitors].map(element => {
+        return decodeURI(element.id);
+      });
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url: { '$in': entries } })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          for (let url of entries) {
+            let target = results.find(item => item.url === url);
+            leancloudSelector(url).innerText = target ? target.time : 0;
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    let { app_id, app_key, server_url } = {"enable":true,"app_id":"iiWVTMTERRQ2WJd5heGT8XYr-gzGzoHsz","app_key":"9t8v39uaLv5hdfC1udYVLOok","server_url":null,"security":true};
+    function fetchData(api_server) {
+      var Counter = (method, url, data) => {
+        return fetch(`${api_server}/1.1${url}`, {
+          method,
+          headers: {
+            'X-LC-Id'     : app_id,
+            'X-LC-Key'    : app_key,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+      };
+      if (CONFIG.page.isPost) {
+        if (CONFIG.hostname !== location.hostname) return;
+        addCount(Counter);
+      } else if (document.querySelectorAll('.post-title-link').length >= 1) {
+        showTime(Counter);
+      }
+    }
+
+    let api_server = app_id.slice(-9) !== '-MdYXbMMI' ? server_url : `https://${app_id.slice(0, 8).toLowerCase()}.api.lncldglobal.com`;
+
+    if (api_server) {
+      fetchData(api_server);
+    } else {
+      fetch('https://app-router.leancloud.cn/2/route?appId=' + app_id)
+        .then(response => response.json())
+        .then(({ api_server }) => {
+          fetchData('https://' + api_server);
+        });
+    }
+  })();
+</script>
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>

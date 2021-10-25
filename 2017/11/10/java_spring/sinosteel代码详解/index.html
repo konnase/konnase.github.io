@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"konnase.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":true},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Github代码仓库 spring开发服务器端Http消息机制(也即一些编程规范) controller一般只负责Http消息的传输；service负责业务逻辑的处理；repository负责执行数据库操作；domain层是领域模型对象，对应数据库中相应的表 controller中基本的交互方法应写成：  123@RequestMapping(&quot;自定义的路径&quot;)@Respons">
+<meta property="og:type" content="article">
+<meta property="og:title" content="sinosteel代码详解">
+<meta property="og:url" content="https://konnase.github.io/2017/11/10/java_spring/sinosteel%E4%BB%A3%E7%A0%81%E8%AF%A6%E8%A7%A3/index.html">
+<meta property="og:site_name" content="Konnase Lee">
+<meta property="og:description" content="Github代码仓库 spring开发服务器端Http消息机制(也即一些编程规范) controller一般只负责Http消息的传输；service负责业务逻辑的处理；repository负责执行数据库操作；domain层是领域模型对象，对应数据库中相应的表 controller中基本的交互方法应写成：  123@RequestMapping(&quot;自定义的路径&quot;)@Respons">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://konnase.github.io/img/inherit_aopmethod_interceptor.png">
+<meta property="article:published_time" content="2017-11-10T06:55:14.000Z">
+<meta property="article:modified_time" content="2021-10-25T02:59:15.923Z">
+<meta property="article:author" content="Konnase Lee">
+<meta property="article:tag" content="spring">
+<meta property="article:tag" content="shiro">
+<meta property="article:tag" content="annotation">
+<meta property="article:tag" content="aspect">
+<meta property="article:tag" content="hibernate">
+<meta property="article:tag" content="mybatis">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://konnase.github.io/img/inherit_aopmethod_interceptor.png">
+
+<link rel="canonical" href="https://konnase.github.io/2017/11/10/java_spring/sinosteel%E4%BB%A3%E7%A0%81%E8%AF%A6%E8%A7%A3/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>sinosteel代码详解 | Konnase Lee</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Konnase Lee</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://konnase.github.io/2017/11/10/java_spring/sinosteel%E4%BB%A3%E7%A0%81%E8%AF%A6%E8%A7%A3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Konnase Lee">
+      <meta itemprop="description" content="There is no ending to learn">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Konnase Lee">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          sinosteel代码详解
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2017-11-10 14:55:14" itemprop="dateCreated datePublished" datetime="2017-11-10T14:55:14+08:00">2017-11-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2021-10-25 10:59:15" itemprop="dateModified" datetime="2021-10-25T10:59:15+08:00">2021-10-25</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2017/11/10/java_spring/sinosteel%E4%BB%A3%E7%A0%81%E8%AF%A6%E8%A7%A3/" class="post-meta-item leancloud_visitors" data-flag-title="sinosteel代码详解" title="Views">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><a target="_blank" rel="noopener" href="https://github.com/DimitriZhao/sinosteel.git">Github代码仓库</a></p>
+<h2 id="spring开发服务器端"><a href="#spring开发服务器端" class="headerlink" title="spring开发服务器端"></a>spring开发服务器端</h2><h3 id="Http消息机制-也即一些编程规范"><a href="#Http消息机制-也即一些编程规范" class="headerlink" title="Http消息机制(也即一些编程规范)"></a>Http消息机制(也即一些编程规范)</h3><ol>
+<li><strong>controller一般只负责Http消息的传输；service负责业务逻辑的处理；repository负责执行数据库操作；domain层是领域模型对象，对应数据库中相应的表</strong></li>
+<li>controller中基本的交互方法应写成：</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RequestMapping(&quot;自定义的路径&quot;)</span></span><br><span class="line"><span class="meta">@ResponseBody</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> Response <span class="title">doSomething</span><span class="params">(Request request)</span></span></span><br></pre></td></tr></table></figure>
+<p>所有的Http请求都会被解析为Request类的实例，而对于基本的返回类型（String、JSON之类的），则一律定义成Response类实例</p>
+<span id="more"></span>
+<h3 id="基础CURD"><a href="#基础CURD" class="headerlink" title="基础CURD"></a>基础CURD</h3><ol>
+<li>很多框架会有比如BaseEntity，BaseDao，BaseService之类的基础类，很多新建的领域对象模型都是从这些基础类继承而来。</li>
+<li>orm框架：hibernate和mybatis各有千秋</li>
+</ol>
+<h2 id="RequiresAuthorization的实现"><a href="#RequiresAuthorization的实现" class="headerlink" title="@RequiresAuthorization的实现"></a>@RequiresAuthorization的实现</h2><p>以framework-example中的StandardController为例。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">   <span class="comment">//通过切面编程实现</span></span><br><span class="line"><span class="meta">@RequiresAuthorization(</span></span><br><span class="line"><span class="meta">		requestType = RequestType.QUERY, </span></span><br><span class="line"><span class="meta">		serviceClass = UserService.class, </span></span><br><span class="line"><span class="meta">		queryScope = AuthorizationScope.ALL,</span></span><br><span class="line"><span class="meta">		editScope = AuthorizationScope.ORGANIZATION,</span></span><br><span class="line"><span class="meta">		deleteScope = AuthorizationScope.ORGANIZATION)</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> Response <span class="title">queryStandards</span><span class="params">(Request request)</span></span>&#123;</span><br><span class="line">       ...</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p>queryStandards方法前面加上了@RequiresAuthorization注解，看一下@RequiresAuthorization的定义：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//注解表明这个注解应该被 javadoc工具记录</span></span><br><span class="line"><span class="meta">@Documented</span></span><br><span class="line"><span class="comment">//用于设定注解使用范围，这里表明注解仅使用于方法上</span></span><br><span class="line"><span class="meta">@Target(ElementType.METHOD)</span>  </span><br><span class="line"><span class="comment">//用于说明这种类型的注解会被保留到那个阶段。此处注解能在运行时被JVM或其他使用反射机制的代码所读取和使用.</span></span><br><span class="line"><span class="meta">@Retention(RetentionPolicy.RUNTIME)</span>  </span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> RequiresAuthorization</span><br><span class="line">&#123;</span><br><span class="line">	<span class="function">RequestType <span class="title">requestType</span><span class="params">()</span></span>;</span><br><span class="line">	</span><br><span class="line">	<span class="function">AuthorizationScope <span class="title">queryScope</span><span class="params">()</span> <span class="keyword">default</span> AuthorizationScope.ORGANIZATION</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="function">AuthorizationScope <span class="title">editScope</span><span class="params">()</span> <span class="keyword">default</span> AuthorizationScope.USER</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="function">AuthorizationScope <span class="title">deleteScope</span><span class="params">()</span> <span class="keyword">default</span> AuthorizationScope.USER</span>;</span><br><span class="line">	</span><br><span class="line">	Class&lt;? extends BaseService&lt;? extends BaseEntity&gt;&gt; serviceClass();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当queryStandards方法执行的时候，将会触发com.sinosteel.framework.core.auth包下面的类AuthorizationAspect中的filterAuthorizations方法，AuthorizationAspect被定义为一个切面，filterAuthorizations方法作为@RequiresAuthorization注解的切入点。进入该方法内部：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">   Object arg = args[<span class="number">0</span>];</span><br><span class="line">Request request = (Request) arg;</span><br><span class="line">User requestUser = request.getUser();</span><br></pre></td></tr></table></figure>
+<p>此处获取Controller中queryStandards方法的入口参数，即一个Request，并获取request中的参数user。查看Request的类型定义：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Request</span> </span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">	<span class="keyword">private</span> User user;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">private</span> String uri;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">private</span> String client;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">private</span> String dateTime;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">private</span> JSONObject params;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">private</span> List&lt;MultipartFile&gt; files;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//constructers, getters and setters</span></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后将@RequireAuthorization注解中的属性值提取出来，得到requestType, serviceClass, queryScope, editScope，deleteScope。接着进行环绕处理：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">   <span class="keyword">if</span>(requestType == RequestType.QUERY)</span><br><span class="line">&#123;</span><br><span class="line">	Response response = (Response) joinPoint.proceed(args);</span><br><span class="line">	JSON data = response.data;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">if</span>(data <span class="keyword">instanceof</span> JSONObject) <span class="comment">//pageResult</span></span><br><span class="line">	&#123;</span><br><span class="line">		JSONObject dataJson = (JSONObject) data;</span><br><span class="line">		JSONArray dataJsonArray = dataJson.getJSONArray(<span class="string">&quot;data&quot;</span>);   <span class="comment">//一些Standard</span></span><br><span class="line"></span><br><span class="line">		<span class="keyword">int</span> filteredDataCount = filterData(dataJsonArray, requestUser, queryScope, editScope, deleteScope);</span><br><span class="line">		<span class="keyword">int</span> total = dataJson.getIntValue(<span class="string">&quot;total&quot;</span>);</span><br><span class="line">		dataJson.put(<span class="string">&quot;total&quot;</span>, total - filteredDataCount);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">if</span>(data <span class="keyword">instanceof</span> JSONArray) <span class="comment">//list</span></span><br><span class="line">	&#123;</span><br><span class="line">		JSONArray dataJsonArray = (JSONArray) data;</span><br><span class="line">		filterData(dataJsonArray, requestUser, queryScope, editScope, deleteScope);</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">return</span> response;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上述代码首先判断请求类型为QUERY，则执行查询操作，即执行Controller中的standardService.queryStandards(request.getParams())方法，进入queryStandards方法，在com.sinosteel.metallurgical.knowledge.service.StandardService中：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">   <span class="function"><span class="keyword">public</span> JSONObject <span class="title">queryStandards</span><span class="params">(JSONObject params)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	StringBuilder hqlBuilder = <span class="keyword">new</span> StringBuilder(<span class="string">&quot;FROM Standard standard WHERE 1 = 1 &quot;</span>);</span><br><span class="line">	HashMap&lt;String, Object&gt; paramsMap = <span class="keyword">new</span> HashMap&lt;String, Object&gt;();</span><br><span class="line"></span><br><span class="line">       <span class="comment">//更改查询条件，加入查询变量到paramsMap中</span></span><br><span class="line">	...</span><br><span class="line">	</span><br><span class="line">	hqlBuilder.append(<span class="string">&quot;ORDER BY ISSUE_DATE DESC&quot;</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">//在params中得到分页信息后，将该分页信息转化为Pager对象</span></span><br><span class="line">	Pager pager = JSONObject.toJavaObject(params.getJSONObject(<span class="string">&quot;pagination&quot;</span>), Pager.class);</span><br><span class="line">	PageResult&lt;Standard&gt; pageResult = standardRepository.executeHql(hqlBuilder.toString(), paramsMap, pager);</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">return</span> pageResult.toJSONObject();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>该方法定义好查询语句后执行standardRepository.executeHql方法，即执行standardRepository的实现类standardRepositoryImpl中的executeHql方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">   <span class="function"><span class="keyword">public</span> PageResult&lt;T&gt; <span class="title">executeHql</span><span class="params">(String hql, HashMap&lt;String, Object&gt; paramsMap, Pager pager)</span> </span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	Query query = <span class="keyword">this</span>.entityManager.createQuery(hql);</span><br><span class="line">	setParams(query, paramsMap);</span><br><span class="line">	setPager(query, pager);	</span><br><span class="line">	List&lt;T&gt; data = query.getResultList();</span><br><span class="line">	</span><br><span class="line">	String countHql = <span class="keyword">this</span>.genCountSql(hql);</span><br><span class="line">	Query countQuery = <span class="keyword">this</span>.entityManager.createQuery(countHql);</span><br><span class="line">	setParams(countQuery, paramsMap);</span><br><span class="line">	<span class="keyword">int</span> total =  Integer.parseInt(countQuery.getSingleResult().toString());</span><br><span class="line"></span><br><span class="line">	<span class="comment">//PageResult中第二个参数为模板，可为任意类型的值，此处为查询结果集，List&lt;T&gt;</span></span><br><span class="line">	PageResult&lt;T&gt; queryResult = <span class="keyword">new</span> PageResult&lt;T&gt;(total, data);</span><br><span class="line">	<span class="keyword">return</span> queryResult;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>首先设置查询变量和分页信息，其中setPager需要注意：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">   <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">setPager</span><span class="params">(Query query, Pager pager)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(pager != <span class="keyword">null</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">int</span> current = pager.current;</span><br><span class="line">		<span class="keyword">int</span> pageSize = pager.pageSize;</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">int</span> firstIndex = pageSize * (current - <span class="number">1</span>);</span><br><span class="line">		</span><br><span class="line">		query.setFirstResult(firstIndex);</span><br><span class="line">		query.setMaxResults(pageSize);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里设置每页只查询pageSize条记录，根据current的不同设置查询结果集的初始位置=pageSize * (current - 1)。回到execuSql方法中，查询完得到的结果是长度为pageSize的记录，数据类型为Standard，这里用模板T表示的，泛指所有可查询类型。将查询结果数量total和data封装到PageResult中返回给StandardService中的queryStandards方法，该方法将pageResult对象转换为JSONObject后返回给Controller中的queryStandards方法，Controller中的queryStandards方法将该JSONObject封装到Response对象中返回给调用方。查看Response的类型定义：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Response</span> </span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">	<span class="keyword">public</span> ResponseType status;</span><br><span class="line">	<span class="keyword">public</span> JSON data;   <span class="comment">//可以使JSONArray，也可以时JSONObject</span></span><br><span class="line">	<span class="keyword">public</span> String message;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">Response</span><span class="params">()</span></span></span><br><span class="line"><span class="function">	</span>&#123;</span><br><span class="line">		<span class="keyword">this</span>.status = <span class="keyword">null</span>;</span><br><span class="line">		<span class="keyword">this</span>.data = <span class="keyword">null</span>;</span><br><span class="line">		<span class="keyword">this</span>.message = <span class="keyword">null</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">Response</span><span class="params">(ResponseType status, JSON data, String message)</span></span></span><br><span class="line"><span class="function">	</span>&#123;</span><br><span class="line">		<span class="keyword">this</span>.status = status;</span><br><span class="line">		<span class="keyword">this</span>.data = data;</span><br><span class="line">		<span class="keyword">this</span>.message = message;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>到此queryStandards方法执行完毕，返回到环绕处理阶段。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">   <span class="keyword">if</span>(requestType == RequestType.QUERY)</span><br><span class="line">&#123;</span><br><span class="line">	Response response = (Response) joinPoint.proceed(args);</span><br><span class="line">	JSON data = response.data;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">if</span>(data <span class="keyword">instanceof</span> JSONObject) <span class="comment">//pageResult</span></span><br><span class="line">	&#123;</span><br><span class="line">		JSONObject dataJson = (JSONObject) data;</span><br><span class="line">		JSONArray dataJsonArray = dataJson.getJSONArray(<span class="string">&quot;data&quot;</span>);   <span class="comment">//一些Standard</span></span><br><span class="line"></span><br><span class="line">		<span class="keyword">int</span> filteredDataCount = filterData(dataJsonArray, requestUser, queryScope, editScope, deleteScope);</span><br><span class="line">		<span class="keyword">int</span> total = dataJson.getIntValue(<span class="string">&quot;total&quot;</span>);</span><br><span class="line">		dataJson.put(<span class="string">&quot;total&quot;</span>, total - filteredDataCount);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">if</span>(data <span class="keyword">instanceof</span> JSONArray) <span class="comment">//list</span></span><br><span class="line">	&#123;</span><br><span class="line">		JSONArray dataJsonArray = (JSONArray) data;</span><br><span class="line">		filterData(dataJsonArray, requestUser, queryScope, editScope, deleteScope);</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">return</span> response;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以上我们得到返回值response，获取response中的data（pageResult），获取pageResult中的data属性值（<code>List&lt;Standard&gt;</code>类型），赋值给dataJsonArray，调用filterData方法，遍历dataJsonArrary，过滤掉不满足权限控制的查询结果，并修改total的值为原结果集中的数量-过滤掉的数量，最后返回过滤后的response。</p>
+<p>进入filterData方法：<br>遍历dataJsonArrary，对每一个查询到的Standard结果，获取创建该Standard的用户的ID，即createdUserID，并取得该用户所在的组织的ID，即authorizedOrganizationIds。判断queryScope（删除和修改操作对应的是deleteScope和editScope）的值：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">   <span class="comment">//控制query权限</span></span><br><span class="line"><span class="keyword">switch</span>(queryScope)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">case</span> ALL:</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">		</span><br><span class="line">	<span class="keyword">case</span> ORGANIZATION:</span><br><span class="line">		<span class="keyword">if</span>(!hasAuthorization(queryAuthorizedOrganizationIds, authorizedOrganizationIds) &amp;&amp; !hasAuthorization(requestOrganizationIds, authorizedOrganizationIds))</span><br><span class="line">		&#123;</span><br><span class="line">			iter.remove();  <span class="comment">//删除不是authorizedOrganizationIds授权的查询结果（Standard）</span></span><br><span class="line">			filtered = <span class="keyword">true</span>;</span><br><span class="line">			filteredDataCount++;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">		</span><br><span class="line">	<span class="keyword">case</span> USER:</span><br><span class="line">		<span class="keyword">if</span>(!hasAuthorization(queryAuthorizedOrganizationIds, authorizedOrganizationIds) &amp;&amp; !requestUserId.equals(authorizedUserId))</span><br><span class="line">		&#123;</span><br><span class="line">			iter.remove();</span><br><span class="line">			filtered = <span class="keyword">true</span>;</span><br><span class="line">			filteredDataCount++;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">		</span><br><span class="line">	<span class="keyword">case</span> NONE:</span><br><span class="line">		iter.remove();</span><br><span class="line">		filtered = <span class="keyword">true</span>;</span><br><span class="line">		filteredDataCount++;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果为ORGANIZATION，则判断用户是否有查询authorizedOrganizationIds的权限以及用户是否属于authorizedOrganizationIds这个组织，如果都不满足，则将该条查询从dataJsonArrary中删除。由此完成了权限控制。</p>
+<p><strong>总结一下</strong>：@RequiresAuthorization注解是通过切面来实现的，用户在浏览器访问/queryStandards时，该切面便会执行，完成权限控制。</p>
+<h2 id="shiro注解授权源码实现"><a href="#shiro注解授权源码实现" class="headerlink" title="shiro注解授权源码实现"></a>shiro注解授权源码实现</h2><h3 id="授权流程"><a href="#授权流程" class="headerlink" title="授权流程"></a>授权流程</h3><p>概括的说，shiro在实现注解授权时采用的是Spring AOP的方式。<br>从com.sinosteel.framework.config.shiro.ShiroConfig开始，该类用@Configuration注解，表示为一个Spring IoC容器，往IoC容器中加入一个Bean</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> AuthorizationAttributeSourceAdvisor <span class="title">authorizationAttributeSourceAdvisor</span><span class="params">(SecurityManager securityManager)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor = <span class="keyword">new</span> AuthorizationAttributeSourceAdvisor();</span><br><span class="line">	authorizationAttributeSourceAdvisor.setSecurityManager(securityManager);</span><br><span class="line">	<span class="keyword">return</span> authorizationAttributeSourceAdvisor;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>AuthorizationAttributeSourceAdvisor继承自StaticMethodMatcherPointcutAdvisor，StaticMethodMatcherPointcutAdvisor为静态方法匹配器切点定义的切面，默认情况下，匹配所有的目标类；继承自PointcutAdvisor，代表具有切点的切面，它包含Advice和Pointcut两个类，这样我们就可以通过类、方法名以及方法方位等信息灵活地定义切面的连接点，提供更具适用性的切面。将shiro的securityManager传入AuthorizationAttributeSourceAdvisor中。<br>AuthorizationAttributeSourceAdvisor类定义了一个切面，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AuthorizationAttributeSourceAdvisor</span> <span class="keyword">extends</span> <span class="title">StaticMethodMatcherPointcutAdvisor</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Logger log = LoggerFactory.getLogger(AuthorizationAttributeSourceAdvisor.class);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Class&lt;? extends Annotation&gt;[] AUTHZ_ANNOTATION_CLASSES =</span><br><span class="line">            <span class="keyword">new</span> Class[] &#123;</span><br><span class="line">                    RequiresPermissions.class, RequiresRoles.class,</span><br><span class="line">                    RequiresUser.class, RequiresGuest.class, RequiresAuthentication.class</span><br><span class="line">            &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">protected</span> SecurityManager securityManager = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Create a new AuthorizationAttributeSourceAdvisor.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">AuthorizationAttributeSourceAdvisor</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        **setAdvice**(<span class="keyword">new</span> AopAllianceAnnotationsAuthorizingMethodInterceptor());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> SecurityManager <span class="title">getSecurityManager</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> securityManager;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setSecurityManager</span><span class="params">(org.apache.shiro.mgt.SecurityManager securityManager)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.securityManager = securityManager;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Returns &lt;tt&gt;true&lt;/tt&gt; if the method has any Shiro annotations, false otherwise.</span></span><br><span class="line"><span class="comment">     * The annotations inspected are:</span></span><br><span class="line"><span class="comment">     * &lt;ul&gt;</span></span><br><span class="line"><span class="comment">     * &lt;li&gt;&#123;<span class="doctag">@link</span> org.apache.shiro.authz.annotation.RequiresAuthentication RequiresAuthentication&#125;&lt;/li&gt;</span></span><br><span class="line"><span class="comment">     * &lt;li&gt;&#123;<span class="doctag">@link</span> org.apache.shiro.authz.annotation.RequiresUser RequiresUser&#125;&lt;/li&gt;</span></span><br><span class="line"><span class="comment">     * &lt;li&gt;&#123;<span class="doctag">@link</span> org.apache.shiro.authz.annotation.RequiresGuest RequiresGuest&#125;&lt;/li&gt;</span></span><br><span class="line"><span class="comment">     * &lt;li&gt;&#123;<span class="doctag">@link</span> org.apache.shiro.authz.annotation.RequiresRoles RequiresRoles&#125;&lt;/li&gt;</span></span><br><span class="line"><span class="comment">     * &lt;li&gt;&#123;<span class="doctag">@link</span> org.apache.shiro.authz.annotation.RequiresPermissions RequiresPermissions&#125;&lt;/li&gt;</span></span><br><span class="line"><span class="comment">     * &lt;/ul&gt;</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> method      the method to check for a Shiro annotation</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> targetClass the class potentially declaring Shiro annotations</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> &lt;tt&gt;true&lt;/tt&gt; if the method has a Shiro annotation, false otherwise.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@see</span> org.springframework.aop.MethodMatcher#matches(java.lang.reflect.Method, Class)</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">matches</span><span class="params">(Method method, Class targetClass)</span> </span>&#123;</span><br><span class="line">        Method m = method;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> ( isAuthzAnnotationPresent(m) ) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//The &#x27;method&#x27; parameter could be from an interface that doesn&#x27;t have the annotation.</span></span><br><span class="line">        <span class="comment">//Check to see if the implementation has it.</span></span><br><span class="line">        <span class="keyword">if</span> ( targetClass != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                m = targetClass.getMethod(m.getName(), m.getParameterTypes());</span><br><span class="line">                <span class="keyword">if</span> ( isAuthzAnnotationPresent(m) ) &#123;</span><br><span class="line">                    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (NoSuchMethodException ignored) &#123;</span><br><span class="line">                <span class="comment">//default return value is false.  If we can&#x27;t find the method, then obviously</span></span><br><span class="line">                <span class="comment">//there is no annotation, so just use the default return value.</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">isAuthzAnnotationPresent</span><span class="params">(Method method)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span>( Class&lt;? extends Annotation&gt; annClass : AUTHZ_ANNOTATION_CLASSES ) &#123;</span><br><span class="line">            Annotation a = AnnotationUtils.findAnnotation(method, annClass);</span><br><span class="line">            <span class="keyword">if</span> ( a != <span class="keyword">null</span> ) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>AuthorizationAttributeSourceAdvisor类中的setAdvice方法，传入一个Advice（通知）。查看AopAllianceAnnotationsAuthorizingMethodInterceptor的继承关系发现该类继承自org.aopalliance.aop.Advice和org.apache.shiro.aop.MethodInterceptor<br><img src="/img/inherit_aopmethod_interceptor.png" alt="image"><br>AopAllianceAnnotationsAuthorizingMethodInterceptor的方法如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">AopAllianceAnnotationsAuthorizingMethodInterceptor</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    List&lt;AuthorizingAnnotationMethodInterceptor&gt; interceptors =</span><br><span class="line">            <span class="keyword">new</span> ArrayList&lt;AuthorizingAnnotationMethodInterceptor&gt;(<span class="number">5</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//use a Spring-specific Annotation resolver - Spring&#x27;s AnnotationUtils is nicer than the</span></span><br><span class="line">    <span class="comment">//raw JDK resolution process.</span></span><br><span class="line">    AnnotationResolver resolver = <span class="keyword">new</span> SpringAnnotationResolver();</span><br><span class="line">    <span class="comment">//we can re-use the same resolver instance - it does not retain state:</span></span><br><span class="line">    interceptors.add(<span class="keyword">new</span> RoleAnnotationMethodInterceptor(resolver));</span><br><span class="line">    interceptors.add(<span class="keyword">new</span> PermissionAnnotationMethodInterceptor(resolver));</span><br><span class="line">    interceptors.add(<span class="keyword">new</span> AuthenticatedAnnotationMethodInterceptor(resolver));</span><br><span class="line">    interceptors.add(<span class="keyword">new</span> UserAnnotationMethodInterceptor(resolver));</span><br><span class="line">    interceptors.add(<span class="keyword">new</span> GuestAnnotationMethodInterceptor(resolver));</span><br><span class="line"></span><br><span class="line">    setMethodInterceptors(interceptors);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到，这里添加了5个AuthorizingAnnotationMethodInterceptor，分别对应@RequiresRoles注解权限、@RequiresPermissions注解权限、@RequiresAuthentication注解权限、@RequiresUser注解权限和@RequiresGuest注解权限。这里以@RequiresPermissions为例展开讨论。<br>PermissionAnnotationMethodInterceptor内部构造器：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">PermissionAnnotationMethodInterceptor</span><span class="params">(AnnotationResolver resolver)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">super</span>( <span class="keyword">new</span> PermissionAnnotationHandler(), resolver);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面代码new一个PermissionAnnotationHandler对象。然后PermissionAnnotationHandler对象的构造器设置annotationClass = RequiresPermissions.class，如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">PermissionAnnotationHandler</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">super</span>(RequiresPermissions.class);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样PermissionAnnotationMethodInterceptor就设置好了，回到AopAllianceAnnotationsAuthorizingMethodInterceptor方法拦截器中，代理对象的方法被调用时触发回调方法invoke()，调用父类AuthorizingMethodInterceptor的invoke()方法，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Object <span class="title">invoke</span><span class="params">(MethodInvocation methodInvocation)</span> <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">        assertAuthorized(methodInvocation);</span><br><span class="line">        <span class="keyword">return</span> methodInvocation.proceed();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>在com.sinosteel.framework.config.shiro.ShiroConfig类中，定义了一个Spring IoC容器，配置了securityManager，并配置securityManager的subjectFactory（用于产生subject，setSessionCreationEnabled(false)，表示不创建会话，将web应用做成无会话的），sessionManager（会话管理）和realm（就是自定义的com.sinosteel.framework.core.auth.StatelessAuthorizingRealm）。<br>还定义了StatelessAccessControlFilter，根据当前请求上下文信息每次请求时都要登录的认证过滤器，重写onAccessDenied方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">boolean</span> <span class="title">onAccessDenied</span><span class="params">(ServletRequest request, ServletResponse response)</span> <span class="keyword">throws</span> Exception </span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">    	String clientDigest = request.getParameter(<span class="string">&quot;clientDigest&quot;</span>);</span><br><span class="line">    	String username = request.getParameter(<span class="string">&quot;username&quot;</span>);</span><br><span class="line"></span><br><span class="line">    	StatelessAuthenticationToken token = <span class="keyword">new</span> StatelessAuthenticationToken(username, clientDigest);</span><br><span class="line">    	</span><br><span class="line">    	<span class="keyword">try</span> </span><br><span class="line">    	&#123;</span><br><span class="line">    		getSubject(request, response).login(token);</span><br><span class="line">    		<span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    	&#125; </span><br><span class="line">    	<span class="keyword">catch</span> (Exception e) </span><br><span class="line">    	&#123;</span><br><span class="line">    		e.printStackTrace();</span><br><span class="line">    		onLoginFail(response);</span><br><span class="line">           </span><br><span class="line">    		<span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    	&#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>客户端在验证时，除了发送用户名和密码外，还需要发送使用基于散列的消息认证码生成的消息摘要，StatelessAccessControlFilter收到验证请求后，根据username和消息摘要生成无状态的token，并交由StatelessAuthorizingRealm进行验证。StatelessAuthorizingRealm的doGetAuthenticationInfo方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> AuthenticationInfo <span class="title">doGetAuthenticationInfo</span><span class="params">(AuthenticationToken token)</span> <span class="keyword">throws</span> AuthenticationException </span></span><br><span class="line"><span class="function">    </span>&#123;	</span><br><span class="line">    	StatelessAuthenticationToken statelessToken = (StatelessAuthenticationToken)token;</span><br><span class="line">    	String username = (String)statelessToken.getPrincipal();</span><br><span class="line">    	</span><br><span class="line">    	JSONObject userInfoJson = CacheUtil.getUserInfoJson(username);</span><br><span class="line">    	<span class="keyword">if</span>(userInfoJson == <span class="keyword">null</span>)</span><br><span class="line">    	&#123; 	</span><br><span class="line">    		User user = userRepository.findByUsername(username);  </span><br><span class="line">        	<span class="keyword">if</span>(user == <span class="keyword">null</span>)</span><br><span class="line">        	&#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        	</span><br><span class="line">        	userInfoJson = CacheUtil.saveUserInfoCache(user);</span><br><span class="line">    	&#125;</span><br><span class="line">    	</span><br><span class="line">    	String serverDigest = HmacSHA256Util.digest(getKey(username), userInfoJson.getString(<span class="string">&quot;password&quot;</span>));</span><br><span class="line"></span><br><span class="line">    	SimpleAuthenticationInfo authenticationInfo = <span class="keyword">new</span> SimpleAuthenticationInfo(username, serverDigest, getName());</span><br><span class="line">    	<span class="keyword">return</span> authenticationInfo;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>此处首先根据客户端传入的用户名获取相应的密钥，然后使用密钥对请求参数生成服务器端的消息摘要serverDigest；然后生成authenticationInfo，返回给调用方，与客户端的消息摘要进行匹配；如果匹配，说明是合法客户端传入的，则login成功；否则是非法的。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/spring/" rel="tag"># spring</a>
+              <a href="/tags/shiro/" rel="tag"># shiro</a>
+              <a href="/tags/annotation/" rel="tag"># annotation</a>
+              <a href="/tags/aspect/" rel="tag"># aspect</a>
+              <a href="/tags/hibernate/" rel="tag"># hibernate</a>
+              <a href="/tags/mybatis/" rel="tag"># mybatis</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/11/05/java_spring/Maven%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="prev" title="Maven学习笔记">
+      <i class="fa fa-chevron-left"></i> Maven学习笔记
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/11/13/java_spring/java%E8%8C%83%E5%9E%8B/" rel="next" title="java范型">
+      java范型 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#spring%E5%BC%80%E5%8F%91%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%AB%AF"><span class="nav-number">1.</span> <span class="nav-text">spring开发服务器端</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Http%E6%B6%88%E6%81%AF%E6%9C%BA%E5%88%B6-%E4%B9%9F%E5%8D%B3%E4%B8%80%E4%BA%9B%E7%BC%96%E7%A8%8B%E8%A7%84%E8%8C%83"><span class="nav-number">1.1.</span> <span class="nav-text">Http消息机制(也即一些编程规范)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80CURD"><span class="nav-number">1.2.</span> <span class="nav-text">基础CURD</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RequiresAuthorization%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">2.</span> <span class="nav-text">@RequiresAuthorization的实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#shiro%E6%B3%A8%E8%A7%A3%E6%8E%88%E6%9D%83%E6%BA%90%E7%A0%81%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.</span> <span class="nav-text">shiro注解授权源码实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%88%E6%9D%83%E6%B5%81%E7%A8%8B"><span class="nav-number">3.1.</span> <span class="nav-text">授权流程</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Konnase Lee</p>
+  <div class="site-description" itemprop="description">There is no ending to learn</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">42</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">56</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/konnase" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;konnase" rel="noopener" target="_blank"><i class="github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:konnase123@gmail.com" title="E-Mail → mailto:konnase123@gmail.com" rel="noopener" target="_blank"><i class="envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/u/3833522360" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;3833522360" rel="noopener" target="_blank"><i class="weibo fa-fw"></i>Weibo</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Konnase Lee</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+
+
+
+
+
+
+<script>
+  (function() {
+    function leancloudSelector(url) {
+      url = encodeURI(url);
+      return document.getElementById(url).querySelector('.leancloud-visitors-count');
+    }
+
+    function addCount(Counter) {
+      var visitors = document.querySelector('.leancloud_visitors');
+      var url = decodeURI(visitors.id);
+      var title = visitors.dataset.flagTitle;
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length > 0) {
+            var counter = results[0];
+            leancloudSelector(url).innerText = counter.time + 1;
+            Counter('put', '/classes/Counter/' + counter.objectId, { time: { '__op': 'Increment', 'amount': 1 } })
+              .catch(error => {
+                console.error('Failed to save visitor count', error);
+              });
+          } else {
+              leancloudSelector(url).innerText = 'Counter not initialized! More info at console err msg.';
+              console.error('ATTENTION! LeanCloud counter has security bug, see how to solve it here: https://github.com/theme-next/hexo-leancloud-counter-security. \n However, you can still use LeanCloud without security, by setting `security` option to `false`.');
+            
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    function showTime(Counter) {
+      var visitors = document.querySelectorAll('.leancloud_visitors');
+      var entries = [...visitors].map(element => {
+        return decodeURI(element.id);
+      });
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url: { '$in': entries } })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          for (let url of entries) {
+            let target = results.find(item => item.url === url);
+            leancloudSelector(url).innerText = target ? target.time : 0;
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    let { app_id, app_key, server_url } = {"enable":true,"app_id":"iiWVTMTERRQ2WJd5heGT8XYr-gzGzoHsz","app_key":"9t8v39uaLv5hdfC1udYVLOok","server_url":null,"security":true};
+    function fetchData(api_server) {
+      var Counter = (method, url, data) => {
+        return fetch(`${api_server}/1.1${url}`, {
+          method,
+          headers: {
+            'X-LC-Id'     : app_id,
+            'X-LC-Key'    : app_key,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+      };
+      if (CONFIG.page.isPost) {
+        if (CONFIG.hostname !== location.hostname) return;
+        addCount(Counter);
+      } else if (document.querySelectorAll('.post-title-link').length >= 1) {
+        showTime(Counter);
+      }
+    }
+
+    let api_server = app_id.slice(-9) !== '-MdYXbMMI' ? server_url : `https://${app_id.slice(0, 8).toLowerCase()}.api.lncldglobal.com`;
+
+    if (api_server) {
+      fetchData(api_server);
+    } else {
+      fetch('https://app-router.leancloud.cn/2/route?appId=' + app_id)
+        .then(response => response.json())
+        .then(({ api_server }) => {
+          fetchData('https://' + api_server);
+        });
+    }
+  })();
+</script>
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>

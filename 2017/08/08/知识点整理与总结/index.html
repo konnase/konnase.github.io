@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"konnase.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":true},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="网络文件系统NFS： 查看启动rpcbind服务的状态：  ps -ef|grep rpcbind    修改NFS服务的配置文件：  sudo vi &#x2F;etc&#x2F;exports 其中中的最后一行为新添加的NFS配置，NFS配置信息格式如下：&lt;共享目录&gt; [客户端1 选项（访问权限,用户映射,其他）] [客户端2 选项（访问权限,用户映射,其他）]  如：&#x2F;home&#x2F;tos&#x2F;shareD">
+<meta property="og:type" content="article">
+<meta property="og:title" content="知识点整理与总结">
+<meta property="og:url" content="https://konnase.github.io/2017/08/08/%E7%9F%A5%E8%AF%86%E7%82%B9%E6%95%B4%E7%90%86%E4%B8%8E%E6%80%BB%E7%BB%93/index.html">
+<meta property="og:site_name" content="Konnase Lee">
+<meta property="og:description" content="网络文件系统NFS： 查看启动rpcbind服务的状态：  ps -ef|grep rpcbind    修改NFS服务的配置文件：  sudo vi &#x2F;etc&#x2F;exports 其中中的最后一行为新添加的NFS配置，NFS配置信息格式如下：&lt;共享目录&gt; [客户端1 选项（访问权限,用户映射,其他）] [客户端2 选项（访问权限,用户映射,其他）]  如：&#x2F;home&#x2F;tos&#x2F;shareD">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2017-08-08T09:33:58.000Z">
+<meta property="article:modified_time" content="2021-10-25T02:59:15.960Z">
+<meta property="article:author" content="Konnase Lee">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://konnase.github.io/2017/08/08/%E7%9F%A5%E8%AF%86%E7%82%B9%E6%95%B4%E7%90%86%E4%B8%8E%E6%80%BB%E7%BB%93/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>知识点整理与总结 | Konnase Lee</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Konnase Lee</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://konnase.github.io/2017/08/08/%E7%9F%A5%E8%AF%86%E7%82%B9%E6%95%B4%E7%90%86%E4%B8%8E%E6%80%BB%E7%BB%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Konnase Lee">
+      <meta itemprop="description" content="There is no ending to learn">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Konnase Lee">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          知识点整理与总结
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2017-08-08 17:33:58" itemprop="dateCreated datePublished" datetime="2017-08-08T17:33:58+08:00">2017-08-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2021-10-25 10:59:15" itemprop="dateModified" datetime="2021-10-25T10:59:15+08:00">2021-10-25</time>
+              </span>
+
+          
+            <span id="/2017/08/08/%E7%9F%A5%E8%AF%86%E7%82%B9%E6%95%B4%E7%90%86%E4%B8%8E%E6%80%BB%E7%BB%93/" class="post-meta-item leancloud_visitors" data-flag-title="知识点整理与总结" title="Views">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="网络文件系统NFS："><a href="#网络文件系统NFS：" class="headerlink" title="网络文件系统NFS："></a>网络文件系统NFS：</h1><ul>
+<li><p>查看启动rpcbind服务的状态：<br>  ps -ef|grep rpcbind  </p>
+</li>
+<li><p>修改NFS服务的配置文件：<br>  sudo vi /etc/exports <br>其中中的最后一行为新添加的NFS配置，NFS配置信息格式如下：<br>&lt;共享目录&gt; [客户端1 选项（访问权限,用户映射,其他）] [客户端2 选项（访问权限,用户映射,其他）]  <br>如：/home/tos/shareDir 192.168.137.129(rw,no_root_squash,async)<br>客户端如果是 * ，表示所有主机都可以挂载</p>
+<span id="more"></span></li>
+<li><p>启动服务：<br>  sudo service nfs-kernel-server start <br>  查看运行状态：sudo service nfs-kernel-server status</p>
+<pre><code>  ps -ef|grep nfsd
+</code></pre>
+</li>
+<li><p>查看共享的文件夹和目标主机：<br>  showmount –e</p>
+</li>
+</ul>
+<h1 id="分布式文件系统Ceph："><a href="#分布式文件系统Ceph：" class="headerlink" title="分布式文件系统Ceph："></a>分布式文件系统Ceph：</h1><h2 id="Ceph-生态系统架构可以划分为四部分："><a href="#Ceph-生态系统架构可以划分为四部分：" class="headerlink" title="Ceph 生态系统架构可以划分为四部分："></a>Ceph 生态系统架构可以划分为四部分：</h2><ol>
+<li>Clients：客户端（数据用户）</li>
+<li>cmds：Metadata server cluster，元数据服务器（缓存和同步分布式元数据）</li>
+<li>cosd：Object storage cluster，对象存储集群（将数据和元数据作为对象存储，执行其他关键职能）</li>
+<li>cmon：Cluster monitors，集群监视器（执行监视功能）</li>
+</ol>
+<h2 id="磁盘块映射到元数据："><a href="#磁盘块映射到元数据：" class="headerlink" title="磁盘块映射到元数据："></a>磁盘块映射到元数据：</h2><p>Linux 透视图中的一个文件会分配到一个来自元数据服务器的 inode number（INO），对于文件这是一个唯一的标识符。然后文件被推入一些对象中（根据文件的大小）。使用 INO 和 object number（ONO），每个对象都分配到一个对象 ID（OID）。在 OID 上使用一个简单的哈希，每个对象都被分配到一个放置组。放置组（标识为 PGID）是一个对象的概念容器。最后，放置组到对象存储设备（OSD）的映射是一个伪随机映射，使用一个叫做 Controlled Replication Under Scalable Hashing（CRUSH）的算法。这样一来，放置组（以及副本）到存储设备的映射就不用依赖任何元数据，而是依赖一个伪随机的映射函数。这种操作是理想的，因为它把存储的开销最小化，简化了分配和数据查询。</p>
+<h2 id="元数据服务器主要应用就是一个智能元数据缓存；元数据服务器管理-inode-空间，将文件名转变为元数据"><a href="#元数据服务器主要应用就是一个智能元数据缓存；元数据服务器管理-inode-空间，将文件名转变为元数据" class="headerlink" title="元数据服务器主要应用就是一个智能元数据缓存；元数据服务器管理 inode 空间，将文件名转变为元数据"></a>元数据服务器主要应用就是一个智能元数据缓存；元数据服务器管理 inode 空间，将文件名转变为元数据</h2><h2 id="从存储角度来看，Ceph-对象存储设备执行从对象到块的映射"><a href="#从存储角度来看，Ceph-对象存储设备执行从对象到块的映射" class="headerlink" title="从存储角度来看，Ceph 对象存储设备执行从对象到块的映射"></a>从存储角度来看，Ceph 对象存储设备执行从对象到块的映射</h2><h2 id="对于objects-storage和block-storage-不需要元数据服务器。"><a href="#对于objects-storage和block-storage-不需要元数据服务器。" class="headerlink" title="对于objects storage和block storage,不需要元数据服务器。"></a>对于objects storage和block storage,不需要元数据服务器。</h2><h2 id="组件："><a href="#组件：" class="headerlink" title="组件："></a>组件：</h2><pre><code>MDS
+Monitor
+OSD：一个CEPH存储集群，要求至少两个CEPH OSDs，才能有效的保存两份数据。注意，这里的两个CEPH OSD是指运行在两台物理服务器上的，并不是在一台物理服务器上开两个CEPH OSD的守护进程。
+RADOS
+Gateway
+</code></pre>
+<h2 id="映射"><a href="#映射" class="headerlink" title="映射"></a>映射</h2><pre><code>这种数据映射的优点：
+</code></pre>
+<p>把Object分成组，这降低了需要追踪和处理metadata的数量(在全局的层面上，我们不需要追踪和处理每个object的metadata和placement，只需要管理PG的metadata就可以了。PG的数量级远远低于object的数量级)。<br>增加PG的数量可以均衡每个OSD的负载，提高并行度。<br>分隔故障域，提高数据的可靠性。</p>
+<h2 id="强一致性"><a href="#强一致性" class="headerlink" title="强一致性"></a>强一致性</h2><h1 id="Docker"><a href="#Docker" class="headerlink" title="Docker"></a>Docker</h1><h2 id="Docker-使用客户端-服务器-C-S-架构模式。"><a href="#Docker-使用客户端-服务器-C-S-架构模式。" class="headerlink" title="Docker 使用客户端-服务器 (C/S) 架构模式。"></a>Docker 使用客户端-服务器 (C/S) 架构模式。</h2><h2 id="要理解-Docker-内部构建，需要理解以下三种部件："><a href="#要理解-Docker-内部构建，需要理解以下三种部件：" class="headerlink" title="要理解 Docker 内部构建，需要理解以下三种部件："></a>要理解 Docker 内部构建，需要理解以下三种部件：</h2><ul>
+<li><p>Docker 镜像 - Docker images  ：Docker 容器运行时的只读模板</p>
+</li>
+<li><p>Docker 仓库 - Docker registries   ：用来保存镜像</p>
+</li>
+<li><p>Docker 容器 - Docker containers  ：和文件夹很类似，一个Docker容器包含了所有的某个应用运行所需要的环境</p>
+<h2 id="Docker架构："><a href="#Docker架构：" class="headerlink" title="Docker架构："></a>Docker架构：</h2></li>
+<li><p>1).libcontainer：正是由于libcontainer的存在，Docker可以直接调用libcontainer，而最终操纵容器的namespace、cgroups、apparmor、网络设备以及防火墙规则等。这一系列操作的完成都不需要依赖LXC或者其他包。</p>
+</li>
+<li><p>2). docker pull命令的作用为：从Docker Registry中下载指定的容器镜像，并存储在本地的Graph中，以备后续创建Docker容器时的使用。<br>名为”pull”的job在执行过程中，执行pullRepository操作，即从Docker Registry中下载相应的一个或者多个image；</p>
+</li>
+<li><p>3). docker run命令的作用是在一个全新的Docker容器内部运行一条指令。Docker在执行这条命令的时候，所做工作可以分为两部分：第一，创建Docker容器所需的rootfs；第二，创建容器的网络等运行环境，并真正运行用户指令。</p>
+</li>
+</ul>
+<h2 id="An-image-is-a-filesystem-and-parameters-to-use-at-runtime"><a href="#An-image-is-a-filesystem-and-parameters-to-use-at-runtime" class="headerlink" title="An image is a filesystem and parameters to use at runtime."></a>An image is a filesystem and parameters to use at runtime.</h2><h1 id="错误解决办法："><a href="#错误解决办法：" class="headerlink" title="错误解决办法："></a>错误解决办法：</h1><h2 id="提示-include-lt-sys-types-h-gt-找不到sys-types-h"><a href="#提示-include-lt-sys-types-h-gt-找不到sys-types-h" class="headerlink" title="提示#include&lt;sys/types.h&gt; 找不到sys/types.h   :"></a>提示#include&lt;sys/types.h&gt; 找不到sys/types.h   :</h2><p>更新go语言包到版本1.8</p>
+<h2 id="提示在gfapi-h中找不到glfs-fallocate-方法"><a href="#提示在gfapi-h中找不到glfs-fallocate-方法" class="headerlink" title="提示在gfapi.h中找不到glfs_fallocate()方法    :"></a>提示在gfapi.h中找不到glfs_fallocate()方法    :</h2><p>更新glusterfs版本到3.8</p>
+<h2 id="Package-uuid-was-not-found-in-the-pkg-config-search-path-Perhaps-you-should-add-the-directory-containing-uuid-pc’-to-the-PKG-CONFIG-PATH-environment-variable-Package-‘uuid’-required-by-‘glusterfs-api’-not-found"><a href="#Package-uuid-was-not-found-in-the-pkg-config-search-path-Perhaps-you-should-add-the-directory-containing-uuid-pc’-to-the-PKG-CONFIG-PATH-environment-variable-Package-‘uuid’-required-by-‘glusterfs-api’-not-found" class="headerlink" title="Package uuid was not found in the pkg-config search path.Perhaps you should add the directory containing `uuid.pc’ to the PKG_CONFIG_PATH environment variable .Package ‘uuid’, required by ‘glusterfs-api’, not found   :"></a>Package uuid was not found in the pkg-config search path.Perhaps you should add the directory containing `uuid.pc’ to the PKG_CONFIG_PATH environment variable .Package ‘uuid’, required by ‘glusterfs-api’, not found   :</h2><p>执行:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install uuid-dev </span><br></pre></td></tr></table></figure>
+<h2 id="fatal-error-sys-acl-h-No-such-file-or-directory"><a href="#fatal-error-sys-acl-h-No-such-file-or-directory" class="headerlink" title="fatal error: sys/acl.h: No such file or directory"></a>fatal error: sys/acl.h: No such file or directory</h2><p>执行：  </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install uuid-dev libacl1-dev liblzo2-dev</span><br></pre></td></tr></table></figure>
+
+<h2 id="apt-get-update的时候如果出现hash校验失败"><a href="#apt-get-update的时候如果出现hash校验失败" class="headerlink" title="apt-get update的时候如果出现hash校验失败"></a>apt-get update的时候如果出现hash校验失败</h2><p>可以尝试使用apt-get update –fix-missing来解决；也可以试试sudo apt-get upgrade来升级软件包</p>
+<h2 id="出现connection-failed-check-if-gluster-deamon-is-running-："><a href="#出现connection-failed-check-if-gluster-deamon-is-running-：" class="headerlink" title="出现connection failed check if gluster deamon is running ："></a>出现connection failed check if gluster deamon is running ：</h2><p>执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">rm -fR /var/<span class="built_in">log</span>/glusterfs/*</span><br><span class="line">rm -rf /var/lib/glusterd/*</span><br></pre></td></tr></table></figure>
+<p>直接卸载重装：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get remove glusterfs-common</span><br><span class="line">sudo add-apt-repository ppa:gluster/glusterfs-3.8</span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install glusterfs-server</span><br></pre></td></tr></table></figure>
+
+<h2 id="安装glusterfs3-8："><a href="#安装glusterfs3-8：" class="headerlink" title="安装glusterfs3.8："></a>安装glusterfs3.8：</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo add-apt-repository ppa:gluster/glusterfs-3.8</span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install glusterfs-server</span><br></pre></td></tr></table></figure>
+
+<h2 id="git-add的时候拼命地提示："><a href="#git-add的时候拼命地提示：" class="headerlink" title="git add的时候拼命地提示："></a>git add的时候拼命地提示：</h2><p>尚未暂存以备提交的变更：<br>  （使用 “git add &lt;文件&gt;…” 更新要提交的内容）<br>  （使用 “git checkout – &lt;文件&gt;…” 丢弃工作区的改动）<br>  （提交或丢弃子模组中未跟踪或修改的内容）</p>
+<pre><code>这是因为这个主题是用git clone下来的,说白了,也是一个git 仓库…
+</code></pre>
+<p>可以cd到该目录下,删掉.git文件夹,结束git的控制<br>然后就可以了</p>
+<h2 id="glusterfs删除某个brick："><a href="#glusterfs删除某个brick：" class="headerlink" title="glusterfs删除某个brick："></a>glusterfs删除某个brick：</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo gluster volume remove-brick datapoint replica 1 n103:/mnt/glustermac force</span><br></pre></td></tr></table></figure>
+
+<h2 id="在一台机器上创建replica-2的卷："><a href="#在一台机器上创建replica-2的卷：" class="headerlink" title="在一台机器上创建replica=2的卷："></a>在一台机器上创建replica=2的卷：</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo gluster volume create datapoint replica 2 transport tcp n103:/mnt/gluster n103:/mnt/glustermac force</span><br></pre></td></tr></table></figure>
+
+<h2 id="安装docker"><a href="#安装docker" class="headerlink" title="安装docker"></a>安装docker</h2><p>如果之前装过docker则sudo apt-get remove docker docker-engine</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install \</span><br><span class="line">    linux-image-extra-$(uname -r) \</span><br><span class="line">    linux-image-extra-virtual</span><br><span class="line">sudo apt-get install \</span><br><span class="line">    apt-transport-https \</span><br><span class="line">    ca-certificates \</span><br><span class="line">    curl \</span><br><span class="line">    software-properties-common</span><br><span class="line">curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -</span><br><span class="line">sudo add-apt-repository \</span><br><span class="line">   <span class="string">&quot;deb [arch=amd64] https://download.docker.com/linux/ubuntu \</span></span><br><span class="line"><span class="string">   <span class="subst">$(lsb_release -cs)</span> \</span></span><br><span class="line"><span class="string">   stable&quot;</span></span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install docker-ce</span><br></pre></td></tr></table></figure>
+<h2 id="将用户加入docker-group中，使用docker时不用加sudo："><a href="#将用户加入docker-group中，使用docker时不用加sudo：" class="headerlink" title="将用户加入docker group中，使用docker时不用加sudo："></a>将用户加入docker group中，使用docker时不用加sudo：</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo groupadd docker</span><br><span class="line">sudo gpasswd -a <span class="variable">$&#123;USER&#125;</span> docker</span><br><span class="line">sudo service docker restart</span><br></pre></td></tr></table></figure>
+<p>注销登录后生效</p>
+<h2 id="往registry-push镜像时，time-Parse-方法出错：parsing-time-“2017-04-22T07-30-42Z”-extra-text"><a href="#往registry-push镜像时，time-Parse-方法出错：parsing-time-“2017-04-22T07-30-42Z”-extra-text" class="headerlink" title="往registry push镜像时，time.Parse()方法出错：parsing time “2017-04-22T07:30:42Z”: extra text:"></a>往registry push镜像时，time.Parse()方法出错：parsing time “2017-04-22T07:30:42Z”: extra text:</h2><p>解决办法：见问题15</p>
+<h2 id="registry的存储结构："><a href="#registry的存储结构：" class="headerlink" title="registry的存储结构："></a>registry的存储结构：</h2><p>blobs下面存储了registry的所有基本信息元素（镜像实际内容）</p>
+<p>digest是基于内容寻址算法算出来的一串hash值</p>
+<p>_layers是跟这个镜像有关的所有镜像层</p>
+<p>_manifest是镜像的相关信息</p>
+<p>revisions里面是该镜像所有可用的镜像digest，下面一个link指向blobs里面对应的digest。可以想象，同一个镜像名可以有多个不同的tag，所以revision目录下也会有多个digest指向不同的镜像digest。比如：将Ubuntu镜像tag成ubuntu:v0.1 ，将hello-world  tag成ubuntu:v0.2，这样他们两个虽然都是名为ubuntu的镜像，但是他们的内容却完全不同，所以digest也不同，因此revision下面会有多个digest</p>
+<h2 id="将一个-byte数组p直接用string-p-转化为string后是有问题的"><a href="#将一个-byte数组p直接用string-p-转化为string后是有问题的" class="headerlink" title="将一个[]byte数组p直接用string(p)转化为string后是有问题的"></a>将一个[]byte数组p直接用string(p)转化为string后是有问题的</h2><p>string的结构体是这样的：</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> String</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">byte</span>* str;</span><br><span class="line">    intgo <span class="built_in">len</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>golang里面string的概念不是以前遇到\0结尾的概念，他是一块连续的内存，首地址+长度，上面那样赋值，如果p里面有\0，他不会做结尾的处理。这个时候如果对这个string做其他操作，如time.parse(),strconv.Atoi()等就会出错，解决办法是自己写一个正规的转换函数。</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">byteString</span><span class="params">(p []<span class="keyword">byte</span>)</span> <span class="title">string</span></span> &#123;</span><br><span class="line">        <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="built_in">len</span>(p); i++ &#123;</span><br><span class="line">                <span class="keyword">if</span> p[i] == <span class="number">0</span> &#123;</span><br><span class="line">                        <span class="keyword">return</span> <span class="keyword">string</span>(p[<span class="number">0</span>:i])</span><br><span class="line">                &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">string</span>(p)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Docker-Error-response-from-daemon-client-is-newer-than-server"><a href="#Docker-Error-response-from-daemon-client-is-newer-than-server" class="headerlink" title="Docker-Error response from daemon:client is newer than server"></a>Docker-Error response from daemon:client is newer than server</h2><p>方法一：在client端的环境变量中指定旧的API版本来解决：export DOCKER_API_VERSION=<version><br>方法二（推荐）：重启Docker服务：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo service docker restart</span><br></pre></td></tr></table></figure>
+
+<h2 id="git删除本地已修改但未提交的文件："><a href="#git删除本地已修改但未提交的文件：" class="headerlink" title="git删除本地已修改但未提交的文件："></a>git删除本地已修改但未提交的文件：</h2><p>如果未加入暂存区：git checkout . &amp;&amp; git clean –xdf<br>如果已加入暂存区：git reset –hard    ;    git clean -xdf</p>
+<h2 id="使用Dockerfile生成镜像时，底层如果是alpine，如果提示pkg-config-exec-“pkg-config”-executable-file-not-found-in-PATH"><a href="#使用Dockerfile生成镜像时，底层如果是alpine，如果提示pkg-config-exec-“pkg-config”-executable-file-not-found-in-PATH" class="headerlink" title="使用Dockerfile生成镜像时，底层如果是alpine，如果提示pkg-config: exec: “pkg-config”: executable file not found in $PATH"></a>使用Dockerfile生成镜像时，底层如果是alpine，如果提示pkg-config: exec: “pkg-config”: executable file not found in $PATH</h2><p>表明alpine系统缺少pkg-config包，则在Dockerfile中加入 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">RUN apk add --update alpine-sdk</span><br></pre></td></tr></table></figure>
+<p> 安装alpine系统相关包</p>
+<h2 id="使用Dockerfile生成镜像时，底层使用gluster-gluster-centos，如果提示Package-glusterfs-api-was-not-found-in-the-pkg-config-search-path"><a href="#使用Dockerfile生成镜像时，底层使用gluster-gluster-centos，如果提示Package-glusterfs-api-was-not-found-in-the-pkg-config-search-path" class="headerlink" title="使用Dockerfile生成镜像时，底层使用gluster/gluster-centos，如果提示Package glusterfs-api was not found in the pkg-config search path."></a>使用Dockerfile生成镜像时，底层使用gluster/gluster-centos，如果提示Package glusterfs-api was not found in the pkg-config search path.</h2><p>表明pak-config里面缺少glusterfs-api包，安装即可，命令如下 </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum -y install glusterfs-api-devel</span><br></pre></td></tr></table></figure>
+
+<h2 id="遇到docker-daemon不能启动"><a href="#遇到docker-daemon不能启动" class="headerlink" title="遇到docker daemon不能启动"></a>遇到docker daemon不能启动</h2><p>检查/etc/docker/daemon.json有没有问题，删除该文件也可以。执行sudo service docker restart启动daemon</p>
+<h2 id="docker-login时遇到Error-response-from-daemon-getsockopt-connection-refused问题"><a href="#docker-login时遇到Error-response-from-daemon-getsockopt-connection-refused问题" class="headerlink" title="docker login时遇到Error response from daemon: getsockopt: connection refused问题"></a>docker login时遇到Error response from daemon: getsockopt: connection refused问题</h2><p>在/etc/default/docker文件中加入：<br>DOCKER_OPTS=”–insecure-registry 10.0.40.16:5000”</p>
+<h2 id="系统如果缺少依赖，执行"><a href="#系统如果缺少依赖，执行" class="headerlink" title="系统如果缺少依赖，执行"></a>系统如果缺少依赖，执行</h2><pre><code>sudo apt-get update
+sudo apt-get install -f
+</code></pre>
+<h2 id="配置harbor时，如果在docker-login的时候出现错误：Error-responsefrom-daemon-Get-https-xx-xxx-xx-xx-v1-users-dial-tcp-xx-xxx-xx-xx-443-getsockopt-connection-refused"><a href="#配置harbor时，如果在docker-login的时候出现错误：Error-responsefrom-daemon-Get-https-xx-xxx-xx-xx-v1-users-dial-tcp-xx-xxx-xx-xx-443-getsockopt-connection-refused" class="headerlink" title="配置harbor时，如果在docker login的时候出现错误：Error responsefrom daemon: Get https://xx.xxx.xx.xx/v1/users/: dial tcp xx.xxx.xx.xx:443:getsockopt: connection refused"></a>配置harbor时，如果在docker login的时候出现错误：Error responsefrom daemon: Get <a target="_blank" rel="noopener" href="https://xx.xxx.xx.xx/v1/users/">https://xx.xxx.xx.xx/v1/users/</a>: dial tcp xx.xxx.xx.xx:443:getsockopt: connection refused</h2><p>表明registry的端口5000没有映射出来，则在docker-compose.yml文件中添加registry的端口映射，ports: - 5000:5000 如：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">registry:</span></span><br><span class="line">   <span class="attr">image:</span> <span class="string">vmware/registry:photon-2.6.0</span></span><br><span class="line">   <span class="attr">container_name:</span> <span class="string">registry</span></span><br><span class="line">   <span class="attr">restart:</span> <span class="string">always</span></span><br><span class="line">   <span class="attr">volumes:</span></span><br><span class="line">     <span class="bullet">-</span> <span class="string">/data/registry:/storage:zfile:///home/konnase/workspace/blog/source/_posts/Spring%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86.md</span></span><br><span class="line"></span><br><span class="line">     <span class="bullet">-</span> <span class="string">./common/config/registry/:/etc/registry/:z</span></span><br><span class="line">   <span class="attr">ports:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="number">5000</span><span class="string">:5000</span></span><br><span class="line">   <span class="attr">networks:</span></span><br><span class="line">     <span class="bullet">-</span> <span class="string">harbor</span></span><br><span class="line">   <span class="attr">environment:</span></span><br><span class="line">     <span class="bullet">-</span> <span class="string">GODEBUG=netdns=cgo</span></span><br><span class="line">   <span class="attr">command:</span></span><br><span class="line">     [<span class="string">&quot;serve&quot;</span>, <span class="string">&quot;/etc/registry/config.yml&quot;</span>]</span><br><span class="line">   <span class="attr">depends_on:</span></span><br><span class="line">     <span class="bullet">-</span> <span class="string">log</span></span><br><span class="line">   <span class="attr">logging:</span></span><br><span class="line">     <span class="attr">driver:</span> <span class="string">&quot;syslog&quot;</span></span><br><span class="line">     <span class="attr">options:</span>  </span><br><span class="line">       <span class="attr">syslog-address:</span> <span class="string">&quot;tcp://127.0.0.1:1514&quot;</span></span><br><span class="line">       <span class="attr">tag:</span> <span class="string">&quot;registry&quot;</span></span><br></pre></td></tr></table></figure>
+<h2 id="手动释放Ubuntu系统占用的内存"><a href="#手动释放Ubuntu系统占用的内存" class="headerlink" title="手动释放Ubuntu系统占用的内存"></a>手动释放Ubuntu系统占用的内存</h2><p>通过调整/proc/sys/vm/drop_caches来释放内存<br>echo 3 &gt; /proc/sys/vm/drop_caches</p>
+<h2 id="为远程主机设置代理"><a href="#为远程主机设置代理" class="headerlink" title="为远程主机设置代理"></a>为远程主机设置代理</h2><p>本机通过ssh登录远程主机，可以使用anyproxy来代理远程主机，这样远程主机即使没联网也能上外网。<br>本机通过</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install -g anyproxy</span><br></pre></td></tr></table></figure>
+<p>安装anyproxy，然后在命令行执行：<code>anyproxy</code>即可开启代理。<br>远程主机上，执行<br><code>export http_proxy=your_proxy_address:port</code><br><code>export https_proxy=your_proxy_address:port</code><br>即可使远程主机使用本机代理上网.</p>
+<blockquote>
+<p>注意</p>
+</blockquote>
+<p>Windows防火墙可能导致代理出现问题，使用代理前请关闭Windows防火墙</p>
+<h2 id="ssh登录gitlab"><a href="#ssh登录gitlab" class="headerlink" title="ssh登录gitlab"></a>ssh登录gitlab</h2><p>需要在本地.ssh目录下新建config文件，内容如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Host git.njuics.cn</span><br><span class="line">    Hostname git.njuics.cn</span><br><span class="line">    Port 2222</span><br></pre></td></tr></table></figure>
+
+<h2 id="docker-registry加速"><a href="#docker-registry加速" class="headerlink" title="docker registry加速"></a>docker registry加速</h2><p>在/etc/docker/daemon.json中加入：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;registry-mirrors&quot;</span>: [<span class="string">&quot;http://hub-mirror.c.163.com&quot;</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/08/05/system_management/Linux%E5%AD%A6%E4%B9%A0%E5%BF%83%E5%BE%97/" rel="prev" title="Linux学习心得">
+      <i class="fa fa-chevron-left"></i> Linux学习心得
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/11/05/java_spring/Maven%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="next" title="Maven学习笔记">
+      Maven学习笔记 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9FNFS%EF%BC%9A"><span class="nav-number">1.</span> <span class="nav-text">网络文件系统NFS：</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9FCeph%EF%BC%9A"><span class="nav-number">2.</span> <span class="nav-text">分布式文件系统Ceph：</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Ceph-%E7%94%9F%E6%80%81%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84%E5%8F%AF%E4%BB%A5%E5%88%92%E5%88%86%E4%B8%BA%E5%9B%9B%E9%83%A8%E5%88%86%EF%BC%9A"><span class="nav-number">2.1.</span> <span class="nav-text">Ceph 生态系统架构可以划分为四部分：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A3%81%E7%9B%98%E5%9D%97%E6%98%A0%E5%B0%84%E5%88%B0%E5%85%83%E6%95%B0%E6%8D%AE%EF%BC%9A"><span class="nav-number">2.2.</span> <span class="nav-text">磁盘块映射到元数据：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%83%E6%95%B0%E6%8D%AE%E6%9C%8D%E5%8A%A1%E5%99%A8%E4%B8%BB%E8%A6%81%E5%BA%94%E7%94%A8%E5%B0%B1%E6%98%AF%E4%B8%80%E4%B8%AA%E6%99%BA%E8%83%BD%E5%85%83%E6%95%B0%E6%8D%AE%E7%BC%93%E5%AD%98%EF%BC%9B%E5%85%83%E6%95%B0%E6%8D%AE%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%AE%A1%E7%90%86-inode-%E7%A9%BA%E9%97%B4%EF%BC%8C%E5%B0%86%E6%96%87%E4%BB%B6%E5%90%8D%E8%BD%AC%E5%8F%98%E4%B8%BA%E5%85%83%E6%95%B0%E6%8D%AE"><span class="nav-number">2.3.</span> <span class="nav-text">元数据服务器主要应用就是一个智能元数据缓存；元数据服务器管理 inode 空间，将文件名转变为元数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%8E%E5%AD%98%E5%82%A8%E8%A7%92%E5%BA%A6%E6%9D%A5%E7%9C%8B%EF%BC%8CCeph-%E5%AF%B9%E8%B1%A1%E5%AD%98%E5%82%A8%E8%AE%BE%E5%A4%87%E6%89%A7%E8%A1%8C%E4%BB%8E%E5%AF%B9%E8%B1%A1%E5%88%B0%E5%9D%97%E7%9A%84%E6%98%A0%E5%B0%84"><span class="nav-number">2.4.</span> <span class="nav-text">从存储角度来看，Ceph 对象存储设备执行从对象到块的映射</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%B9%E4%BA%8Eobjects-storage%E5%92%8Cblock-storage-%E4%B8%8D%E9%9C%80%E8%A6%81%E5%85%83%E6%95%B0%E6%8D%AE%E6%9C%8D%E5%8A%A1%E5%99%A8%E3%80%82"><span class="nav-number">2.5.</span> <span class="nav-text">对于objects storage和block storage,不需要元数据服务器。</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%84%E4%BB%B6%EF%BC%9A"><span class="nav-number">2.6.</span> <span class="nav-text">组件：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%98%A0%E5%B0%84"><span class="nav-number">2.7.</span> <span class="nav-text">映射</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%BA%E4%B8%80%E8%87%B4%E6%80%A7"><span class="nav-number">2.8.</span> <span class="nav-text">强一致性</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Docker"><span class="nav-number">3.</span> <span class="nav-text">Docker</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Docker-%E4%BD%BF%E7%94%A8%E5%AE%A2%E6%88%B7%E7%AB%AF-%E6%9C%8D%E5%8A%A1%E5%99%A8-C-S-%E6%9E%B6%E6%9E%84%E6%A8%A1%E5%BC%8F%E3%80%82"><span class="nav-number">3.1.</span> <span class="nav-text">Docker 使用客户端-服务器 (C&#x2F;S) 架构模式。</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A6%81%E7%90%86%E8%A7%A3-Docker-%E5%86%85%E9%83%A8%E6%9E%84%E5%BB%BA%EF%BC%8C%E9%9C%80%E8%A6%81%E7%90%86%E8%A7%A3%E4%BB%A5%E4%B8%8B%E4%B8%89%E7%A7%8D%E9%83%A8%E4%BB%B6%EF%BC%9A"><span class="nav-number">3.2.</span> <span class="nav-text">要理解 Docker 内部构建，需要理解以下三种部件：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Docker%E6%9E%B6%E6%9E%84%EF%BC%9A"><span class="nav-number">3.3.</span> <span class="nav-text">Docker架构：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#An-image-is-a-filesystem-and-parameters-to-use-at-runtime"><span class="nav-number">3.4.</span> <span class="nav-text">An image is a filesystem and parameters to use at runtime.</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%94%99%E8%AF%AF%E8%A7%A3%E5%86%B3%E5%8A%9E%E6%B3%95%EF%BC%9A"><span class="nav-number">4.</span> <span class="nav-text">错误解决办法：</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8F%90%E7%A4%BA-include-lt-sys-types-h-gt-%E6%89%BE%E4%B8%8D%E5%88%B0sys-types-h"><span class="nav-number">4.1.</span> <span class="nav-text">提示#include&lt;sys&#x2F;types.h&gt; 找不到sys&#x2F;types.h   :</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8F%90%E7%A4%BA%E5%9C%A8gfapi-h%E4%B8%AD%E6%89%BE%E4%B8%8D%E5%88%B0glfs-fallocate-%E6%96%B9%E6%B3%95"><span class="nav-number">4.2.</span> <span class="nav-text">提示在gfapi.h中找不到glfs_fallocate()方法    :</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Package-uuid-was-not-found-in-the-pkg-config-search-path-Perhaps-you-should-add-the-directory-containing-uuid-pc%E2%80%99-to-the-PKG-CONFIG-PATH-environment-variable-Package-%E2%80%98uuid%E2%80%99-required-by-%E2%80%98glusterfs-api%E2%80%99-not-found"><span class="nav-number">4.3.</span> <span class="nav-text">Package uuid was not found in the pkg-config search path.Perhaps you should add the directory containing &#96;uuid.pc’ to the PKG_CONFIG_PATH environment variable .Package ‘uuid’, required by ‘glusterfs-api’, not found   :</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#fatal-error-sys-acl-h-No-such-file-or-directory"><span class="nav-number">4.4.</span> <span class="nav-text">fatal error: sys&#x2F;acl.h: No such file or directory</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#apt-get-update%E7%9A%84%E6%97%B6%E5%80%99%E5%A6%82%E6%9E%9C%E5%87%BA%E7%8E%B0hash%E6%A0%A1%E9%AA%8C%E5%A4%B1%E8%B4%A5"><span class="nav-number">4.5.</span> <span class="nav-text">apt-get update的时候如果出现hash校验失败</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%87%BA%E7%8E%B0connection-failed-check-if-gluster-deamon-is-running-%EF%BC%9A"><span class="nav-number">4.6.</span> <span class="nav-text">出现connection failed check if gluster deamon is running ：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85glusterfs3-8%EF%BC%9A"><span class="nav-number">4.7.</span> <span class="nav-text">安装glusterfs3.8：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#git-add%E7%9A%84%E6%97%B6%E5%80%99%E6%8B%BC%E5%91%BD%E5%9C%B0%E6%8F%90%E7%A4%BA%EF%BC%9A"><span class="nav-number">4.8.</span> <span class="nav-text">git add的时候拼命地提示：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#glusterfs%E5%88%A0%E9%99%A4%E6%9F%90%E4%B8%AAbrick%EF%BC%9A"><span class="nav-number">4.9.</span> <span class="nav-text">glusterfs删除某个brick：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%A8%E4%B8%80%E5%8F%B0%E6%9C%BA%E5%99%A8%E4%B8%8A%E5%88%9B%E5%BB%BAreplica-2%E7%9A%84%E5%8D%B7%EF%BC%9A"><span class="nav-number">4.10.</span> <span class="nav-text">在一台机器上创建replica&#x3D;2的卷：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85docker"><span class="nav-number">4.11.</span> <span class="nav-text">安装docker</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%86%E7%94%A8%E6%88%B7%E5%8A%A0%E5%85%A5docker-group%E4%B8%AD%EF%BC%8C%E4%BD%BF%E7%94%A8docker%E6%97%B6%E4%B8%8D%E7%94%A8%E5%8A%A0sudo%EF%BC%9A"><span class="nav-number">4.12.</span> <span class="nav-text">将用户加入docker group中，使用docker时不用加sudo：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BE%80registry-push%E9%95%9C%E5%83%8F%E6%97%B6%EF%BC%8Ctime-Parse-%E6%96%B9%E6%B3%95%E5%87%BA%E9%94%99%EF%BC%9Aparsing-time-%E2%80%9C2017-04-22T07-30-42Z%E2%80%9D-extra-text"><span class="nav-number">4.13.</span> <span class="nav-text">往registry push镜像时，time.Parse()方法出错：parsing time “2017-04-22T07:30:42Z”: extra text:</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#registry%E7%9A%84%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84%EF%BC%9A"><span class="nav-number">4.14.</span> <span class="nav-text">registry的存储结构：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%86%E4%B8%80%E4%B8%AA-byte%E6%95%B0%E7%BB%84p%E7%9B%B4%E6%8E%A5%E7%94%A8string-p-%E8%BD%AC%E5%8C%96%E4%B8%BAstring%E5%90%8E%E6%98%AF%E6%9C%89%E9%97%AE%E9%A2%98%E7%9A%84"><span class="nav-number">4.15.</span> <span class="nav-text">将一个[]byte数组p直接用string(p)转化为string后是有问题的</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Docker-Error-response-from-daemon-client-is-newer-than-server"><span class="nav-number">4.16.</span> <span class="nav-text">Docker-Error response from daemon:client is newer than server</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#git%E5%88%A0%E9%99%A4%E6%9C%AC%E5%9C%B0%E5%B7%B2%E4%BF%AE%E6%94%B9%E4%BD%86%E6%9C%AA%E6%8F%90%E4%BA%A4%E7%9A%84%E6%96%87%E4%BB%B6%EF%BC%9A"><span class="nav-number">4.17.</span> <span class="nav-text">git删除本地已修改但未提交的文件：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8Dockerfile%E7%94%9F%E6%88%90%E9%95%9C%E5%83%8F%E6%97%B6%EF%BC%8C%E5%BA%95%E5%B1%82%E5%A6%82%E6%9E%9C%E6%98%AFalpine%EF%BC%8C%E5%A6%82%E6%9E%9C%E6%8F%90%E7%A4%BApkg-config-exec-%E2%80%9Cpkg-config%E2%80%9D-executable-file-not-found-in-PATH"><span class="nav-number">4.18.</span> <span class="nav-text">使用Dockerfile生成镜像时，底层如果是alpine，如果提示pkg-config: exec: “pkg-config”: executable file not found in $PATH</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8Dockerfile%E7%94%9F%E6%88%90%E9%95%9C%E5%83%8F%E6%97%B6%EF%BC%8C%E5%BA%95%E5%B1%82%E4%BD%BF%E7%94%A8gluster-gluster-centos%EF%BC%8C%E5%A6%82%E6%9E%9C%E6%8F%90%E7%A4%BAPackage-glusterfs-api-was-not-found-in-the-pkg-config-search-path"><span class="nav-number">4.19.</span> <span class="nav-text">使用Dockerfile生成镜像时，底层使用gluster&#x2F;gluster-centos，如果提示Package glusterfs-api was not found in the pkg-config search path.</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%81%87%E5%88%B0docker-daemon%E4%B8%8D%E8%83%BD%E5%90%AF%E5%8A%A8"><span class="nav-number">4.20.</span> <span class="nav-text">遇到docker daemon不能启动</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#docker-login%E6%97%B6%E9%81%87%E5%88%B0Error-response-from-daemon-getsockopt-connection-refused%E9%97%AE%E9%A2%98"><span class="nav-number">4.21.</span> <span class="nav-text">docker login时遇到Error response from daemon: getsockopt: connection refused问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E5%A6%82%E6%9E%9C%E7%BC%BA%E5%B0%91%E4%BE%9D%E8%B5%96%EF%BC%8C%E6%89%A7%E8%A1%8C"><span class="nav-number">4.22.</span> <span class="nav-text">系统如果缺少依赖，执行</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEharbor%E6%97%B6%EF%BC%8C%E5%A6%82%E6%9E%9C%E5%9C%A8docker-login%E7%9A%84%E6%97%B6%E5%80%99%E5%87%BA%E7%8E%B0%E9%94%99%E8%AF%AF%EF%BC%9AError-responsefrom-daemon-Get-https-xx-xxx-xx-xx-v1-users-dial-tcp-xx-xxx-xx-xx-443-getsockopt-connection-refused"><span class="nav-number">4.23.</span> <span class="nav-text">配置harbor时，如果在docker login的时候出现错误：Error responsefrom daemon: Get https:&#x2F;&#x2F;xx.xxx.xx.xx&#x2F;v1&#x2F;users&#x2F;: dial tcp xx.xxx.xx.xx:443:getsockopt: connection refused</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%89%8B%E5%8A%A8%E9%87%8A%E6%94%BEUbuntu%E7%B3%BB%E7%BB%9F%E5%8D%A0%E7%94%A8%E7%9A%84%E5%86%85%E5%AD%98"><span class="nav-number">4.24.</span> <span class="nav-text">手动释放Ubuntu系统占用的内存</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E8%BF%9C%E7%A8%8B%E4%B8%BB%E6%9C%BA%E8%AE%BE%E7%BD%AE%E4%BB%A3%E7%90%86"><span class="nav-number">4.25.</span> <span class="nav-text">为远程主机设置代理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ssh%E7%99%BB%E5%BD%95gitlab"><span class="nav-number">4.26.</span> <span class="nav-text">ssh登录gitlab</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#docker-registry%E5%8A%A0%E9%80%9F"><span class="nav-number">4.27.</span> <span class="nav-text">docker registry加速</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Konnase Lee</p>
+  <div class="site-description" itemprop="description">There is no ending to learn</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">42</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">56</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/konnase" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;konnase" rel="noopener" target="_blank"><i class="github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:konnase123@gmail.com" title="E-Mail → mailto:konnase123@gmail.com" rel="noopener" target="_blank"><i class="envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/u/3833522360" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;3833522360" rel="noopener" target="_blank"><i class="weibo fa-fw"></i>Weibo</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Konnase Lee</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+
+
+
+
+
+
+<script>
+  (function() {
+    function leancloudSelector(url) {
+      url = encodeURI(url);
+      return document.getElementById(url).querySelector('.leancloud-visitors-count');
+    }
+
+    function addCount(Counter) {
+      var visitors = document.querySelector('.leancloud_visitors');
+      var url = decodeURI(visitors.id);
+      var title = visitors.dataset.flagTitle;
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length > 0) {
+            var counter = results[0];
+            leancloudSelector(url).innerText = counter.time + 1;
+            Counter('put', '/classes/Counter/' + counter.objectId, { time: { '__op': 'Increment', 'amount': 1 } })
+              .catch(error => {
+                console.error('Failed to save visitor count', error);
+              });
+          } else {
+              leancloudSelector(url).innerText = 'Counter not initialized! More info at console err msg.';
+              console.error('ATTENTION! LeanCloud counter has security bug, see how to solve it here: https://github.com/theme-next/hexo-leancloud-counter-security. \n However, you can still use LeanCloud without security, by setting `security` option to `false`.');
+            
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    function showTime(Counter) {
+      var visitors = document.querySelectorAll('.leancloud_visitors');
+      var entries = [...visitors].map(element => {
+        return decodeURI(element.id);
+      });
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url: { '$in': entries } })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          for (let url of entries) {
+            let target = results.find(item => item.url === url);
+            leancloudSelector(url).innerText = target ? target.time : 0;
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    let { app_id, app_key, server_url } = {"enable":true,"app_id":"iiWVTMTERRQ2WJd5heGT8XYr-gzGzoHsz","app_key":"9t8v39uaLv5hdfC1udYVLOok","server_url":null,"security":true};
+    function fetchData(api_server) {
+      var Counter = (method, url, data) => {
+        return fetch(`${api_server}/1.1${url}`, {
+          method,
+          headers: {
+            'X-LC-Id'     : app_id,
+            'X-LC-Key'    : app_key,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+      };
+      if (CONFIG.page.isPost) {
+        if (CONFIG.hostname !== location.hostname) return;
+        addCount(Counter);
+      } else if (document.querySelectorAll('.post-title-link').length >= 1) {
+        showTime(Counter);
+      }
+    }
+
+    let api_server = app_id.slice(-9) !== '-MdYXbMMI' ? server_url : `https://${app_id.slice(0, 8).toLowerCase()}.api.lncldglobal.com`;
+
+    if (api_server) {
+      fetchData(api_server);
+    } else {
+      fetch('https://app-router.leancloud.cn/2/route?appId=' + app_id)
+        .then(response => response.json())
+        .then(({ api_server }) => {
+          fetchData('https://' + api_server);
+        });
+    }
+  })();
+</script>
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>

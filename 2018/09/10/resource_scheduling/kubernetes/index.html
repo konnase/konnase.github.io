@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"konnase.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":true},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="设计架构Schedulerk8s的有两步调度策略  预选策略(predicates)：强制性规则，遍历所有Node，选择满足要求的Node列表。v1.7支持15种策略  PodFitsResources：检查主机资源是否满足pod需求 NoDiskConfilict：检查主机上的卷冲突 MatchInterPodAffinity：检查pod和其他pod是否符合亲和性规则   优选策略(Priori">
+<meta property="og:type" content="article">
+<meta property="og:title" content="kubernetes">
+<meta property="og:url" content="https://konnase.github.io/2018/09/10/resource_scheduling/kubernetes/index.html">
+<meta property="og:site_name" content="Konnase Lee">
+<meta property="og:description" content="设计架构Schedulerk8s的有两步调度策略  预选策略(predicates)：强制性规则，遍历所有Node，选择满足要求的Node列表。v1.7支持15种策略  PodFitsResources：检查主机资源是否满足pod需求 NoDiskConfilict：检查主机上的卷冲突 MatchInterPodAffinity：检查pod和其他pod是否符合亲和性规则   优选策略(Priori">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://konnase.github.io/img/resource--role.png">
+<meta property="og:image" content="https://konnase.github.io/img/architecture.png">
+<meta property="article:published_time" content="2018-09-10T12:26:35.000Z">
+<meta property="article:modified_time" content="2021-10-25T02:59:15.954Z">
+<meta property="article:author" content="Konnase Lee">
+<meta property="article:tag" content="kubernetes">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://konnase.github.io/img/resource--role.png">
+
+<link rel="canonical" href="https://konnase.github.io/2018/09/10/resource_scheduling/kubernetes/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>kubernetes | Konnase Lee</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Konnase Lee</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://konnase.github.io/2018/09/10/resource_scheduling/kubernetes/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Konnase Lee">
+      <meta itemprop="description" content="There is no ending to learn">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Konnase Lee">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          kubernetes
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-09-10 20:26:35" itemprop="dateCreated datePublished" datetime="2018-09-10T20:26:35+08:00">2018-09-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2021-10-25 10:59:15" itemprop="dateModified" datetime="2021-10-25T10:59:15+08:00">2021-10-25</time>
+              </span>
+
+          
+            <span id="/2018/09/10/resource_scheduling/kubernetes/" class="post-meta-item leancloud_visitors" data-flag-title="kubernetes" title="Views">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="设计架构"><a href="#设计架构" class="headerlink" title="设计架构"></a>设计架构</h1><h2 id="Scheduler"><a href="#Scheduler" class="headerlink" title="Scheduler"></a>Scheduler</h2><p>k8s的有两步调度策略</p>
+<ul>
+<li><p>预选策略(predicates)：强制性规则，遍历所有Node，选择满足要求的Node列表。v1.7支持15种策略</p>
+<ul>
+<li>PodFitsResources：检查主机资源是否满足pod需求</li>
+<li>NoDiskConfilict：检查主机上的卷冲突</li>
+<li>MatchInterPodAffinity：检查pod和其他pod是否符合亲和性规则</li>
+</ul>
+</li>
+<li><p>优选策略(Priorities)：在预选策略的基础上，给Node打分排序，选出最优者。v1.7支持10个策略，每项策略对应一个权重，每项策略的得分乘以权重得到总分</p>
+<ul>
+<li>ImageLocalityPriority：根据主机上是否已具备Pod运行的环境来打分，得分计算：不存在所需镜像，返回0分，存在镜像，镜像越大得分越高</li>
+<li>LeastRequestedPriority：计算Pods需要的CPU和内存在当前节点可用资源的百分比，具有最小百分比的节点就是最优，得分计算公式：cpu((capacity – sum(requested)) * 10 / capacity) + memory((capacity – sum(requested)) * 10 / capacity) / 2</li>
+</ul>
+<span id="more"></span></li>
+</ul>
+<h2 id="Serviceaccount"><a href="#Serviceaccount" class="headerlink" title="Serviceaccount"></a>Serviceaccount</h2><p>一个角色拥有指定的资源权限（可以访问k8s里面的哪些资源，如pods、sercices等）和功能权限（CRUD），通过将RoleBinding将一个role绑定到某个serviceaccount上，即可让资源可通过serviceaccount来访问。关系图如下：<br><img src="/img/resource--role.png" alt="image"></p>
+<h2 id="NodeStatus"><a href="#NodeStatus" class="headerlink" title="NodeStatus"></a>NodeStatus</h2><p>在所有的 zones 都不健康（也即集群中没有健康 node）的极端情况下，node controller 将假设 master 的连接出了某些问题，它将停止所有删除动作直到一些连接恢复</p>
+<h2 id="containerd-架构"><a href="#containerd-架构" class="headerlink" title="containerd 架构"></a>containerd 架构</h2><p><a target="_blank" rel="noopener" href="https://containerd.io/">https://containerd.io/</a><br><img src="/img/architecture.png" alt="architecture"></p>
+<h2 id="存储拓扑调度"><a href="#存储拓扑调度" class="headerlink" title="存储拓扑调度"></a>存储拓扑调度</h2><p>在k8s中，存储是以PVC-StorageClass-PV的形式产生的，而存储的调度和pod的调度是两个并行的操作（前者由PV controller调度，后者由scheduler调度），所以两个并行独立的调度过程就很可能导致最终的存储访问不满足nodeAffinity的需求（比如pod和PV分别被调度到两个不同的region，而这两个region不能互相访问存储）。为了解决这个问题，k8s使用了存储拓扑调度，即将PV和PVC的binding操作和动态创建PV的操作做了delay，delay到pod调度结果出来之后，再去做这两个操作。使得最终选择的node既满足pod的计算资源需求，又满足pod的PV的nodeAffinity需求。需求对一些组件进行改动：</p>
+<ol>
+<li>PV controller需求支持延迟binding</li>
+<li>动态生成PV的组件。pod调度结果出来之后，根据pod的拓扑信息动态创建PV</li>
+<li>kube-scheduler：在选择node的时候考虑计算资源的同时，需要考虑pod对存储的需求，即看选择的node是否能满足和PVC匹配的PV的nodeAffinity需求。<br>动态创建PV的拓扑限制需要保证两方面：一是动态创建出来的存储要能被这个可用区访问；二是调度器在选择node的时候，要落在这个可用区内。</li>
+</ol>
+<p>k8s中支持使用Snapshot来进行存储快照，持久化卷</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/kubernetes/" rel="tag"># kubernetes</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/09/10/resource_scheduling/%E8%B5%84%E6%BA%90%E8%B0%83%E5%BA%A6/" rel="prev" title="资源调度">
+      <i class="fa fa-chevron-left"></i> 资源调度
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/09/14/deep_learning/deep_learning_scheduling/" rel="next" title="分布式深度学习资源调度">
+      分布式深度学习资源调度 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1%E6%9E%B6%E6%9E%84"><span class="nav-number">1.</span> <span class="nav-text">设计架构</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Scheduler"><span class="nav-number">1.1.</span> <span class="nav-text">Scheduler</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Serviceaccount"><span class="nav-number">1.2.</span> <span class="nav-text">Serviceaccount</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NodeStatus"><span class="nav-number">1.3.</span> <span class="nav-text">NodeStatus</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#containerd-%E6%9E%B6%E6%9E%84"><span class="nav-number">1.4.</span> <span class="nav-text">containerd 架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%98%E5%82%A8%E6%8B%93%E6%89%91%E8%B0%83%E5%BA%A6"><span class="nav-number">1.5.</span> <span class="nav-text">存储拓扑调度</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Konnase Lee</p>
+  <div class="site-description" itemprop="description">There is no ending to learn</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">42</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">56</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/konnase" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;konnase" rel="noopener" target="_blank"><i class="github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:konnase123@gmail.com" title="E-Mail → mailto:konnase123@gmail.com" rel="noopener" target="_blank"><i class="envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/u/3833522360" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;3833522360" rel="noopener" target="_blank"><i class="weibo fa-fw"></i>Weibo</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Konnase Lee</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+
+
+
+
+
+
+<script>
+  (function() {
+    function leancloudSelector(url) {
+      url = encodeURI(url);
+      return document.getElementById(url).querySelector('.leancloud-visitors-count');
+    }
+
+    function addCount(Counter) {
+      var visitors = document.querySelector('.leancloud_visitors');
+      var url = decodeURI(visitors.id);
+      var title = visitors.dataset.flagTitle;
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length > 0) {
+            var counter = results[0];
+            leancloudSelector(url).innerText = counter.time + 1;
+            Counter('put', '/classes/Counter/' + counter.objectId, { time: { '__op': 'Increment', 'amount': 1 } })
+              .catch(error => {
+                console.error('Failed to save visitor count', error);
+              });
+          } else {
+              leancloudSelector(url).innerText = 'Counter not initialized! More info at console err msg.';
+              console.error('ATTENTION! LeanCloud counter has security bug, see how to solve it here: https://github.com/theme-next/hexo-leancloud-counter-security. \n However, you can still use LeanCloud without security, by setting `security` option to `false`.');
+            
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    function showTime(Counter) {
+      var visitors = document.querySelectorAll('.leancloud_visitors');
+      var entries = [...visitors].map(element => {
+        return decodeURI(element.id);
+      });
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url: { '$in': entries } })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          for (let url of entries) {
+            let target = results.find(item => item.url === url);
+            leancloudSelector(url).innerText = target ? target.time : 0;
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    let { app_id, app_key, server_url } = {"enable":true,"app_id":"iiWVTMTERRQ2WJd5heGT8XYr-gzGzoHsz","app_key":"9t8v39uaLv5hdfC1udYVLOok","server_url":null,"security":true};
+    function fetchData(api_server) {
+      var Counter = (method, url, data) => {
+        return fetch(`${api_server}/1.1${url}`, {
+          method,
+          headers: {
+            'X-LC-Id'     : app_id,
+            'X-LC-Key'    : app_key,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+      };
+      if (CONFIG.page.isPost) {
+        if (CONFIG.hostname !== location.hostname) return;
+        addCount(Counter);
+      } else if (document.querySelectorAll('.post-title-link').length >= 1) {
+        showTime(Counter);
+      }
+    }
+
+    let api_server = app_id.slice(-9) !== '-MdYXbMMI' ? server_url : `https://${app_id.slice(0, 8).toLowerCase()}.api.lncldglobal.com`;
+
+    if (api_server) {
+      fetchData(api_server);
+    } else {
+      fetch('https://app-router.leancloud.cn/2/route?appId=' + app_id)
+        .then(response => response.json())
+        .then(({ api_server }) => {
+          fetchData('https://' + api_server);
+        });
+    }
+  })();
+</script>
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"konnase.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":true},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="使用kubeadm安装kubernetes预备条件 &#x2F;etc&#x2F;hosts文件 关闭firewall 关闭selinux 关闭swap iptables参数1234567$ cat &lt;&lt;EOF &gt;  &#x2F;etc&#x2F;sysctl.d&#x2F;k8s.confnet.bridge.bridge-nf-call-ip6tables &#x3D; 1net.bridge.bridge-nf-call-iptab">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kubernetes搭建">
+<meta property="og:url" content="https://konnase.github.io/2018/07/09/resource_scheduling/kubernetes-%E6%90%AD%E5%BB%BA/index.html">
+<meta property="og:site_name" content="Konnase Lee">
+<meta property="og:description" content="使用kubeadm安装kubernetes预备条件 &#x2F;etc&#x2F;hosts文件 关闭firewall 关闭selinux 关闭swap iptables参数1234567$ cat &lt;&lt;EOF &gt;  &#x2F;etc&#x2F;sysctl.d&#x2F;k8s.confnet.bridge.bridge-nf-call-ip6tables &#x3D; 1net.bridge.bridge-nf-call-iptab">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://konnase.github.io/img/pod_error.png">
+<meta property="article:published_time" content="2018-07-09T06:19:40.000Z">
+<meta property="article:modified_time" content="2021-10-25T02:59:15.955Z">
+<meta property="article:author" content="Konnase Lee">
+<meta property="article:tag" content="kubernetes">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://konnase.github.io/img/pod_error.png">
+
+<link rel="canonical" href="https://konnase.github.io/2018/07/09/resource_scheduling/kubernetes-%E6%90%AD%E5%BB%BA/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Kubernetes搭建 | Konnase Lee</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Konnase Lee</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://konnase.github.io/2018/07/09/resource_scheduling/kubernetes-%E6%90%AD%E5%BB%BA/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Konnase Lee">
+      <meta itemprop="description" content="There is no ending to learn">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Konnase Lee">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Kubernetes搭建
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-07-09 14:19:40" itemprop="dateCreated datePublished" datetime="2018-07-09T14:19:40+08:00">2018-07-09</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2021-10-25 10:59:15" itemprop="dateModified" datetime="2021-10-25T10:59:15+08:00">2021-10-25</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Resource-Management/" itemprop="url" rel="index"><span itemprop="name">Resource Management</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/07/09/resource_scheduling/kubernetes-%E6%90%AD%E5%BB%BA/" class="post-meta-item leancloud_visitors" data-flag-title="Kubernetes搭建" title="Views">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="使用kubeadm安装kubernetes"><a href="#使用kubeadm安装kubernetes" class="headerlink" title="使用kubeadm安装kubernetes"></a>使用kubeadm安装kubernetes</h1><h2 id="预备条件"><a href="#预备条件" class="headerlink" title="预备条件"></a>预备条件</h2><ul>
+<li>/etc/hosts文件</li>
+<li>关闭firewall</li>
+<li>关闭selinux</li>
+<li>关闭swap</li>
+<li>iptables参数<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ cat &lt;&lt;<span class="string">EOF &gt;  /etc/sysctl.d/k8s.conf</span></span><br><span class="line"><span class="string">net.bridge.bridge-nf-call-ip6tables = 1</span></span><br><span class="line"><span class="string">net.bridge.bridge-nf-call-iptables = 1</span></span><br><span class="line"><span class="string">net.ipv4.ip_forward = 1</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line">$ sysctl --system</span><br></pre></td></tr></table></figure>
+<span id="more"></span>
+<h2 id="按照官网安装kubernetes"><a href="#按照官网安装kubernetes" class="headerlink" title="按照官网安装kubernetes"></a>按照官网安装kubernetes</h2><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/">create-cluster-kubeadm</a></li>
+</ul>
+<p>确保docker和kubelet使用相同的cgroup driver(cgroupfs or systemd)</p>
+<p>有些镜像需要外网才能pull下来，可以使用shadowsocks开一个http代理，服务器指定http代理pull镜像（注意接网线，要不然找不到地址。。）</p>
+<p>执行</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl init --kubernetes-version=v.1.11.0 --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=[master-ip]</span><br></pre></td></tr></table></figure>
+<p>关闭http_proxy，不然最后init不成功，<code>--kubernetes-version</code>需要加上，不然需要连接外网获取version。总结就是要连外网的时候挂代理，不用的时候（连接集群中的某些机器时）把代理去掉。</p>
+<p><code>--pod-network-cidr=10.244.0.0/16</code>的意思是设置cidr（无类别域间路由），使10.244.0.0/16网段的路由都通过10.244.0.0网络号转发（就是所谓的网络地址斜杠标记法），在node加入k8s集群之后，pod network(eg. flannel)会自动为其他node分配一个10.244.0.0/16网段的一个子网，如10.244.1.0/24</p>
+<p>安装dashboard后，要通过其他机器浏览器访问ui，需要开启kube-proxy，执行</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl proxy --address 0.0.0.0 --port=8181 --accept-hosts=<span class="string">&#x27;^*$&#x27;</span></span><br></pre></td></tr></table></figure>
+<p>保证接受任何ip、任何host发送的请求</p>
+<h2 id="坑"><a href="#坑" class="headerlink" title="坑"></a>坑</h2><h3 id="镜像需要从外网获取"><a href="#镜像需要从外网获取" class="headerlink" title="镜像需要从外网获取"></a>镜像需要从外网获取</h3><p>执行<code>kubectl get pods --all-namespaces</code>观察到有很多pods的状态不是running，其实是一些镜像没能pull下来<br><img src="/img/pod_error.png" alt="image"><br>将这些镜像pull下来传到registry，然后每个node上从registry pull镜像，再tag称官方的镜像名。</p>
+<p>kubernetes-dashboard也一样要pull镜像下来，开启kube-proxy后，浏览器访问 <a target="_blank" rel="noopener" href="http://n167:8181/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/">n167:8181/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy</a> 或者<a href="n167:6443/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/">n167:6443/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/</a>即可进入登录界面。（提示services &quot;https:kubernetes-dashboard:&quot; is forbidden: User &quot;system:anonymous&quot; cannot get services/proxy in the namespace &quot;kube-system&quot;时表示用户未认证，需要生成证书，使用openssl生成p12证书，然后在浏览器导入该证书，才能从个人电脑上访问服务器的dashboard）</p>
+<h3 id="pod-network"><a href="#pod-network" class="headerlink" title="pod network"></a>pod network</h3><p>不要单独用calico做proxy和networking，否则k8s集群内部pods之间无法通信，最大的影响是heapster不能集成，看不到配置字典等。推荐使用canal pod network，它使用calico做proxy，flannel做networking。</p>
+<p><strong>targetPort表示容器内部的端口，port表示Service的虚拟端口，不要搞反了</strong>；targetPort只在service起作用，表示用来访问该service对应的容器的内部containerPort；外部系统只要用任意一个Node的IP地址+nodePort即可访问到相应的服务（即使该服务只运行在一个node上，也可以通过任意一个node访问到该服务）</p>
+<h3 id="cluster-reset"><a href="#cluster-reset" class="headerlink" title="cluster reset"></a>cluster reset</h3><p>集群重置过后，再从浏览器登录的时候，由于之前的证书已经失效，需要重新导入证书，将之前的证书删除</p>
+<h3 id="Service"><a href="#Service" class="headerlink" title="Service"></a>Service</h3><p>cluster IP无法被ping通，因为没有“实体对象”响应单独的clusterIP，不具备TCP/IP通信的基础。当通过域名（如nginx.default.svc）访问应用时，实际上是通过service访问的，k8s内部会将该域名解析为service的clusterIP，所以在集群中是不能ping通某个域名，但是可以走http协议（如curl命令）拿到该域名对应端口的内容，注意端口应该使用Service的虚拟端口port，而不是容器内部的端口targetPort（如nginx.default.svc:8080）</p>
+<p>kubernetes 集群中service可以映射的物理机端口范围默认为30000~32767</p>
+<p>Replica Set就是Replication Controller，只是比后者多了一个支持集合的Label Selector，RS一般不单独使用，主要是被Deployment这个更高层的资源对象使用，RS负责Deployment的自动扩容</p>
+<h3 id="三种方式访问nginx服务器"><a href="#三种方式访问nginx服务器" class="headerlink" title="三种方式访问nginx服务器"></a>三种方式访问nginx服务器</h3><ul>
+<li>podIP:port  只能在本机上访问</li>
+<li>clusterIP:targetPort  只能在集群内访问</li>
+<li>nodeIP:nodePort  可以在外网访问（只要nodeIP可以出外网）</li>
+</ul>
+<h3 id="kubelet"><a href="#kubelet" class="headerlink" title="kubelet"></a>kubelet</h3><p>kubelet需要一个read-only-port，监听其他pod的请求，使用安装完kubelet之后默认为启用该port。在<code>/etc/systemd/system/kubelet.service.d/10.kubeadm.conf</code>中加入<code>Environment=&quot;KUBELET_READ_ONLY_PORT=--read-only-port=10255&quot;</code>，并在Execstart后接上该环境变量<code>$KUBELET_READ_ONLY_PORT</code>，完整的文件如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"># Note: This dropin only works with kubeadm and kubelet v1.11+</span><br><span class="line">[Service]</span><br><span class="line">Environment=&quot;KUBELET_KUBECONFIG_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf&quot;</span><br><span class="line">Environment=&quot;KUBELET_CONFIG_ARGS=--config=/var/lib/kubelet/config.yaml&quot;</span><br><span class="line"># This is a file that &quot;kubeadm init&quot; and &quot;kubeadm join&quot; generates at runtime, populating the KUBELET_KUBEADM_ARGS variable dynamically</span><br><span class="line">EnvironmentFile=-/var/lib/kubelet/kubeadm-flags.env</span><br><span class="line"># This is a file that the user can use for overrides of the kubelet args as a last resort. Preferably, the user should use</span><br><span class="line"># the .NodeRegistration.KubeletExtraArgs object in the configuration files instead. KUBELET_EXTRA_ARGS should be sourced from this file.</span><br><span class="line">EnvironmentFile=-/etc/sysconfig/kubelet</span><br><span class="line">Environment=&quot;KUBELET_READ_ONLY_PORT=--read-only-port=10255&quot;</span><br><span class="line">ExecStart=</span><br><span class="line">ExecStart=/usr/bin/kubelet $KUBELET_KUBECONFIG_ARGS $KUBELET_CONFIG_ARGS $KUBELET_KUBEADM_ARGS $KUBELET_EXTRA_ARGS $KUBELET_READ_ONLY_PORT</span><br></pre></td></tr></table></figure>
+
+<h3 id="更换网卡"><a href="#更换网卡" class="headerlink" title="更换网卡"></a>更换网卡</h3><p>需要修改flannel网络</p>
+<ul>
+<li>到～/kubernetes/flannel下面修改kube-flannel.yml，因为机器是amd64的，所以修改DaemonSet kube-flannel-ds-amd64的container kube-flannel的args的–iface=p3p2，改成某一张网卡设备</li>
+<li>重启每台机器上的kube-flannel</li>
+<li>如果遇到同一台机器上两个service之间不能通信的问题，可能是iptables被跳过了，应该将下面两项置为1<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cat &lt;&lt;<span class="string">EOF &gt;  /etc/sysctl.d/k8s.conf</span></span><br><span class="line"><span class="string">net.bridge.bridge-nf-call-ip6tables = 1</span></span><br><span class="line"><span class="string">net.bridge.bridge-nf-call-iptables = 1</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line">sysctl --system</span><br></pre></td></tr></table></figure></li>
+<li>改变每台机器上的internal ip：在/etc/hosts里面加入<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">10.0.1.167  n167.njuics.cn</span><br><span class="line">10.0.1.168  n168.njuics.cn</span><br><span class="line">10.0.1.169  n169.njuics.cn</span><br><span class="line">10.0.1.170  n170.njuics.cn</span><br></pre></td></tr></table></figure></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/kubernetes/" rel="tag"># kubernetes</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/05/30/system_management/elasticsearch-configuration/" rel="prev" title="elasticsearch configuration">
+      <i class="fa fa-chevron-left"></i> elasticsearch configuration
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/08/01/deep_learning/%E5%88%86%E5%B8%83%E5%BC%8F%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%B3%BB%E7%BB%9F/" rel="next" title="分布式深度学习系统">
+      分布式深度学习系统 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8kubeadm%E5%AE%89%E8%A3%85kubernetes"><span class="nav-number">1.</span> <span class="nav-text">使用kubeadm安装kubernetes</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A2%84%E5%A4%87%E6%9D%A1%E4%BB%B6"><span class="nav-number">1.1.</span> <span class="nav-text">预备条件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8C%89%E7%85%A7%E5%AE%98%E7%BD%91%E5%AE%89%E8%A3%85kubernetes"><span class="nav-number">1.2.</span> <span class="nav-text">按照官网安装kubernetes</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9D%91"><span class="nav-number">1.3.</span> <span class="nav-text">坑</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%95%9C%E5%83%8F%E9%9C%80%E8%A6%81%E4%BB%8E%E5%A4%96%E7%BD%91%E8%8E%B7%E5%8F%96"><span class="nav-number">1.3.1.</span> <span class="nav-text">镜像需要从外网获取</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pod-network"><span class="nav-number">1.3.2.</span> <span class="nav-text">pod network</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#cluster-reset"><span class="nav-number">1.3.3.</span> <span class="nav-text">cluster reset</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Service"><span class="nav-number">1.3.4.</span> <span class="nav-text">Service</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E7%A7%8D%E6%96%B9%E5%BC%8F%E8%AE%BF%E9%97%AEnginx%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-number">1.3.5.</span> <span class="nav-text">三种方式访问nginx服务器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kubelet"><span class="nav-number">1.3.6.</span> <span class="nav-text">kubelet</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9B%B4%E6%8D%A2%E7%BD%91%E5%8D%A1"><span class="nav-number">1.3.7.</span> <span class="nav-text">更换网卡</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Konnase Lee</p>
+  <div class="site-description" itemprop="description">There is no ending to learn</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">42</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">56</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/konnase" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;konnase" rel="noopener" target="_blank"><i class="github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:konnase123@gmail.com" title="E-Mail → mailto:konnase123@gmail.com" rel="noopener" target="_blank"><i class="envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/u/3833522360" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;3833522360" rel="noopener" target="_blank"><i class="weibo fa-fw"></i>Weibo</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Konnase Lee</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+
+
+
+
+
+
+<script>
+  (function() {
+    function leancloudSelector(url) {
+      url = encodeURI(url);
+      return document.getElementById(url).querySelector('.leancloud-visitors-count');
+    }
+
+    function addCount(Counter) {
+      var visitors = document.querySelector('.leancloud_visitors');
+      var url = decodeURI(visitors.id);
+      var title = visitors.dataset.flagTitle;
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length > 0) {
+            var counter = results[0];
+            leancloudSelector(url).innerText = counter.time + 1;
+            Counter('put', '/classes/Counter/' + counter.objectId, { time: { '__op': 'Increment', 'amount': 1 } })
+              .catch(error => {
+                console.error('Failed to save visitor count', error);
+              });
+          } else {
+              leancloudSelector(url).innerText = 'Counter not initialized! More info at console err msg.';
+              console.error('ATTENTION! LeanCloud counter has security bug, see how to solve it here: https://github.com/theme-next/hexo-leancloud-counter-security. \n However, you can still use LeanCloud without security, by setting `security` option to `false`.');
+            
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    function showTime(Counter) {
+      var visitors = document.querySelectorAll('.leancloud_visitors');
+      var entries = [...visitors].map(element => {
+        return decodeURI(element.id);
+      });
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url: { '$in': entries } })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          for (let url of entries) {
+            let target = results.find(item => item.url === url);
+            leancloudSelector(url).innerText = target ? target.time : 0;
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    let { app_id, app_key, server_url } = {"enable":true,"app_id":"iiWVTMTERRQ2WJd5heGT8XYr-gzGzoHsz","app_key":"9t8v39uaLv5hdfC1udYVLOok","server_url":null,"security":true};
+    function fetchData(api_server) {
+      var Counter = (method, url, data) => {
+        return fetch(`${api_server}/1.1${url}`, {
+          method,
+          headers: {
+            'X-LC-Id'     : app_id,
+            'X-LC-Key'    : app_key,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+      };
+      if (CONFIG.page.isPost) {
+        if (CONFIG.hostname !== location.hostname) return;
+        addCount(Counter);
+      } else if (document.querySelectorAll('.post-title-link').length >= 1) {
+        showTime(Counter);
+      }
+    }
+
+    let api_server = app_id.slice(-9) !== '-MdYXbMMI' ? server_url : `https://${app_id.slice(0, 8).toLowerCase()}.api.lncldglobal.com`;
+
+    if (api_server) {
+      fetchData(api_server);
+    } else {
+      fetch('https://app-router.leancloud.cn/2/route?appId=' + app_id)
+        .then(response => response.json())
+        .then(({ api_server }) => {
+          fetchData('https://' + api_server);
+        });
+    }
+  })();
+</script>
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>

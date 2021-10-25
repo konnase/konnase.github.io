@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"konnase.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":true},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Dispatcher Servlet是怎样被调用的？我的这篇博客有讲到过程，再来分析一下Spring4.2.6的源代码 DispatcherServlet类继承关系是DispatcherServlet -&gt; FrameworkServlet -&gt; HttpServletBean -&gt; HttpServlet，由DispatcherServlet负责处理Http请求。另：Shiro">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Controller处理web请求的流程">
+<meta property="og:url" content="https://konnase.github.io/2018/03/17/java_spring/Controller%E5%A4%84%E7%90%86web%E8%AF%B7%E6%B1%82%E7%9A%84%E6%B5%81%E7%A8%8B/index.html">
+<meta property="og:site_name" content="Konnase Lee">
+<meta property="og:description" content="Dispatcher Servlet是怎样被调用的？我的这篇博客有讲到过程，再来分析一下Spring4.2.6的源代码 DispatcherServlet类继承关系是DispatcherServlet -&gt; FrameworkServlet -&gt; HttpServletBean -&gt; HttpServlet，由DispatcherServlet负责处理Http请求。另：Shiro">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://konnase.github.io/img/frameworservletonstartup.png">
+<meta property="article:published_time" content="2018-03-17T07:57:39.000Z">
+<meta property="article:modified_time" content="2021-10-25T02:59:15.916Z">
+<meta property="article:author" content="Konnase Lee">
+<meta property="article:tag" content="spring">
+<meta property="article:tag" content="controller">
+<meta property="article:tag" content="dispatcherservlet">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://konnase.github.io/img/frameworservletonstartup.png">
+
+<link rel="canonical" href="https://konnase.github.io/2018/03/17/java_spring/Controller%E5%A4%84%E7%90%86web%E8%AF%B7%E6%B1%82%E7%9A%84%E6%B5%81%E7%A8%8B/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Controller处理web请求的流程 | Konnase Lee</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Konnase Lee</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://konnase.github.io/2018/03/17/java_spring/Controller%E5%A4%84%E7%90%86web%E8%AF%B7%E6%B1%82%E7%9A%84%E6%B5%81%E7%A8%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Konnase Lee">
+      <meta itemprop="description" content="There is no ending to learn">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Konnase Lee">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Controller处理web请求的流程
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-03-17 15:57:39" itemprop="dateCreated datePublished" datetime="2018-03-17T15:57:39+08:00">2018-03-17</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2021-10-25 10:59:15" itemprop="dateModified" datetime="2021-10-25T10:59:15+08:00">2021-10-25</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/03/17/java_spring/Controller%E5%A4%84%E7%90%86web%E8%AF%B7%E6%B1%82%E7%9A%84%E6%B5%81%E7%A8%8B/" class="post-meta-item leancloud_visitors" data-flag-title="Controller处理web请求的流程" title="Views">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="Dispatcher-Servlet是怎样被调用的？"><a href="#Dispatcher-Servlet是怎样被调用的？" class="headerlink" title="Dispatcher Servlet是怎样被调用的？"></a>Dispatcher Servlet是怎样被调用的？</h2><p>我的<a href="https://konnase.github.io/2017/07/24/Spring%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86/">这篇博客</a>有讲到过程，再来分析一下Spring4.2.6的源代码</p>
+<p>DispatcherServlet类继承关系是DispatcherServlet -&gt; FrameworkServlet -&gt; HttpServletBean -&gt; HttpServlet，由DispatcherServlet负责处理Http请求。<br>另：Shiro里面的securitymanager的作用跟DispatcherServlet的作用很相似，都是负责全局组件交互的前端控制器。</p>
+<span id="more"></span>
+<p>初始化过程如下：<br>首先，HttpServletBean方法执行初始化方法init()：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">    * Map config parameters onto bean properties of this servlet, and</span></span><br><span class="line"><span class="comment">    * invoke subclass initialization.</span></span><br><span class="line"><span class="comment">    * <span class="doctag">@throws</span> ServletException if bean properties are invalid (or required</span></span><br><span class="line"><span class="comment">    * properties are missing), or if subclass initialization fails.</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">()</span> <span class="keyword">throws</span> ServletException </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (logger.isDebugEnabled()) &#123;</span><br><span class="line">        logger.debug(<span class="string">&quot;Initializing servlet &#x27;&quot;</span> + getServletName() + <span class="string">&quot;&#x27;&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Set bean properties from init parameters.</span></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        PropertyValues pvs = <span class="keyword">new</span> ServletConfigPropertyValues(getServletConfig(), <span class="keyword">this</span>.requiredProperties);</span><br><span class="line">        BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(<span class="keyword">this</span>);</span><br><span class="line">        ResourceLoader resourceLoader = <span class="keyword">new</span> ServletContextResourceLoader(getServletContext());</span><br><span class="line">        bw.registerCustomEditor(Resource.class, <span class="keyword">new</span> ResourceEditor(resourceLoader, getEnvironment()));</span><br><span class="line">        initBeanWrapper(bw);</span><br><span class="line">        bw.setPropertyValues(pvs, <span class="keyword">true</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">catch</span> (BeansException ex) &#123;</span><br><span class="line">        logger.error(<span class="string">&quot;Failed to set bean properties on servlet &#x27;&quot;</span> + getServletName() + <span class="string">&quot;&#x27;&quot;</span>, ex);</span><br><span class="line">        <span class="keyword">throw</span> ex;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Let subclasses do whatever initialization they like.</span></span><br><span class="line">    initServletBean();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (logger.isDebugEnabled()) &#123;</span><br><span class="line">        logger.debug(<span class="string">&quot;Servlet &#x27;&quot;</span> + getServletName() + <span class="string">&quot;&#x27; configured successfully&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后调用子类的initServletBean方法，这里的子类就是FrameworkServlet类，该方法如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">    * Overridden method of &#123;<span class="doctag">@link</span> HttpServletBean&#125;, invoked after any bean properties</span></span><br><span class="line"><span class="comment">    * have been set. Creates this servlet&#x27;s WebApplicationContext.</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">initServletBean</span><span class="params">()</span> <span class="keyword">throws</span> ServletException </span>&#123;</span><br><span class="line">    getServletContext().log(<span class="string">&quot;Initializing Spring FrameworkServlet &#x27;&quot;</span> + getServletName() + <span class="string">&quot;&#x27;&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span>.logger.isInfoEnabled()) &#123;</span><br><span class="line">        <span class="keyword">this</span>.logger.info(<span class="string">&quot;FrameworkServlet &#x27;&quot;</span> + getServletName() + <span class="string">&quot;&#x27;: initialization started&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">long</span> startTime = System.currentTimeMillis();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">this</span>.webApplicationContext = initWebApplicationContext();</span><br><span class="line">        initFrameworkServlet();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">catch</span> (ServletException ex) &#123;</span><br><span class="line">        <span class="keyword">this</span>.logger.error(<span class="string">&quot;Context initialization failed&quot;</span>, ex);</span><br><span class="line">        <span class="keyword">throw</span> ex;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">catch</span> (RuntimeException ex) &#123;</span><br><span class="line">        <span class="keyword">this</span>.logger.error(<span class="string">&quot;Context initialization failed&quot;</span>, ex);</span><br><span class="line">        <span class="keyword">throw</span> ex;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span>.logger.isInfoEnabled()) &#123;</span><br><span class="line">        <span class="keyword">long</span> elapsedTime = System.currentTimeMillis() - startTime;</span><br><span class="line">        <span class="keyword">this</span>.logger.info(<span class="string">&quot;FrameworkServlet &#x27;&quot;</span> + getServletName() + <span class="string">&quot;&#x27;: initialization completed in &quot;</span> +</span><br><span class="line">                elapsedTime + <span class="string">&quot; ms&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>initServletBean方法的执行可在控制台看到输出，跟该方法给出的输出是一致的。在Springboot中，servlet是在完成各种bean的加载、jpa的初始化等操作后，在开始接受Http请求时初始化的：<br><img src="/img/frameworservletonstartup.png" alt="image"><br>执行initWebApplicationContext方法，该方法调用onRefresh方法（由子类实现），即由DispatcherServlet类实现的onRefresh方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">    * This implementation calls &#123;<span class="doctag">@link</span> #initStrategies&#125;.</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onRefresh</span><span class="params">(ApplicationContext context)</span> </span>&#123;</span><br><span class="line">    initStrategies(context);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">    * Initialize the strategy objects that this servlet uses.</span></span><br><span class="line"><span class="comment">    * &lt;p&gt;May be overridden in subclasses in order to initialize further strategy objects.</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">initStrategies</span><span class="params">(ApplicationContext context)</span> </span>&#123;</span><br><span class="line">    initMultipartResolver(context);</span><br><span class="line">    initLocaleResolver(context);</span><br><span class="line">    initThemeResolver(context);</span><br><span class="line">    initHandlerMappings(context);</span><br><span class="line">    initHandlerAdapters(context);</span><br><span class="line">    initHandlerExceptionResolvers(context);</span><br><span class="line">    initRequestToViewNameTranslator(context);</span><br><span class="line">    initViewResolvers(context);</span><br><span class="line">    initFlashMapManager(context);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>initStrategies方法初始化很多策略，包括handlerMapping、handlerAdapter等，如果从bean容器中找不到相关策略，则采用缺省的策略，即spring-webmvc jar包的文件org.springframework.web.servlet.DispatcherServlet.properties中的缺省值。如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"># Default implementation classes for DispatcherServlet&#x27;s strategy interfaces.</span><br><span class="line"># Used as fallback when no matching beans are found in the DispatcherServlet context.</span><br><span class="line"># Not meant to be customized by application developers.</span><br><span class="line"></span><br><span class="line">org.springframework.web.servlet.LocaleResolver=org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver</span><br><span class="line"></span><br><span class="line">org.springframework.web.servlet.ThemeResolver=org.springframework.web.servlet.theme.FixedThemeResolver</span><br><span class="line"></span><br><span class="line">org.springframework.web.servlet.HandlerMapping=org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping,\</span><br><span class="line">	org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping</span><br><span class="line"></span><br><span class="line">org.springframework.web.servlet.HandlerAdapter=org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter,\</span><br><span class="line">	org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter,\</span><br><span class="line">	org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter</span><br><span class="line"></span><br><span class="line">org.springframework.web.servlet.HandlerExceptionResolver=org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerExceptionResolver,\</span><br><span class="line">	org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver,\</span><br><span class="line">	org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver</span><br><span class="line"></span><br><span class="line">org.springframework.web.servlet.RequestToViewNameTranslator=org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator</span><br><span class="line"></span><br><span class="line">org.springframework.web.servlet.ViewResolver=org.springframework.web.servlet.view.InternalResourceViewResolver</span><br><span class="line"></span><br><span class="line">org.springframework.web.servlet.FlashMapManager=org.springframework.web.servlet.support.SessionFlashMapManager</span><br></pre></td></tr></table></figure>
+
+<p>DispatcherServlet的初始化过程主要完成两件事。</p>
+<ol>
+<li>初始化Spring Web MVC使用的Web上下文，并且可能指定父容器为（ContextLoaderListener加载了根上下文）；</li>
+<li>初始化DispatcherServlet使用的策略，如HandlerMapping、HandlerAdapter等。</li>
+</ol>
+<p>而在处理Http请求时，主要调用doService方法，该方法将DispatcherServlet的具体参数加入到request中，并委托doDispatch方法完成真正的调度，doDispatch方法实现了以下处理流程：</p>
+<ol>
+<li>用户发送请求–&gt; DispatcherServlet，前端控制器收到请求后自己不进行处理，而是委托给其他解析器进行处理，作为统一访问点，进行全局流程控制。</li>
+<li>DispatherServlet–&gt; HandlerMapping，后者将把请求映射为HandlerExecutionChain对象（包含一个Handler处理器（页面控制器）对象、多个HandlerInterceptor拦截器），通过这种策略模式，很容易添加新的映射策略，得到一个handler</li>
+<li>DispatcherServlet–&gt; HandlerAdapter，后者将会把处理器包装为适配器，从而支持多种类型的处理器，由适配器执行处理器</li>
+<li>HandlerAdapter–&gt; 处理器功能处理方法的调用，HandlerAdapter将会根据适配的结果调用真正的处理器的功能处理方法，完成功能处理，并返回一个ModelAndView对象</li>
+<li>ModelAndView的逻辑视图名–&gt; ViewResolver，ViewResolver将把逻辑视图名解析成具体的View，通过这种策略，很容易更换其他视图技术</li>
+<li>View–&gt; 渲染，View会根据传进来的Model模型数据进行渲染，此处的Model实际是一个Map数据结构，因此很容易支持其他视图技术</li>
+<li>返回控制权给DIspatcherServlet，由DispatcherServlet返回响应给用户，流程结束<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//前端控制器分派方法  </span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">doDispatch</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span> <span class="keyword">throws</span> Exception </span>&#123;  </span><br><span class="line">        HttpServletRequest processedRequest = request;  </span><br><span class="line">        HandlerExecutionChain mappedHandler = <span class="keyword">null</span>;  </span><br><span class="line">        <span class="keyword">int</span> interceptorIndex = -<span class="number">1</span>;  </span><br><span class="line">  </span><br><span class="line">        <span class="keyword">try</span> &#123;  </span><br><span class="line">            ModelAndView mv;  </span><br><span class="line">            <span class="keyword">boolean</span> errorView = <span class="keyword">false</span>;  </span><br><span class="line">  </span><br><span class="line">            <span class="keyword">try</span> &#123;  </span><br><span class="line">                   <span class="comment">//检查请求是否是multipart（如文件上传），如果是将通过MultipartResolver解析  </span></span><br><span class="line">                processedRequest = checkMultipart(request);  </span><br><span class="line">                   <span class="comment">//步骤2、请求到处理器（页面控制器）的映射，通过HandlerMapping进行映射  </span></span><br><span class="line">                mappedHandler = getHandler(processedRequest, <span class="keyword">false</span>);  </span><br><span class="line">                <span class="keyword">if</span> (mappedHandler == <span class="keyword">null</span> || mappedHandler.getHandler() == <span class="keyword">null</span>) &#123;  </span><br><span class="line">                    noHandlerFound(processedRequest, response);  </span><br><span class="line">                    <span class="keyword">return</span>;  </span><br><span class="line">                &#125;  </span><br><span class="line">                   <span class="comment">//步骤3、处理器适配，即将我们的处理器包装成相应的适配器（从而支持多种类型的处理器）  </span></span><br><span class="line">                HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());  </span><br><span class="line">  </span><br><span class="line">                  <span class="comment">// 304 Not Modified缓存支持  </span></span><br><span class="line">                <span class="comment">//此处省略具体代码  </span></span><br><span class="line">  </span><br><span class="line">                <span class="comment">// 执行处理器相关的拦截器的预处理（HandlerInterceptor.preHandle）  </span></span><br><span class="line">                <span class="comment">//此处省略具体代码  </span></span><br><span class="line">  </span><br><span class="line">                <span class="comment">// 步骤4、由适配器执行处理器（调用处理器相应功能处理方法）  </span></span><br><span class="line">                mv = ha.handle(processedRequest, response, mappedHandler.getHandler());  </span><br><span class="line">  </span><br><span class="line">                <span class="comment">// Do we need view name translation?  </span></span><br><span class="line">                <span class="comment">// 在spring4.2.6中，这段代码被写入一个函数中</span></span><br><span class="line">                <span class="keyword">if</span> (mv != <span class="keyword">null</span> &amp;&amp; !mv.hasView()) &#123;  </span><br><span class="line">                    mv.setViewName(getDefaultViewName(request));  </span><br><span class="line">                &#125;  </span><br><span class="line">  </span><br><span class="line">                <span class="comment">// 执行处理器相关的拦截器的后处理（HandlerInterceptor.postHandle）  </span></span><br><span class="line">                <span class="comment">//此处省略具体代码  </span></span><br><span class="line">            &#125;  </span><br><span class="line">            <span class="keyword">catch</span> (ModelAndViewDefiningException ex) &#123;  </span><br><span class="line">                logger.debug(<span class="string">&quot;ModelAndViewDefiningException encountered&quot;</span>, ex);  </span><br><span class="line">                mv = ex.getModelAndView();  </span><br><span class="line">            &#125;  </span><br><span class="line">            <span class="keyword">catch</span> (Exception ex) &#123;  </span><br><span class="line">                Object handler = (mappedHandler != <span class="keyword">null</span> ? mappedHandler.getHandler() : <span class="keyword">null</span>);  </span><br><span class="line">                mv = processHandlerException(processedRequest, response, handler, ex);  </span><br><span class="line">                errorView = (mv != <span class="keyword">null</span>);  </span><br><span class="line">            &#125;  </span><br><span class="line">  </span><br><span class="line">            <span class="comment">//步骤5 步骤6、解析视图并进行视图的渲染  </span></span><br><span class="line"><span class="comment">//步骤5 由ViewResolver解析View（viewResolver.resolveViewName(viewName, locale)）  </span></span><br><span class="line"><span class="comment">//步骤6 视图在渲染时会把Model传入（view.render(mv.getModelInternal(), request, response);）  </span></span><br><span class="line">            <span class="keyword">if</span> (mv != <span class="keyword">null</span> &amp;&amp; !mv.wasCleared()) &#123;  </span><br><span class="line">                render(mv, processedRequest, response);  </span><br><span class="line">                <span class="keyword">if</span> (errorView) &#123;  </span><br><span class="line">                    WebUtils.clearErrorRequestAttributes(request);  </span><br><span class="line">                &#125;  </span><br><span class="line">            &#125;  </span><br><span class="line">            <span class="keyword">else</span> &#123;  </span><br><span class="line">                <span class="keyword">if</span> (logger.isDebugEnabled()) &#123;  </span><br><span class="line">                    logger.debug(<span class="string">&quot;Null ModelAndView returned to DispatcherServlet with name &#x27;&quot;</span> + getServletName() +  </span><br><span class="line">                            <span class="string">&quot;&#x27;: assuming HandlerAdapter completed request handling&quot;</span>);  </span><br><span class="line">                &#125;  </span><br><span class="line">            &#125;  </span><br><span class="line">  </span><br><span class="line">            <span class="comment">// 执行处理器相关的拦截器的完成后处理（HandlerInterceptor.afterCompletion）  </span></span><br><span class="line">            <span class="comment">//此处省略具体代码  </span></span><br><span class="line">  </span><br><span class="line">  </span><br><span class="line">        <span class="keyword">catch</span> (Exception ex) &#123;  </span><br><span class="line">            <span class="comment">// Trigger after-completion for thrown exception.  </span></span><br><span class="line">            triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, ex);  </span><br><span class="line">            <span class="keyword">throw</span> ex;  </span><br><span class="line">        &#125;  </span><br><span class="line">        <span class="keyword">catch</span> (Error err) &#123;  </span><br><span class="line">            ServletException ex = <span class="keyword">new</span> NestedServletException(<span class="string">&quot;Handler processing failed&quot;</span>, err);  </span><br><span class="line">            <span class="comment">// Trigger after-completion for thrown exception.  </span></span><br><span class="line">            triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, ex);  </span><br><span class="line">            <span class="keyword">throw</span> ex;  </span><br><span class="line">        &#125;  </span><br><span class="line">  </span><br><span class="line">        <span class="keyword">finally</span> &#123;  </span><br><span class="line">            <span class="comment">// Clean up any resources used by a multipart request.  </span></span><br><span class="line">            <span class="keyword">if</span> (processedRequest != request) &#123;  </span><br><span class="line">                cleanupMultipart(processedRequest);  </span><br><span class="line">            &#125;  </span><br><span class="line">        &#125;  </span><br><span class="line">    &#125;  </span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2 id="哪个类负责拦截Http请求并转发给Dispatcher-Servlet的"><a href="#哪个类负责拦截Http请求并转发给Dispatcher-Servlet的" class="headerlink" title="哪个类负责拦截Http请求并转发给Dispatcher Servlet的"></a>哪个类负责拦截Http请求并转发给Dispatcher Servlet的</h2><p>本篇博客同时参考博客网站ITEYE上开涛的Spring MVC相关教程。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/spring/" rel="tag"># spring</a>
+              <a href="/tags/controller/" rel="tag"># controller</a>
+              <a href="/tags/dispatcherservlet/" rel="tag"># dispatcherservlet</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/03/07/%E7%BB%8F%E5%85%B8%E7%AE%97%E6%B3%95/" rel="prev" title="经典算法">
+      <i class="fa fa-chevron-left"></i> 经典算法
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/03/19/java_spring/Shiro%E7%99%BB%E5%BD%95%E9%AA%8C%E8%AF%81%E6%B5%81%E7%A8%8B/" rel="next" title="Shiro登录验证流程">
+      Shiro登录验证流程 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Dispatcher-Servlet%E6%98%AF%E6%80%8E%E6%A0%B7%E8%A2%AB%E8%B0%83%E7%94%A8%E7%9A%84%EF%BC%9F"><span class="nav-number">1.</span> <span class="nav-text">Dispatcher Servlet是怎样被调用的？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%93%AA%E4%B8%AA%E7%B1%BB%E8%B4%9F%E8%B4%A3%E6%8B%A6%E6%88%AAHttp%E8%AF%B7%E6%B1%82%E5%B9%B6%E8%BD%AC%E5%8F%91%E7%BB%99Dispatcher-Servlet%E7%9A%84"><span class="nav-number">2.</span> <span class="nav-text">哪个类负责拦截Http请求并转发给Dispatcher Servlet的</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Konnase Lee</p>
+  <div class="site-description" itemprop="description">There is no ending to learn</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">42</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">56</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/konnase" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;konnase" rel="noopener" target="_blank"><i class="github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:konnase123@gmail.com" title="E-Mail → mailto:konnase123@gmail.com" rel="noopener" target="_blank"><i class="envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/u/3833522360" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;3833522360" rel="noopener" target="_blank"><i class="weibo fa-fw"></i>Weibo</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Konnase Lee</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+
+
+
+
+
+
+<script>
+  (function() {
+    function leancloudSelector(url) {
+      url = encodeURI(url);
+      return document.getElementById(url).querySelector('.leancloud-visitors-count');
+    }
+
+    function addCount(Counter) {
+      var visitors = document.querySelector('.leancloud_visitors');
+      var url = decodeURI(visitors.id);
+      var title = visitors.dataset.flagTitle;
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length > 0) {
+            var counter = results[0];
+            leancloudSelector(url).innerText = counter.time + 1;
+            Counter('put', '/classes/Counter/' + counter.objectId, { time: { '__op': 'Increment', 'amount': 1 } })
+              .catch(error => {
+                console.error('Failed to save visitor count', error);
+              });
+          } else {
+              leancloudSelector(url).innerText = 'Counter not initialized! More info at console err msg.';
+              console.error('ATTENTION! LeanCloud counter has security bug, see how to solve it here: https://github.com/theme-next/hexo-leancloud-counter-security. \n However, you can still use LeanCloud without security, by setting `security` option to `false`.');
+            
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    function showTime(Counter) {
+      var visitors = document.querySelectorAll('.leancloud_visitors');
+      var entries = [...visitors].map(element => {
+        return decodeURI(element.id);
+      });
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url: { '$in': entries } })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          for (let url of entries) {
+            let target = results.find(item => item.url === url);
+            leancloudSelector(url).innerText = target ? target.time : 0;
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    let { app_id, app_key, server_url } = {"enable":true,"app_id":"iiWVTMTERRQ2WJd5heGT8XYr-gzGzoHsz","app_key":"9t8v39uaLv5hdfC1udYVLOok","server_url":null,"security":true};
+    function fetchData(api_server) {
+      var Counter = (method, url, data) => {
+        return fetch(`${api_server}/1.1${url}`, {
+          method,
+          headers: {
+            'X-LC-Id'     : app_id,
+            'X-LC-Key'    : app_key,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+      };
+      if (CONFIG.page.isPost) {
+        if (CONFIG.hostname !== location.hostname) return;
+        addCount(Counter);
+      } else if (document.querySelectorAll('.post-title-link').length >= 1) {
+        showTime(Counter);
+      }
+    }
+
+    let api_server = app_id.slice(-9) !== '-MdYXbMMI' ? server_url : `https://${app_id.slice(0, 8).toLowerCase()}.api.lncldglobal.com`;
+
+    if (api_server) {
+      fetchData(api_server);
+    } else {
+      fetch('https://app-router.leancloud.cn/2/route?appId=' + app_id)
+        .then(response => response.json())
+        .then(({ api_server }) => {
+          fetchData('https://' + api_server);
+        });
+    }
+  })();
+</script>
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"konnase.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":true},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="基础环境搭建四台阿里云集群： 1234172.0.0.1    master1172.0.0.2    agent1172.0.0.3    agent2172.0.0.4    agent3 其中172.0.0.1机器可以访问外网(47.0.0.1)。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="部署DC环境">
+<meta property="og:url" content="https://konnase.github.io/2018/03/29/system_management/%E9%83%A8%E7%BD%B2DC%E7%8E%AF%E5%A2%83/index.html">
+<meta property="og:site_name" content="Konnase Lee">
+<meta property="og:description" content="基础环境搭建四台阿里云集群： 1234172.0.0.1    master1172.0.0.2    agent1172.0.0.3    agent2172.0.0.4    agent3 其中172.0.0.1机器可以访问外网(47.0.0.1)。">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2018-03-29T07:12:49.000Z">
+<meta property="article:modified_time" content="2021-10-25T02:59:15.925Z">
+<meta property="article:author" content="Konnase Lee">
+<meta property="article:tag" content="marathon">
+<meta property="article:tag" content="glusterfs">
+<meta property="article:tag" content="docker">
+<meta property="article:tag" content="mesos">
+<meta property="article:tag" content="zookeeper">
+<meta property="article:tag" content="calico">
+<meta property="article:tag" content="docker registry">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://konnase.github.io/2018/03/29/system_management/%E9%83%A8%E7%BD%B2DC%E7%8E%AF%E5%A2%83/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>部署DC环境 | Konnase Lee</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Konnase Lee</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://konnase.github.io/2018/03/29/system_management/%E9%83%A8%E7%BD%B2DC%E7%8E%AF%E5%A2%83/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Konnase Lee">
+      <meta itemprop="description" content="There is no ending to learn">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Konnase Lee">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          部署DC环境
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-03-29 15:12:49" itemprop="dateCreated datePublished" datetime="2018-03-29T15:12:49+08:00">2018-03-29</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2021-10-25 10:59:15" itemprop="dateModified" datetime="2021-10-25T10:59:15+08:00">2021-10-25</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Resource-Management/" itemprop="url" rel="index"><span itemprop="name">Resource Management</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/03/29/system_management/%E9%83%A8%E7%BD%B2DC%E7%8E%AF%E5%A2%83/" class="post-meta-item leancloud_visitors" data-flag-title="部署DC环境" title="Views">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="基础环境搭建"><a href="#基础环境搭建" class="headerlink" title="基础环境搭建"></a>基础环境搭建</h1><p>四台阿里云集群：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">172.0.0.1    master1</span><br><span class="line">172.0.0.2    agent1</span><br><span class="line">172.0.0.3    agent2</span><br><span class="line">172.0.0.4    agent3</span><br></pre></td></tr></table></figure>
+<p>其中172.0.0.1机器可以访问外网(47.0.0.1)。</p>
+<span id="more"></span>
+
+<h2 id="安装Docker"><a href="#安装Docker" class="headerlink" title="安装Docker"></a>安装Docker</h2><p>每台机器都安装</p>
+<ul>
+<li>安装必要的packages<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo yum install -y yum-utils \</span><br><span class="line">  device-mapper-persistent-data \</span><br><span class="line">  lvm2</span><br></pre></td></tr></table></figure></li>
+<li>配置阿里镜像源<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo yum-config-manager \</span><br><span class="line">    --add-repo \</span><br><span class="line">    http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo</span><br></pre></td></tr></table></figure></li>
+<li>安装docker<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install docker-ce</span><br></pre></td></tr></table></figure></li>
+<li>开启docker服务<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl start docker</span><br></pre></td></tr></table></figure>
+<h3 id="遇到的问题："><a href="#遇到的问题：" class="headerlink" title="遇到的问题："></a>遇到的问题：</h3>docker daemon不能启动，即执行<code>systemctl start docker</code>时提示<code>Job for docker.service failed because the control process exited with error code. See &quot;systemctl status docker.service&quot; and &quot;journalctl -xe&quot; for details. </code>，执行<code>systemctl status docker.service </code>，输出<code> Active: failed (Result: start-limit)  Process: 7880 ExecStart=/usr/bin/dockerd (code=exited, status=1/FAILURE) Main PID: 7880 (code=exited, status=1/FAILURE)</code>。<br>解决方法：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">rm -rf /var/lib/docker/</span><br><span class="line"><span class="comment"># 添加如下内容</span></span><br><span class="line"><span class="comment"># vim /etc/docker/daemon.json</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="string">&quot;graph&quot;</span>: <span class="string">&quot;/mnt/docker-data&quot;</span>,</span><br><span class="line">    <span class="string">&quot;storage-driver&quot;</span>: <span class="string">&quot;overlay&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="安装Glusterfs"><a href="#安装Glusterfs" class="headerlink" title="安装Glusterfs"></a>安装Glusterfs</h2><ul>
+<li>每台机器都安装<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">yum install glusterfs</span><br><span class="line">yum install glusterfs-cli</span><br><span class="line">yum install glusterfs-libs</span><br><span class="line">yum install glusterfs-server</span><br><span class="line">yum install glusterfs-fuse</span><br><span class="line">yum install glusterfs-geo-replication</span><br></pre></td></tr></table></figure></li>
+<li>在每台机器上的/etc/hosts文件中添加hosts信息：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">172.0.0.1    master1</span><br><span class="line">172.0.0.2    agent1</span><br><span class="line">172.0.0.3    agent2</span><br><span class="line">172.0.0.4    agent3</span><br></pre></td></tr></table></figure></li>
+<li>加入peer<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># master1上：</span></span><br><span class="line">gluster peer probe agent1</span><br><span class="line">gluster peer probe agent2</span><br><span class="line">gluster peer probe agent3</span><br><span class="line"><span class="comment"># 在各台机器上查看peer status</span></span><br><span class="line">gluster peer status</span><br></pre></td></tr></table></figure></li>
+<li>创建两个volume，一个做复制卷(replica=2)，一个Hash卷<ul>
+<li><p>创建复制卷：</p>
+<ul>
+<li>在master1和agent1上创建<code>/data/repli</code>目录</li>
+<li>执行<code>gluster volume create replica_volume replica 2 transport tcp master1:/data/repli agent1:/data/repli force</code>创建名为replica_volume的复制卷</li>
+<li>执行<code>gluster volume start replica_volume</code>开启复制卷</li>
+<li>在master1上创建目录<code>/data/mnt</code>用于挂载复制卷</li>
+<li>执行<code>mount -t glusterfs master1:replica_volume /data/mnt</code>挂载复制卷</li>
+</ul>
+</li>
+<li><p>创建Hash卷</p>
+<ul>
+<li>分别在四台机器上创建<code>/data/hash</code>目录</li>
+<li>执行<code>gluster volume create hash_volume master1:/data/hash agent1:/data/hash agent2:/data/hash agent3:/data/hash force </code>创建名为hash_volume的Hash卷</li>
+<li>执行<code>gluster volume start hash_volume</code></li>
+<li>在master1上创建目录<code>/data/mnt_hash</code>用于挂载Hash卷</li>
+<li>执行<code>mount -t glusterfs master1:hash_volume /data/mnt_hash</code>挂载Hash卷</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="Mesos-Zookeeper-Marathon集群搭建"><a href="#Mesos-Zookeeper-Marathon集群搭建" class="headerlink" title="Mesos+Zookeeper+Marathon集群搭建"></a>Mesos+Zookeeper+Marathon集群搭建</h2><h3 id="Mesos-master节点"><a href="#Mesos-master节点" class="headerlink" title="Mesos-master节点"></a>Mesos-master节点</h3><p>这里使用master1节点作为mesos-master，配置如下：</p>
+<ul>
+<li><p>关闭selinux</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sed -i <span class="string">&#x27;/SELINUX/s/enforcing/disabled/&#x27;</span> /etc/selinux/config</span><br><span class="line">setenforce 0</span><br></pre></td></tr></table></figure></li>
+<li><p>关闭防火墙</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">systemctl stop firewalld.service</span><br><span class="line">systemctl <span class="built_in">disable</span> firewalld.service</span><br></pre></td></tr></table></figure></li>
+<li><p>添加mesos的yum源</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rpm -Uvh http://repos.mesosphere.io/el/7/noarch/RPMS/mesosphere-el-repo-7-1.noarch.rpm</span><br></pre></td></tr></table></figure></li>
+<li><p>安装依赖的JDK环境、Mesos1.5.0、Marathon、Zookeeper</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 需要java8</span></span><br><span class="line">yum install -y java-1.8.0-openjdk-devel java-1.8.0-openjdk      </span><br><span class="line">yum -y install mesos marathon mesosphere-zookeeper</span><br></pre></td></tr></table></figure></li>
+<li><p>配置Zookeeper<br>我们将master1、agent1和agent2作为zookeeper的三个Znode，分别编号为1,2,3；zookeeper的配置必须在这三个Znode上都完成。</p>
+<ul>
+<li><p>将编号写到/var/lib/zookeeper/myid文件中去：</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">master1: <span class="built_in">echo</span> 1 &gt; /var/lib/zookeeper/myid</span><br><span class="line">agent1: <span class="built_in">echo</span> 2 &gt; /var/lib/zookeeper/myid</span><br><span class="line">agent2: <span class="built_in">echo</span> 3 &gt; /var/lib/zookeeper/myid</span><br></pre></td></tr></table></figure></li>
+<li><p>修改zookeeper文件：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 备份zoo.cfg文件</span></span><br><span class="line">cp /etc/zookeeper/conf/zoo.cfg /etc/zookeeper/conf/zoo.cfg.bak</span><br><span class="line"><span class="comment"># 然后往zoo.cfg文件中加入以下配置信息：</span></span><br><span class="line">server.1=master1:2888:3888</span><br><span class="line">server.2=agent1:2888:3888</span><br><span class="line">server.3=agent2:2888:3888 </span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p>配置Mesos-master</p>
+<ul>
+<li>在/etc/mesos/zk文件中加入<code>zk://172.0.0.1:2181,172.0.0.2:2181,172.0.0.3:2181/mesos</code></li>
+<li>设置文件/etc/mesos-master/quorum内容为一个大于（master节点数除以2）的整数。这里只有一个master，故quorum设置为1：<code>echo 1 &gt;/etc/mesos-master/quorum</code>。</li>
+<li>创建目录：<code>mkdir -p /etc/marathon/conf</code></li>
+<li>设置mesos-master的hostname：<code>echo 172.0.0.1 &gt; /etc/mesos-master/hostname</code></li>
+<li>设置marathon的hostname：<code>echo 172.0.0.1 &gt; /etc/marathon/conf/hostname</code></li>
+<li>在/etc/marathon/conf/master文件中加入<code>zk://172.0.0.1:2181,172.0.0.2:2181,172.0.0.3:2181/mesos</code></li>
+<li>在/etc/marathon/conf/zk文件中加入<code>zk://172.0.0.1:2181,172.0.0.2:2181,172.0.0.3:2181/marathon</code></li>
+</ul>
+</li>
+<li><p>启动mesos，marathon，zookeeper</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">systemctl <span class="built_in">enable</span> zookeeper &amp;&amp; systemctl <span class="built_in">enable</span> mesos-master &amp;&amp; systemctl <span class="built_in">enable</span> marathon</span><br><span class="line">systemctl start zookeeper &amp;&amp; systemctl start mesos-master &amp;&amp; systemctl start marathon</span><br></pre></td></tr></table></figure></li>
+<li><p>启动marathon的时候报错：未指定master。<br>解决办法：在启动marathon的时候指定master和zk，即进入<code>/usr/lib/systemd/system/marathon.service</code>，修改</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ExecStart=/usr/share/marathon/bin/marathon \</span><br><span class="line">--master zk://172.0.0.1:2181,172.0.0.2:2181,172.0.0.3:2181/mesos \</span><br><span class="line">--zk zk://172.0.0.1:2181,172.0.0.2:2181,172.0.0.3:2181/marathon</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">systemctl daemon-reload</span><br><span class="line">systemctl start marathon</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="Mesos-slave节点"><a href="#Mesos-slave节点" class="headerlink" title="Mesos-slave节点"></a>Mesos-slave节点</h3><p>这里使用全部四个节点作为mesos-slave，配置如下：</p>
+<ul>
+<li>关闭selinux<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sed -i <span class="string">&#x27;/SELINUX/s/enforcing/disabled/&#x27;</span> /etc/selinux/config</span><br><span class="line">setenforce 0</span><br></pre></td></tr></table></figure></li>
+<li>关闭防火墙<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">systemctl stop firewalld.service</span><br><span class="line">systemctl <span class="built_in">disable</span> firewalld.service</span><br></pre></td></tr></table></figure></li>
+<li>添加mesos的yum源<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rpm -Uvh http://repos.mesosphere.io/el/7/noarch/RPMS/mesosphere-el-repo-7-1.noarch.rpm</span><br></pre></td></tr></table></figure></li>
+<li>安装Mesos1.5.0<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y mesos</span><br></pre></td></tr></table></figure></li>
+<li>将IP写入<code>/etc/mesos-slave/hostname</code>中：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">master1: <span class="built_in">echo</span> 172.0.0.1 &gt; /etc/mesos-slave/hostname</span><br><span class="line">agent1: <span class="built_in">echo</span> 172.0.0.2 &gt; /etc/mesos-slave/hostname</span><br><span class="line">agent2: <span class="built_in">echo</span> 172.0.0.3 &gt; /etc/mesos-slave/hostname</span><br><span class="line">agent3: <span class="built_in">echo</span> 172.0.0.4 &gt; /etc/mesos-slave/hostname</span><br></pre></td></tr></table></figure></li>
+<li>配置Mesos<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> zk://172.0.0.1:2181,172.0.0.2:2181,172.0.0.3:2181/mesos /etc/mesos/zk</span><br></pre></td></tr></table></figure></li>
+<li>配置marathon调用mesos运行docker容器<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;docker,mesos&#x27;</span> &gt; /etc/mesos-slave/containerizers</span><br></pre></td></tr></table></figure></li>
+<li>启动slave<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl <span class="built_in">enable</span> mesos-slave &amp;&amp; systemctl start mesos-slave</span><br></pre></td></tr></table></figure>
+除了master1节点外，其余节点分别执行：<code>systemctl disable mesos-master</code></li>
+</ul>
+<h3 id="遇到的问题：-1"><a href="#遇到的问题：-1" class="headerlink" title="遇到的问题："></a>遇到的问题：</h3><p>  <code>Mesos-slave：Failed to perform recovery: Incompatible agent info detected.</code>通过<code>journalctl -xe</code>查看log，提示<br>  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">To restart this agent with a new agent id instead, <span class="keyword">do</span> as follows:</span><br><span class="line">4月 03 19:13:30 iZbp194ugtbu9s8ct8lt3eZ mesos-slave[1542]: rm -f /var/mesos/meta/slaves/latest</span><br><span class="line">4月 03 19:13:30 iZbp194ugtbu9s8ct8lt3eZ mesos-slave[1542]: This ensures that the agent does not recover old live executors.</span><br></pre></td></tr></table></figure><br>  执行<code>rm -f /var/mesos/meta/slaves/latest</code>，重启mesos-slave即可</p>
+<h2 id="安装并配置Etcd3-2-15"><a href="#安装并配置Etcd3-2-15" class="headerlink" title="安装并配置Etcd3.2.15"></a>安装并配置Etcd3.2.15</h2><h3 id="安装etcd"><a href="#安装etcd" class="headerlink" title="安装etcd"></a>安装etcd</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install etcd -y</span><br></pre></td></tr></table></figure>
+<h3 id="配置etcd"><a href="#配置etcd" class="headerlink" title="配置etcd"></a>配置etcd</h3><ul>
+<li><p>修改etcd默认配置文件/etc/etcd/etcd.conf</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line">master1节点：</span><br><span class="line"><span class="comment">#[Member]</span></span><br><span class="line">ETCD_DATA_DIR=<span class="string">&quot;/var/lib/etcd/default.etcd&quot;</span></span><br><span class="line">ETCD_LISTEN_PEER_URLS=<span class="string">&quot;http://0.0.0.0:2380&quot;</span></span><br><span class="line">ETCD_LISTEN_CLIENT_URLS=<span class="string">&quot;http://0.0.0.0:2379,http://0.0.0.0:4001&quot;</span></span><br><span class="line">ETCD_NAME=<span class="string">&quot;master1&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#[Clustering]</span></span><br><span class="line">ETCD_INITIAL_ADVERTISE_PEER_URLS=<span class="string">&quot;http://master1:2380&quot;</span>、</span><br><span class="line">ETCD_ADVERTISE_CLIENT_URLS=<span class="string">&quot;http://master1:2379,http://master1:4001&quot;</span></span><br><span class="line">ETCD_INITIAL_CLUSTER=<span class="string">&quot;master1=http://master1:2380,agent1=http://agent1:2380,agent2=http://agent2:2380,agent3=http://agent3:2380&quot;</span></span><br><span class="line">ETCD_INITIAL_CLUSTER_TOKEN=<span class="string">&quot;mritd-etcd-cluster&quot;</span></span><br><span class="line">ETCD_INITIAL_CLUSTER_STATE=<span class="string">&quot;new&quot;</span></span><br><span class="line"></span><br><span class="line">agent1节点：</span><br><span class="line"><span class="comment">#[Member]</span></span><br><span class="line">ETCD_DATA_DIR=<span class="string">&quot;/var/lib/etcd/default.etcd&quot;</span></span><br><span class="line">ETCD_LISTEN_PEER_URLS=<span class="string">&quot;http://0.0.0.0:2380&quot;</span></span><br><span class="line">ETCD_LISTEN_CLIENT_URLS=<span class="string">&quot;http://0.0.0.0:2379,http://0.0.0.0:4001&quot;</span></span><br><span class="line">ETCD_NAME=<span class="string">&quot;agent1&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#[Clustering]</span></span><br><span class="line">ETCD_INITIAL_ADVERTISE_PEER_URLS=<span class="string">&quot;http://agent1:2380&quot;</span></span><br><span class="line">ETCD_ADVERTISE_CLIENT_URLS=<span class="string">&quot;http://agent1:2379,http://agent1:4001&quot;</span></span><br><span class="line">ETCD_INITIAL_CLUSTER=<span class="string">&quot;master1=http://master1:2380,agent1=http://agent1:2380,agent2=http://agent2:2380,agent3=http://agent3:2380&quot;</span></span><br><span class="line">ETCD_INITIAL_CLUSTER_TOKEN=<span class="string">&quot;mritd-etcd-cluster&quot;</span></span><br><span class="line">ETCD_INITIAL_CLUSTER_STATE=<span class="string">&quot;new&quot;</span></span><br><span class="line"></span><br><span class="line">agent2节点：</span><br><span class="line"><span class="comment">#[Member]</span></span><br><span class="line">ETCD_DATA_DIR=<span class="string">&quot;/var/lib/etcd/default.etcd&quot;</span></span><br><span class="line">ETCD_LISTEN_PEER_URLS=<span class="string">&quot;http://0.0.0.0:2380&quot;</span></span><br><span class="line">ETCD_LISTEN_CLIENT_URLS=<span class="string">&quot;http://0.0.0.0:2379,http://0.0.0.0:4001&quot;</span></span><br><span class="line">ETCD_NAME=<span class="string">&quot;agent2&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#[Clustering]</span></span><br><span class="line">ETCD_INITIAL_ADVERTISE_PEER_URLS=<span class="string">&quot;http://agent2:2380&quot;</span></span><br><span class="line">ETCD_ADVERTISE_CLIENT_URLS=<span class="string">&quot;http://agent2:2379,http://agent2:4001&quot;</span></span><br><span class="line">ETCD_INITIAL_CLUSTER=<span class="string">&quot;master1=http://master1:2380,agent1=http://agent1:2380,agent2=http://agent2:2380,agent3=http://agent3:2380&quot;</span></span><br><span class="line">ETCD_INITIAL_CLUSTER_TOKEN=<span class="string">&quot;mritd-etcd-cluster&quot;</span></span><br><span class="line">ETCD_INITIAL_CLUSTER_STATE=<span class="string">&quot;new&quot;</span></span><br><span class="line"></span><br><span class="line">agent3节点：</span><br><span class="line"><span class="comment">#[Member]</span></span><br><span class="line">ETCD_DATA_DIR=<span class="string">&quot;/var/lib/etcd/default.etcd&quot;</span></span><br><span class="line">ETCD_LISTEN_PEER_URLS=<span class="string">&quot;http://0.0.0.0:2380&quot;</span></span><br><span class="line">ETCD_LISTEN_CLIENT_URLS=<span class="string">&quot;http://0.0.0.0:2379,http://0.0.0.0:4001&quot;</span></span><br><span class="line">ETCD_NAME=<span class="string">&quot;agent3&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#[Clustering]</span></span><br><span class="line">ETCD_INITIAL_ADVERTISE_PEER_URLS=<span class="string">&quot;http://agent3:2380&quot;</span></span><br><span class="line">ETCD_ADVERTISE_CLIENT_URLS=<span class="string">&quot;http://agent3:2379,http://agent3:4001&quot;</span></span><br><span class="line">ETCD_INITIAL_CLUSTER=<span class="string">&quot;master1=http://master1:2380,agent1=http://agent1:2380,agent2=http://agent2:2380,agent3=http://agent3:2380&quot;</span></span><br><span class="line">ETCD_INITIAL_CLUSTER_TOKEN=<span class="string">&quot;mritd-etcd-cluster&quot;</span></span><br><span class="line">ETCD_INITIAL_CLUSTER_STATE=<span class="string">&quot;new&quot;</span></span><br></pre></td></tr></table></figure></li>
+<li><p>修改/usr/lib/systemd/system/etcd.service:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">所有四个节点：</span><br><span class="line">[Unit]</span><br><span class="line">Description=Etcd Server</span><br><span class="line">After=network.target</span><br><span class="line">After=network-online.target</span><br><span class="line">Wants=network-online.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type=notify</span><br><span class="line">WorkingDirectory=/var/lib/etcd/</span><br><span class="line">EnvironmentFile=-/etc/etcd/etcd.conf</span><br><span class="line">User=etcd</span><br><span class="line"><span class="comment"># set GOMAXPROCS to number of processors</span></span><br><span class="line">ExecStart=/bin/bash -c <span class="string">&quot;GOMAXPROCS=<span class="subst">$(nproc)</span> /usr/bin/etcd --name=\&quot;<span class="variable">$&#123;ETCD_NAME&#125;</span>\&quot; \</span></span><br><span class="line"><span class="string">--data-dir=\&quot;<span class="variable">$&#123;ETCD_DATA_DIR&#125;</span>\&quot; \</span></span><br><span class="line"><span class="string">--listen-client-urls=\&quot;<span class="variable">$&#123;ETCD_LISTEN_CLIENT_URLS&#125;</span>\&quot; \</span></span><br><span class="line"><span class="string">--advertise-client-urls=\&quot;<span class="variable">$&#123;ETCD_ADVERTISE_CLIENT_URLS&#125;</span>\&quot; \</span></span><br><span class="line"><span class="string">--initial-advertise-peer-urls=\&quot;<span class="variable">$&#123;ETCD_INITIAL_ADVERTISE_PEER_URLS&#125;</span>\&quot; \</span></span><br><span class="line"><span class="string">--listen-peer-urls=\&quot;<span class="variable">$&#123;ETCD_LISTEN_PEER_URLS&#125;</span>\&quot; \</span></span><br><span class="line"><span class="string">--initial-cluster-token=\&quot;<span class="variable">$&#123;ETCD_INITIAL_CLUSTER_TOKEN&#125;</span>\&quot; \</span></span><br><span class="line"><span class="string">--initial-cluster=\&quot;<span class="variable">$&#123;ETCD_INITIAL_CLUSTER&#125;</span>\&quot; \</span></span><br><span class="line"><span class="string">--initial-cluster-state=\&quot;<span class="variable">$&#123;ETCD_INITIAL_CLUSTER_STATE&#125;</span>\&quot; \</span></span><br><span class="line"><span class="string">&quot;</span></span><br><span class="line">Restart=on-failure</span><br><span class="line">LimitNOFILE=65536</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br></pre></td></tr></table></figure></li>
+<li><p>开启etcd服务：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">systemctl daemon-reload</span><br><span class="line">systemctl start etcd</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="遇到的问题：-2"><a href="#遇到的问题：-2" class="headerlink" title="遇到的问题："></a>遇到的问题：</h3><p><code>error verifying flags, --advertise-client-urls is required when --listen-client-urls is set explicitly. See &#39;etcd --help&#39;.</code>问题是–advertise-client-urls未指定。查看<code>/etc/etcd/etcd.cnf</code>发现<code>ETCD_ADVERTISE_CLIENT_URLS=&quot;http://master1:2379,http://master1:4001&quot;</code>写成了<code>ETCD_ADVERTISE_CLIENT_URLS=&quot;http://master1:2379,master1:4001&quot;</code>，应该加上<code>http://</code></p>
+<h2 id="安装Calico"><a href="#安装Calico" class="headerlink" title="安装Calico"></a>安装Calico</h2><p>以下配置在每台机器上都需要完成。</p>
+<ul>
+<li>下载calicoctl二进制文件<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">wget -O /usr/<span class="built_in">local</span>/bin/calicoctl https://github.com/projectcalico/calicoctl/releases/download/v1.6.3/calicoctl</span><br><span class="line">chmod +x /usr/<span class="built_in">local</span>/bin/calicoctl</span><br></pre></td></tr></table></figure></li>
+<li>开启calico/node<figure class="highlight docker"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># master1节点</span></span><br><span class="line">ETCD_ENDPOINTS=http://master1:<span class="number">2379</span> calicoctl node <span class="keyword">run</span><span class="bash"> --node-image=quay.io/calico/node:v2.6.8</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># agent节点（使用自己搭建的registry仓库，下面将介绍如何搭建）</span></span><br><span class="line"><span class="comment"># 将&quot;insecure-registries&quot;:[&quot;master1:5000&quot;]写入/etc/docker/daemon.json</span></span><br><span class="line">ETCD_ENDPOINTS=http://master1:<span class="number">2379</span> calicoctl node <span class="keyword">run</span><span class="bash"> --node-image=master1:5000/calico/node:v2.6.8</span></span><br></pre></td></tr></table></figure>
+
+检查calico/node是否运行：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker ps</span></span><br><span class="line">CONTAINER ID  IMAGE                        COMMAND         CREATED        STATUS       PORTS     NAMES</span><br><span class="line">7cfe445e5d58  quay.io/calico/node:v2.6.8   <span class="string">&quot;start_runit&quot;</span>   26 hours ago   Up 26 hours            calico-node</span><br><span class="line"></span><br><span class="line"><span class="comment"># calicoctl node status</span></span><br><span class="line">Calico process is running.</span><br></pre></td></tr></table></figure>
+对于agent节点，从后面搭建的docker registry拉取镜像。</li>
+<li>配置CNI网络：<ul>
+<li>设置环境变量<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># set cni network</span></span><br><span class="line"><span class="comment"># CNI configuration directory</span></span><br><span class="line"><span class="built_in">export</span> NETWORK_CNI_PLUGINS_DIR=/var/lib/mesos/cni/plugins</span><br><span class="line"><span class="comment"># CNI plugin directory</span></span><br><span class="line"><span class="built_in">export</span> NETWORK_CNI_CONF_DIR=/var/lib/mesos/cni/config</span><br></pre></td></tr></table></figure></li>
+<li>下载Calico CNI插件到$NETWORK_CNI_PLUGINS_DIR<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">curl -L -o <span class="variable">$NETWORK_CNI_PLUGINS_DIR</span>/calico \</span><br><span class="line">https://github.com/projectcalico/cni-plugin/releases/download/v1.11.4/calico</span><br><span class="line">curl -L -o <span class="variable">$NETWORK_CNI_PLUGINS_DIR</span>/calico-ipam \</span><br><span class="line">    https://github.com/projectcalico/cni-plugin/releases/download/v1.11.4/calico-ipam</span><br><span class="line">chmod +x <span class="variable">$NETWORK_CNI_PLUGINS_DIR</span>/calico</span><br><span class="line">chmod +x <span class="variable">$NETWORK_CNI_PLUGINS_DIR</span>/calico-ipam</span><br></pre></td></tr></table></figure></li>
+<li>创建Calico CNI配置到$NETWORK_CNI_CONF_DIR<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">cat &gt; <span class="variable">$NETWORK_CNI_CONF_DIR</span>/calico.conf &lt;&lt;<span class="string">EOF</span></span><br><span class="line"><span class="string">&#123;</span></span><br><span class="line"><span class="string">  &quot;name&quot;: &quot;calico&quot;,</span></span><br><span class="line"><span class="string">  &quot;cniVersion&quot;: &quot;0.1.0&quot;,</span></span><br><span class="line"><span class="string">  &quot;type&quot;: &quot;calico&quot;,</span></span><br><span class="line"><span class="string">  &quot;ipam&quot;: &#123;</span></span><br><span class="line"><span class="string">      &quot;type&quot;: &quot;calico-ipam&quot;</span></span><br><span class="line"><span class="string">  &#125;,</span></span><br><span class="line"><span class="string">  &quot;etcd_endpoints&quot;: &quot;http://master1:2379&quot;</span></span><br><span class="line"><span class="string">&#125;</span></span><br><span class="line"><span class="string">EOF</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li>Docker Registry的搭建(后面由marathon运行docker registry，该步骤可忽略)<br>由于agent[1,2,3]不能出外网，故需要在master1节点上搭建docker registry。<ul>
+<li>在master1节点上，执行<code>docker pull registry</code>拉取最新版docker registry镜像。</li>
+<li>创建/data/registry/config.yml文件，写入一下内容，在创建registry后允许删除镜像<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">version:</span> <span class="number">0.1</span></span><br><span class="line"><span class="attr">log:</span></span><br><span class="line">  <span class="attr">fields:</span></span><br><span class="line">    <span class="attr">service:</span> <span class="string">registry</span></span><br><span class="line"><span class="attr">storage:</span></span><br><span class="line">  <span class="attr">delete:</span></span><br><span class="line">    <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">cache:</span></span><br><span class="line">    <span class="attr">blobdescriptor:</span> <span class="string">inmemory</span></span><br><span class="line">  <span class="attr">filesystem:</span></span><br><span class="line">    <span class="attr">rootdirectory:</span> <span class="string">/var/lib/registry</span></span><br><span class="line"><span class="attr">http:</span></span><br><span class="line">  <span class="attr">addr:</span> <span class="string">:5000</span></span><br><span class="line">  <span class="attr">headers:</span></span><br><span class="line">    <span class="attr">X-Content-Type-Options:</span> [<span class="string">nosniff</span>]</span><br><span class="line"><span class="attr">health:</span></span><br><span class="line">  <span class="attr">storagedriver:</span></span><br><span class="line">    <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">interval:</span> <span class="string">10s</span></span><br><span class="line">    <span class="attr">threshold:</span> <span class="number">3</span></span><br></pre></td></tr></table></figure></li>
+<li>创建/opt/data/registry目录用于挂载registry容器内部存储的镜像</li>
+<li>运行registry<br>加入insecure-registries到/etc/docker/daemon.json中：<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">&quot;graph&quot;</span>: <span class="string">&quot;/mnt/docker-data&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;storage-driver&quot;</span>: <span class="string">&quot;overlay&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;insecure-registries&quot;</span>:[</span><br><span class="line">        <span class="string">&quot;master1:5000&quot;</span></span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+运行registry，将registry容器命名为docker_registry<figure class="highlight docker"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="keyword">run</span><span class="bash"> -d -p 5000:5000 -v /opt/data/registry:/var/lib/registry  -v /data/registry/config.yml:/etc/docker/registry/config.yml --name docker_registry registry </span></span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li>Marathon运行Docker registry<ul>
+<li>在/root/zhongchuang-cluster/marathon/registry.json文件中加入以下内容：<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;id&quot;</span>: <span class="string">&quot;registry&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;cpus&quot;</span>: <span class="number">0.3</span>,</span><br><span class="line">  <span class="attr">&quot;mem&quot;</span>: <span class="number">100.0</span>,</span><br><span class="line">  <span class="attr">&quot;disk&quot;</span>: <span class="number">20000</span>,</span><br><span class="line">  <span class="attr">&quot;instances&quot;</span>: <span class="number">1</span>,</span><br><span class="line">  <span class="attr">&quot;constraints&quot;</span>: [</span><br><span class="line">    [</span><br><span class="line">      <span class="string">&quot;hostname&quot;</span>,</span><br><span class="line">      <span class="string">&quot;CLUSTER&quot;</span>,</span><br><span class="line">      <span class="string">&quot;172.0.0.1&quot;</span></span><br><span class="line">    ]</span><br><span class="line">  ],</span><br><span class="line">  <span class="attr">&quot;container&quot;</span>: &#123;</span><br><span class="line">    <span class="attr">&quot;type&quot;</span>: <span class="string">&quot;DOCKER&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;docker&quot;</span>: &#123;</span><br><span class="line">      <span class="attr">&quot;image&quot;</span>: <span class="string">&quot;registry&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;privileged&quot;</span>: <span class="literal">true</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">&quot;volumes&quot;</span>:[</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">&quot;containerPath&quot;</span>:<span class="string">&quot;/var/lib/registry&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;hostPath&quot;</span>:<span class="string">&quot;/opt/data/registry&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;mode&quot;</span>:<span class="string">&quot;RW&quot;</span></span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">&quot;containerPath&quot;</span>:<span class="string">&quot;/etc/docker/registry/config.yml&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;hostPath&quot;</span>:<span class="string">&quot;/data/registry/config.yml&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;mode&quot;</span>:<span class="string">&quot;RO&quot;</span></span><br><span class="line">      &#125;</span><br><span class="line">    ],</span><br><span class="line">    <span class="attr">&quot;portMappings&quot;</span>: [</span><br><span class="line">      &#123; <span class="attr">&quot;containerPort&quot;</span>: <span class="number">5000</span>, <span class="attr">&quot;hostPort&quot;</span>: <span class="number">5000</span> &#125;</span><br><span class="line">    ]</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+/etc/docker/registry/config.yml为上一步创建的config.yml</li>
+<li>执行<code>curl -X POST http://master1:8080/v2/apps -d@registry.json -H &quot;Conten-type:application/json&quot;</code>即在marathon上启动docker registry。</li>
+<li>测试registry是否创建成功<ul>
+<li><code>docker tag busybox master1:5000/busybox</code></li>
+<li><code>docker push master1:5000/busybox</code></li>
+<li>在agent1上执行：<code>docker pull master1:5000/busybox</code>成功。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Marathon运行Marathon-lb：<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;id&quot;</span>: <span class="string">&quot;/system/marathon-lb&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;cmd&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">  <span class="attr">&quot;cpus&quot;</span>: <span class="number">1</span>,</span><br><span class="line">  <span class="attr">&quot;mem&quot;</span>: <span class="number">128</span>,</span><br><span class="line">  <span class="attr">&quot;disk&quot;</span>: <span class="number">0</span>,</span><br><span class="line">  <span class="attr">&quot;instances&quot;</span>: <span class="number">1</span>,</span><br><span class="line">  <span class="attr">&quot;constraints&quot;</span>: [</span><br><span class="line">    [</span><br><span class="line">      <span class="string">&quot;hostname&quot;</span>,</span><br><span class="line">      <span class="string">&quot;CLUSTER&quot;</span>,</span><br><span class="line">      <span class="string">&quot;172.0.0.1&quot;</span></span><br><span class="line">    ]</span><br><span class="line">  ],</span><br><span class="line">  <span class="attr">&quot;acceptedResourceRoles&quot;</span>: [</span><br><span class="line">    <span class="string">&quot;*&quot;</span></span><br><span class="line">  ],</span><br><span class="line">  <span class="attr">&quot;container&quot;</span>: &#123;</span><br><span class="line">    <span class="attr">&quot;type&quot;</span>: <span class="string">&quot;DOCKER&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;volumes&quot;</span>: [],</span><br><span class="line">    <span class="attr">&quot;docker&quot;</span>: &#123;</span><br><span class="line">      <span class="attr">&quot;image&quot;</span>: <span class="string">&quot;docker.io/mesosphere/marathon-lb&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;network&quot;</span>: <span class="string">&quot;HOST&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;privileged&quot;</span>: <span class="literal">true</span>,</span><br><span class="line">      <span class="attr">&quot;parameters&quot;</span>: [],</span><br><span class="line">      <span class="attr">&quot;forcePullImage&quot;</span>: <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">&quot;portDefinitions&quot;</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">&quot;port&quot;</span>: <span class="number">10000</span>,</span><br><span class="line">      <span class="attr">&quot;protocol&quot;</span>: <span class="string">&quot;tcp&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;name&quot;</span>: <span class="string">&quot;default&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;labels&quot;</span>: &#123;&#125;</span><br><span class="line">    &#125;</span><br><span class="line">  ],</span><br><span class="line">  <span class="attr">&quot;args&quot;</span>: [</span><br><span class="line">    <span class="string">&quot;sse&quot;</span>,</span><br><span class="line">    <span class="string">&quot;-m&quot;</span>,</span><br><span class="line">    <span class="string">&quot;http://master1:8080&quot;</span>,</span><br><span class="line">    <span class="string">&quot;-m&quot;</span>,</span><br><span class="line">    <span class="string">&quot;http://agent1:8080&quot;</span>,</span><br><span class="line">    <span class="string">&quot;-m&quot;</span>,</span><br><span class="line">    <span class="string">&quot;http://agent2:8080&quot;</span>,</span><br><span class="line">    <span class="string">&quot;-m&quot;</span>,</span><br><span class="line">    <span class="string">&quot;http://agent3:8080&quot;</span>,</span><br><span class="line">    <span class="string">&quot;--group&quot;</span>,</span><br><span class="line">    <span class="string">&quot;external&quot;</span></span><br><span class="line">  ],</span><br><span class="line">  <span class="attr">&quot;healthChecks&quot;</span>: []</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>遇到的问题：marathon前端一直显示waiting。解决方案是：<ul>
+<li>mesos-slave上资源不够，一般是内存不够。可上mesos-master:5050上查看</li>
+<li>宿主机上没有镜像，一直在拉或拉不到。上宿主机上查看: docker images | grep xxx，确保marathon上配置的镜像名和版本在宿主机上存在</li>
+<li>marathon上属性Constraints中包含的主机名和/etc/mesos-slave/hostname的内容一样。一开始配置constraints的时候将172.0.0.1写成了master1，而/etc/mesos-slave/hostname写的是172.0.0.1</li>
+<li>mesos-master数量有问题，正常情况应该是3个，至少需要是奇数。如果有多余启动的mesos-master，关掉服务并禁止启动</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="安装DC"><a href="#安装DC" class="headerlink" title="安装DC"></a>安装DC</h2><ul>
+<li>遇到的问题：阿里云上haproxy/nginx反代到自己机子上的一个端口时，如果upstream用的公网ip，会被莫名的拦截，即使开了安全组。<ul>
+<li>使用内网IP做反向代理的upstream就没问题。</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/marathon/" rel="tag"># marathon</a>
+              <a href="/tags/glusterfs/" rel="tag"># glusterfs</a>
+              <a href="/tags/docker/" rel="tag"># docker</a>
+              <a href="/tags/mesos/" rel="tag"># mesos</a>
+              <a href="/tags/zookeeper/" rel="tag"># zookeeper</a>
+              <a href="/tags/calico/" rel="tag"># calico</a>
+              <a href="/tags/docker-registry/" rel="tag"># docker registry</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/03/19/java_spring/Shiro%E7%99%BB%E5%BD%95%E9%AA%8C%E8%AF%81%E6%B5%81%E7%A8%8B/" rel="prev" title="Shiro登录验证流程">
+      <i class="fa fa-chevron-left"></i> Shiro登录验证流程
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/04/10/system_management/Haproxy/" rel="next" title="Haproxy">
+      Haproxy <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA"><span class="nav-number">1.</span> <span class="nav-text">基础环境搭建</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85Docker"><span class="nav-number">1.1.</span> <span class="nav-text">安装Docker</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98%EF%BC%9A"><span class="nav-number">1.1.1.</span> <span class="nav-text">遇到的问题：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85Glusterfs"><span class="nav-number">1.2.</span> <span class="nav-text">安装Glusterfs</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mesos-Zookeeper-Marathon%E9%9B%86%E7%BE%A4%E6%90%AD%E5%BB%BA"><span class="nav-number">1.3.</span> <span class="nav-text">Mesos+Zookeeper+Marathon集群搭建</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Mesos-master%E8%8A%82%E7%82%B9"><span class="nav-number">1.3.1.</span> <span class="nav-text">Mesos-master节点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Mesos-slave%E8%8A%82%E7%82%B9"><span class="nav-number">1.3.2.</span> <span class="nav-text">Mesos-slave节点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98%EF%BC%9A-1"><span class="nav-number">1.3.3.</span> <span class="nav-text">遇到的问题：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E5%B9%B6%E9%85%8D%E7%BD%AEEtcd3-2-15"><span class="nav-number">1.4.</span> <span class="nav-text">安装并配置Etcd3.2.15</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85etcd"><span class="nav-number">1.4.1.</span> <span class="nav-text">安装etcd</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEetcd"><span class="nav-number">1.4.2.</span> <span class="nav-text">配置etcd</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98%EF%BC%9A-2"><span class="nav-number">1.4.3.</span> <span class="nav-text">遇到的问题：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85Calico"><span class="nav-number">1.5.</span> <span class="nav-text">安装Calico</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85DC"><span class="nav-number">1.6.</span> <span class="nav-text">安装DC</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Konnase Lee</p>
+  <div class="site-description" itemprop="description">There is no ending to learn</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">42</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">56</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/konnase" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;konnase" rel="noopener" target="_blank"><i class="github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:konnase123@gmail.com" title="E-Mail → mailto:konnase123@gmail.com" rel="noopener" target="_blank"><i class="envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/u/3833522360" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;3833522360" rel="noopener" target="_blank"><i class="weibo fa-fw"></i>Weibo</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Konnase Lee</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+
+
+
+
+
+
+<script>
+  (function() {
+    function leancloudSelector(url) {
+      url = encodeURI(url);
+      return document.getElementById(url).querySelector('.leancloud-visitors-count');
+    }
+
+    function addCount(Counter) {
+      var visitors = document.querySelector('.leancloud_visitors');
+      var url = decodeURI(visitors.id);
+      var title = visitors.dataset.flagTitle;
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length > 0) {
+            var counter = results[0];
+            leancloudSelector(url).innerText = counter.time + 1;
+            Counter('put', '/classes/Counter/' + counter.objectId, { time: { '__op': 'Increment', 'amount': 1 } })
+              .catch(error => {
+                console.error('Failed to save visitor count', error);
+              });
+          } else {
+              leancloudSelector(url).innerText = 'Counter not initialized! More info at console err msg.';
+              console.error('ATTENTION! LeanCloud counter has security bug, see how to solve it here: https://github.com/theme-next/hexo-leancloud-counter-security. \n However, you can still use LeanCloud without security, by setting `security` option to `false`.');
+            
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    function showTime(Counter) {
+      var visitors = document.querySelectorAll('.leancloud_visitors');
+      var entries = [...visitors].map(element => {
+        return decodeURI(element.id);
+      });
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url: { '$in': entries } })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          for (let url of entries) {
+            let target = results.find(item => item.url === url);
+            leancloudSelector(url).innerText = target ? target.time : 0;
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    let { app_id, app_key, server_url } = {"enable":true,"app_id":"iiWVTMTERRQ2WJd5heGT8XYr-gzGzoHsz","app_key":"9t8v39uaLv5hdfC1udYVLOok","server_url":null,"security":true};
+    function fetchData(api_server) {
+      var Counter = (method, url, data) => {
+        return fetch(`${api_server}/1.1${url}`, {
+          method,
+          headers: {
+            'X-LC-Id'     : app_id,
+            'X-LC-Key'    : app_key,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+      };
+      if (CONFIG.page.isPost) {
+        if (CONFIG.hostname !== location.hostname) return;
+        addCount(Counter);
+      } else if (document.querySelectorAll('.post-title-link').length >= 1) {
+        showTime(Counter);
+      }
+    }
+
+    let api_server = app_id.slice(-9) !== '-MdYXbMMI' ? server_url : `https://${app_id.slice(0, 8).toLowerCase()}.api.lncldglobal.com`;
+
+    if (api_server) {
+      fetchData(api_server);
+    } else {
+      fetch('https://app-router.leancloud.cn/2/route?appId=' + app_id)
+        .then(response => response.json())
+        .then(({ api_server }) => {
+          fetchData('https://' + api_server);
+        });
+    }
+  })();
+</script>
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>

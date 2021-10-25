@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"konnase.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":true},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="传统MVC控制器与RESTful Web Service控制器的不同 传统MVC控制器返回的是一个数据的视图（Model），而RESTful Web Service控制器返回的是Json格式的对象">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring相关知识">
+<meta property="og:url" content="https://konnase.github.io/2017/07/24/java_spring/Spring%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86/index.html">
+<meta property="og:site_name" content="Konnase Lee">
+<meta property="og:description" content="传统MVC控制器与RESTful Web Service控制器的不同 传统MVC控制器返回的是一个数据的视图（Model），而RESTful Web Service控制器返回的是Json格式的对象">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://konnase.github.io/img/spring-overview.png">
+<meta property="og:image" content="https://konnase.github.io/img/springmvc.png">
+<meta property="article:published_time" content="2017-07-24T03:50:56.000Z">
+<meta property="article:modified_time" content="2021-10-25T02:59:15.914Z">
+<meta property="article:author" content="Konnase Lee">
+<meta property="article:tag" content="spring">
+<meta property="article:tag" content="annotation">
+<meta property="article:tag" content="spring mvc">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://konnase.github.io/img/spring-overview.png">
+
+<link rel="canonical" href="https://konnase.github.io/2017/07/24/java_spring/Spring%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Spring相关知识 | Konnase Lee</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Konnase Lee</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://konnase.github.io/2017/07/24/java_spring/Spring%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Konnase Lee">
+      <meta itemprop="description" content="There is no ending to learn">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Konnase Lee">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Spring相关知识
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2017-07-24 11:50:56" itemprop="dateCreated datePublished" datetime="2017-07-24T11:50:56+08:00">2017-07-24</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2021-10-25 10:59:15" itemprop="dateModified" datetime="2021-10-25T10:59:15+08:00">2021-10-25</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2017/07/24/java_spring/Spring%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86/" class="post-meta-item leancloud_visitors" data-flag-title="Spring相关知识" title="Views">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="传统MVC控制器与RESTful-Web-Service控制器的不同"><a href="#传统MVC控制器与RESTful-Web-Service控制器的不同" class="headerlink" title="传统MVC控制器与RESTful Web Service控制器的不同"></a>传统MVC控制器与RESTful Web Service控制器的不同</h2><p> 传统MVC控制器返回的是一个数据的视图（Model），而RESTful Web Service控制器返回的是Json格式的对象</p>
+<span id="more"></span>
+<hr>
+<h2 id="Spring的模块"><a href="#Spring的模块" class="headerlink" title="Spring的模块"></a>Spring的模块</h2><p><img src="/img/spring-overview.png" alt="image"></p>
+<ul>
+<li>上图中每个小单元都至少对应一个jar包，提供相应的API供使用。使用Maven工具管理Spring项目时，这些需要用到的jar包集中在用户目录下的.m2文件夹下，而不是包含在项目中。</li>
+<li> 7个模块<blockquote>
+<ol>
+<li>Spring Core：核心容器的主要组件是BeanFactory，BeanFactory使用的是IoC模式</li>
+<li>Spring Context：向Spring框架提供上下文信息的一个配置文件</li>
+<li>Spring AOP：面向切面的编程</li>
+<li>Spring DAO：数据访问层的设计机制，DAO模式是业务逻辑层和持久存储层之间的抽象层，避免持久化代码和业务逻辑混合在一起。</li>
+<li>Spring ORM：对象/关系映射（Object/Relation Mapping），指的是自动将java对象状态映射到关系数据库中的数据上。</li>
+<li>Spring Web：为基于Web的应用程序提供上下文</li>
+<li>Spring MVC：控制器将接收请求，执行更新模型的操作，然后通知视图关于模型更改的消息，依据请求的状态以及请求的控制器，可以决定显示哪个视图。</li>
+</ol>
+</blockquote>
+</li>
+</ul>
+<h2 id="Spring的注解"><a href="#Spring的注解" class="headerlink" title="Spring的注解"></a>Spring的注解</h2><ul>
+<li>@component 泛指组件，当组件不好归类的时候，我们可以使用这个注解进行标注，作用是将对象实例化到Spring容器中</li>
+<li>@Service用于标注业务层组件；@Controller用于标注控制层组件（如struts中的action）；@Repository用于标注数据访问组件，即DAO组件，使用jpa访问数据库时，Repository类实现了很多数据库查询操作，方便用户进行数据库操作。</li>
+<li>@componentscan标签默认情况下自动扫描指定路径下的包（含所有子包），将带有@Component、@Repository、@Service、@Controller标签的类自动注册到spring容器。对标记了 Spring的 @Required、@Autowired、JSR250的 @PostConstruct、@PreDestroy、@Resource、JAX-WS的 @WebServiceRef、EJB3的 @EJB、JPA的 @PersistenceContext、@PersistenceUnit等注解的类进行对应的操作使注解生效（包含了annotation-config标签的作用）</li>
+<li>@Autowired可以对类成员变量、方法及构造函数进行标注，完成自动装配的工作。 通过 @Autowired的使用来消除 set ，get方法</li>
+<li>@Order可以使数组有序，指定@Order(number)即可设定该Bean在数组中的排序值</li>
+<li>@Configuration标注在类上，相当于把该类作为spring的xml配置文件中的<beans>，作用为：配置spring容器(应用上下文)</li>
+<li>@Bean标注在方法上(返回某个实例的方法)，等价于spring的xml配置文件中的<bean>，作用为：注册bean对象</li>
+<li>@Valid配合JSR303定义的校验类型（@NotNull，@Min等），并紧挨着一个BindingResult 参数，可以完成对Bean对象的自动校验</li>
+</ul>
+<h2 id="Spring的事件"><a href="#Spring的事件" class="headerlink" title="Spring的事件"></a>Spring的事件</h2><p>为Bean与Bean之间的消息通信提供支持。Spring时间的流程如下：</p>
+<ol>
+<li>自定义事件，继承自ApplicationEvent</li>
+<li>定义事件监听器，实现ApplicationListener，并指定监听的事件类型，即第一步的自定义事件。</li>
+<li>使用容器发布事件</li>
+</ol>
+<hr>
+<h2 id="AOP（面向切面编程）"><a href="#AOP（面向切面编程）" class="headerlink" title="AOP（面向切面编程）"></a>AOP（面向切面编程）</h2><ul>
+<li>Aspect（切面）：声明一个类为切面，并为该切面设置切入点（pointcut）后，切入点扫描某一个包中的某一个类中的某一个方法，在该方法被执行的时候，可以指定切面中的某一方法伴随该方法执行，可以是该方法执行之前，也可以是之后。扫描的方式可以是：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">expression=&quot;execution(* com.xrq.aop.HelloWorld.*(..))</span><br></pre></td></tr></table></figure></li>
+<li>好处是可以把应用业务逻辑和系统服务分开</li>
+</ul>
+<h2 id="控制反转（IoC）"><a href="#控制反转（IoC）" class="headerlink" title="控制反转（IoC）"></a>控制反转（IoC）</h2><ul>
+<li>对象们给出它们的依赖，而不是在代码中创建或查找依赖的对象们，即不需要new这些对象，而只需要描述如何创建这些对象。换种说法，依赖注入指的是容器负责创建对象和维护对象之间的依赖关系，而不是通过对象本身负责自己的创建和解决自己的依赖。</li>
+<li>控制反转分为依赖注入（DI）和依赖查找（DL）</li>
+<li>Spring IoC负责创建对象、管理对象（DI）、装配对象并管理这些对象的整个生命周期</li>
+</ul>
+<h2 id="深入理解Spring"><a href="#深入理解Spring" class="headerlink" title="深入理解Spring"></a>深入理解Spring</h2><h3 id="Bean的实例化"><a href="#Bean的实例化" class="headerlink" title="Bean的实例化"></a>Bean的实例化</h3><ul>
+<li>Spring容器启动的过程中，会将Bean解析成Spring内部的BeanDefinition结构，之后对Bean的操作就直接对BeanDefinition进行；BeanDefinition是一个接口，是一个抽象的定义，实际使用的是他的实现类。</li>
+<li>然后以beanName为key，BeanDefinition为value存储到DefaultListableBeanFactory中的beanDefinitionMap（ConcurrentHashMap类型）中，DefaultListableBeanFactory间接实现BeanFactory接口，后者是用于访问Spring Bean容器的根接口，最常用的方法就是getBean方法。DefaultListableBeanFactory间接实现了DefaultSingletonBeanRegistry，后者有一个ConcurrentHashMap类型的属性singletonObjects，用于存储单例bean，getBean方法就是从这里获取实例对象。</li>
+<li>将beanName存入beanDefinitionNames（List类型）中</li>
+<li>遍历beanDefinitionNames，完成对bean的实例化并填充属性。</li>
+<li>实例化后将实例存入单例bean的缓存中，当调用getBean方法时，到单例bean的缓存中查找并返回这个实例</li>
+</ul>
+<h3 id="Bean的生命周期"><a href="#Bean的生命周期" class="headerlink" title="Bean的生命周期"></a>Bean的生命周期</h3><ul>
+<li>创建Bean的实例</li>
+<li>属性注入</li>
+<li>初始化Bean<blockquote>
+<ul>
+<li>激活Aware方法</li>
+<li>处理器应用</li>
+<li>激活自定义的init方法</li>
+</ul>
+</blockquote>
+</li>
+<li>使用Bean</li>
+<li>销毁</li>
+</ul>
+<h2 id="Spring-MVC"><a href="#Spring-MVC" class="headerlink" title="Spring MVC"></a>Spring MVC</h2><p><img src="/img/springmvc.png" alt="image"></p>
+<ol>
+<li>用户发送请求–&gt; DispatcherServlet，前端控制器收到请求后自己不进行处理，而是委托给其他解析器进行处理，作为统一访问点，进行全局流程控制。</li>
+<li>DispatherServlet–&gt; HandlerMapping，后者将把请求映射为HandlerExecutionChain对象（包含一个Handler处理器（页面控制器）对象、多个HandlerInterceptor拦截器）对象，通过这种策略模式，很容易添加新的映射策略</li>
+<li>DispatcherServlet–&gt; HandlerAdapter，后者将会把处理器包装为适配器，从而支持多种类型的处理器</li>
+<li>HandlerAdapter–&gt; 处理器功能处理方法的调用，HandlerAdapter将会根据适配的结果调用真正的处理器的功能处理方法，完成功能处理，并返回一个ModelAndView对象</li>
+<li>ModelAndView的逻辑视图名–&gt; ViewResolver，ViewResolver将把逻辑视图名解析成具体的View，通过这种策略，很容易更换其他视图技术</li>
+<li>View–&gt; 渲染，View会根据传进来的Model模型数据进行渲染，此处的Model实际是一个Map数据结构，因此很容易支持其他视图技术</li>
+<li>返回控制权给DIspatcherServlet，由DispatcherServlet返回响应给用户，流程结束</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/spring/" rel="tag"># spring</a>
+              <a href="/tags/annotation/" rel="tag"># annotation</a>
+              <a href="/tags/spring-mvc/" rel="tag"># spring mvc</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/07/23/system_management/win10-ubuntu%E5%AD%90%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%AD%A6%E4%B9%A0%E5%BF%83%E5%BE%97/" rel="prev" title="win10 ubuntu子系统的学习心得">
+      <i class="fa fa-chevron-left"></i> win10 ubuntu子系统的学习心得
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/07/25/java_spring/Spring-Boot%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/" rel="next" title="Spring Boot的启动流程">
+      Spring Boot的启动流程 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BC%A0%E7%BB%9FMVC%E6%8E%A7%E5%88%B6%E5%99%A8%E4%B8%8ERESTful-Web-Service%E6%8E%A7%E5%88%B6%E5%99%A8%E7%9A%84%E4%B8%8D%E5%90%8C"><span class="nav-number">1.</span> <span class="nav-text">传统MVC控制器与RESTful Web Service控制器的不同</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring%E7%9A%84%E6%A8%A1%E5%9D%97"><span class="nav-number">2.</span> <span class="nav-text">Spring的模块</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring%E7%9A%84%E6%B3%A8%E8%A7%A3"><span class="nav-number">3.</span> <span class="nav-text">Spring的注解</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring%E7%9A%84%E4%BA%8B%E4%BB%B6"><span class="nav-number">4.</span> <span class="nav-text">Spring的事件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AOP%EF%BC%88%E9%9D%A2%E5%90%91%E5%88%87%E9%9D%A2%E7%BC%96%E7%A8%8B%EF%BC%89"><span class="nav-number">5.</span> <span class="nav-text">AOP（面向切面编程）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%A7%E5%88%B6%E5%8F%8D%E8%BD%AC%EF%BC%88IoC%EF%BC%89"><span class="nav-number">6.</span> <span class="nav-text">控制反转（IoC）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Spring"><span class="nav-number">7.</span> <span class="nav-text">深入理解Spring</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Bean%E7%9A%84%E5%AE%9E%E4%BE%8B%E5%8C%96"><span class="nav-number">7.1.</span> <span class="nav-text">Bean的实例化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Bean%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="nav-number">7.2.</span> <span class="nav-text">Bean的生命周期</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring-MVC"><span class="nav-number">8.</span> <span class="nav-text">Spring MVC</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Konnase Lee</p>
+  <div class="site-description" itemprop="description">There is no ending to learn</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">42</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">56</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/konnase" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;konnase" rel="noopener" target="_blank"><i class="github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:konnase123@gmail.com" title="E-Mail → mailto:konnase123@gmail.com" rel="noopener" target="_blank"><i class="envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/u/3833522360" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;3833522360" rel="noopener" target="_blank"><i class="weibo fa-fw"></i>Weibo</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Konnase Lee</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+
+
+
+
+
+
+<script>
+  (function() {
+    function leancloudSelector(url) {
+      url = encodeURI(url);
+      return document.getElementById(url).querySelector('.leancloud-visitors-count');
+    }
+
+    function addCount(Counter) {
+      var visitors = document.querySelector('.leancloud_visitors');
+      var url = decodeURI(visitors.id);
+      var title = visitors.dataset.flagTitle;
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length > 0) {
+            var counter = results[0];
+            leancloudSelector(url).innerText = counter.time + 1;
+            Counter('put', '/classes/Counter/' + counter.objectId, { time: { '__op': 'Increment', 'amount': 1 } })
+              .catch(error => {
+                console.error('Failed to save visitor count', error);
+              });
+          } else {
+              leancloudSelector(url).innerText = 'Counter not initialized! More info at console err msg.';
+              console.error('ATTENTION! LeanCloud counter has security bug, see how to solve it here: https://github.com/theme-next/hexo-leancloud-counter-security. \n However, you can still use LeanCloud without security, by setting `security` option to `false`.');
+            
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    function showTime(Counter) {
+      var visitors = document.querySelectorAll('.leancloud_visitors');
+      var entries = [...visitors].map(element => {
+        return decodeURI(element.id);
+      });
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url: { '$in': entries } })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          for (let url of entries) {
+            let target = results.find(item => item.url === url);
+            leancloudSelector(url).innerText = target ? target.time : 0;
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    let { app_id, app_key, server_url } = {"enable":true,"app_id":"iiWVTMTERRQ2WJd5heGT8XYr-gzGzoHsz","app_key":"9t8v39uaLv5hdfC1udYVLOok","server_url":null,"security":true};
+    function fetchData(api_server) {
+      var Counter = (method, url, data) => {
+        return fetch(`${api_server}/1.1${url}`, {
+          method,
+          headers: {
+            'X-LC-Id'     : app_id,
+            'X-LC-Key'    : app_key,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+      };
+      if (CONFIG.page.isPost) {
+        if (CONFIG.hostname !== location.hostname) return;
+        addCount(Counter);
+      } else if (document.querySelectorAll('.post-title-link').length >= 1) {
+        showTime(Counter);
+      }
+    }
+
+    let api_server = app_id.slice(-9) !== '-MdYXbMMI' ? server_url : `https://${app_id.slice(0, 8).toLowerCase()}.api.lncldglobal.com`;
+
+    if (api_server) {
+      fetchData(api_server);
+    } else {
+      fetch('https://app-router.leancloud.cn/2/route?appId=' + app_id)
+        .then(response => response.json())
+        .then(({ api_server }) => {
+          fetchData('https://' + api_server);
+        });
+    }
+  })();
+</script>
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>
