@@ -1,0 +1,11 @@
+.DS_Store
+Thumbs.db
+db.json
+*.log
+node_modules/
+public/
+.deploy*/*weekly-report.md
+source/_posts/weekly-report.md
+.vscode
+.deploy_git
+package-lock.json
