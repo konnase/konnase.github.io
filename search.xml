@@ -339,7 +339,7 @@ sudo apt-get install -f
 </ul>
 <h2 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h2><h3 id="ncclAllReduce是如何进行GPU间通信的？"><a href="#ncclAllReduce是如何进行GPU间通信的？" class="headerlink" title="ncclAllReduce是如何进行GPU间通信的？"></a>ncclAllReduce是如何进行GPU间通信的？</h3><p>按照ring的形式还是tree的形式？查看<a href="http://on-demand.gputechconf.com/gtc/2017/presentation/s7155-jeaugey-nccl.pdf">gtc 2017 nccl 2.0 report</a>，其中描述了nccl使用ring的形式在GPU之间交换数据，如下图：<br><img src="/img/deep_learning/nccl-move-data-using-ring.jpg"><br>同时，nccl 2.0在单线程调用多device时增加了手动调用的verb ncclGroupStart/ncclGroupEnd<br><img src="/img/deep_learning/nccl2.0-group-device-call.jpg"><br>可以看看知乎上的一个回答，介绍<a href="https://www.zhihu.com/question/63219175">nccl的设计和实验</a></p>
 <p>在nccl 2.4中引入了double binary trees，见<a href="https://devblogs.nvidia.com/massively-scale-deep-learning-training-nccl-2-4/">nccl2.4介绍文档</a>，从效果来看延迟改善了不少，如下图：<br><img src="/img/deep_learning/Summit-Latency.png"><br>double binary trees有待进一步研究</p>
-<h3 id="ncclAllReduce是如何构造一条带宽最大的环？"><a href="#ncclAllReduce是如何构造一条带宽最大的环？" class="headerlink" title="ncclAllReduce是如何构造一条带宽最大的环？"></a>ncclAllReduce是如何构造一条带宽最大的环？</h3><p>nccl 2.4中有一个环境变量<code>NCCL_RINGS</code>可以用来覆盖NCCL构造的GPU环，见<a href="https://docs.nvidia.com/deeplearning/sdk/nccl-developer-guide/docs/env.html#nccl-rings">NCCL_RINGS</a></p>
+<h3 id="ncclAllReduce是如何构造一条带宽最大的环？"><a href="#ncclAllReduce是如何构造一条带宽最大的环？" class="headerlink" title="ncclAllReduce是如何构造一条带宽最大的环？"></a>ncclAllReduce是如何构造一条带宽最大的环？</h3><p>nccl 2.4及以前版本中有一个环境变量<code>NCCL_RINGS</code>可以用来覆盖NCCL构造的GPU环，见<a href="https://docs.nvidia.com/deeplearning/sdk/nccl-developer-guide/docs/env.html#nccl-rings">NCCL_RINGS</a></p>
 <p>nccl 2.5之后可以通过设置<a href="https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/env.html#nccl-algo"><code>NCCL_ALGO</code></a>环境变量可以指定nccl使用collective operation 的算法，默认为<code>Tree,Ring,Collnet</code>，猜测这是按照优先级排列的。</p>
 ]]></content>
       <tags>
@@ -1282,6 +1282,9 @@ sudo apt-get install glusterfs-server
     <title>现代操作系统原理与实现1</title>
     <url>/2021/10/22/system_management/%E7%8E%B0%E4%BB%A3%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86%E4%B8%8E%E5%AE%9E%E7%8E%B01/</url>
     <content><![CDATA[]]></content>
+      <categories>
+        <category>System</category>
+      </categories>
   </entry>
   <entry>
     <title>2020年终总结</title>
