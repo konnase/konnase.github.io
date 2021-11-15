@@ -29,7 +29,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://konnase.github.io/img/resnet_params.png">
 <meta property="article:published_time" content="2019-01-13T08:17:11.000Z">
-<meta property="article:modified_time" content="2021-10-25T02:59:15.944Z">
+<meta property="article:modified_time" content="2021-11-15T02:53:42.861Z">
 <meta property="article:author" content="Konnase Lee">
 <meta property="article:tag" content="deep learning">
 <meta property="article:tag" content="neural network">
@@ -227,7 +227,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-10-25 10:59:15" itemprop="dateModified" datetime="2021-10-25T10:59:15+08:00">2021-10-25</time>
+                <time title="Modified: 2021-11-15 10:53:42" itemprop="dateModified" datetime="2021-11-15T10:53:42+08:00">2021-11-15</time>
               </span>
 
           
@@ -262,6 +262,8 @@
 </ul>
 </li>
 </ul>
+<span id="more"></span>
+
 <h3 id="Data-Augmentation"><a href="#Data-Augmentation" class="headerlink" title="Data Augmentation"></a>Data Augmentation</h3><p>人工增加训练集的大小，包括反射(image reflection)、平移(translation)、旋转(rotation)、加噪声等方法从已有的数据中创造一批新的数据</p>
 <h3 id="Batch-Normalization"><a href="#Batch-Normalization" class="headerlink" title="Batch Normalization"></a>Batch Normalization</h3><p>CNN网络在训练的过程中，前一层的参数变化影响着后面层的变化（因为前面层的输出是后面的输入），而且这种影响会随着网络深度的增加而不断放大。在CNN训练时，绝大多数都采用mini-batch使用随机梯度下降算法进行训练，那么随着输入数据的不断变化，以及网络中参数不断调整，网络的各层输入数据的分布则会不断变化，那么各层在训练的过程中就需要不断的改变以适应这种新的数据分布，从而造成网络训练困难，难以拟合的问题。 </p>
 <p>BatchNorm的目的是将每一层的输入数据进行归一化(normalization)，使得每一层的数据分布是稳定的–均值0方差1，增加两个可学习的参数 β 和 γ ，对数据进行缩放和平移，从而达到加速训练的目的</p>

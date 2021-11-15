@@ -301,7 +301,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-10-25 10:59:15" itemprop="dateModified" datetime="2021-10-25T10:59:15+08:00">2021-10-25</time>
+                <time title="Modified: 2021-11-15 10:53:06" itemprop="dateModified" datetime="2021-11-15T10:53:06+08:00">2021-11-15</time>
               </span>
 
           
@@ -323,10 +323,14 @@
 
       
           <h1 id="Mxnet训练流程"><a href="#Mxnet训练流程" class="headerlink" title="Mxnet训练流程"></a>Mxnet训练流程</h1><ul>
-<li>定义好symbol：符号式编程，生成描述计算的计算图，Symbol API 这个包主要是用于提供神经网络的图和自动求导。使用c++写好的Symbol类，可进行加减乘除等符号运算。</li>
-<li>写好dataiter：如果是分布式训练，需要将训练数据平均切分到每台训练的机器上</li>
-<li>初始化参数：cpu or gpu、学习率、优化器参数、针对不同网络设置参数初始化方法、验证度量(evaluation metrics)、loss function、callbacks</li>
-<li>模型训练：<ul>
+<li><p>定义好symbol：符号式编程，生成描述计算的计算图，Symbol API 这个包主要是用于提供神经网络的图和自动求导。使用c++写好的Symbol类，可进行加减乘除等符号运算。</p>
+</li>
+<li><p>写好dataiter：如果是分布式训练，需要将训练数据平均切分到每台训练的机器上</p>
+</li>
+<li><p>初始化参数：cpu or gpu、学习率、优化器参数、针对不同网络设置参数初始化方法、验证度量(evaluation metrics)、loss function、callbacks</p>
+</li>
+<li><p>模型训练：</p>
+<ul>
 <li>创建Module: <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mod = mx.mod.Module(symbol=net,</span><br><span class="line">    context=mx.cpu(),</span><br><span class="line">    data_names=[<span class="string">&#x27;data&#x27;</span>],</span><br><span class="line">    label_names=[<span class="string">&#x27;softmax_label&#x27;</span>])</span><br></pre></td></tr></table></figure></li>
 <li>mod.fit():<ul>
 <li>mod.bind(): 分配内存，为计算做准备</li>
@@ -342,13 +346,14 @@
 </ul>
 </li>
 </ul>
-<h2 id="Mxnet参数服务器架构"><a href="#Mxnet参数服务器架构" class="headerlink" title="Mxnet参数服务器架构"></a>Mxnet参数服务器架构</h2><ul>
-<li>server节点可以跟其他server节点通信，每个server负责自己分到的参数，server group共同维持所有参数的更新</li>
-<li>worker节点之间没有通信，只跟<strong>自己对应的server</strong>进行通信</li>
-<li>每个worker group有一个task scheduler，负责向worker分配任务，并且监控worker的运行情况。当有新的worker加入或者退出，task scheduler 负责重新分配任务。</li>
-</ul>
-<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/heguanyou/p/7868596.html">MXnet之ps-lite及parameter server原理</a></p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2018/09/16/deep_learning/Mxnet/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -492,7 +497,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-10-25 10:59:15" itemprop="dateModified" datetime="2021-10-25T10:59:15+08:00">2021-10-25</time>
+                <time title="Modified: 2021-11-15 10:51:22" itemprop="dateModified" datetime="2021-11-15T10:51:22+08:00">2021-11-15</time>
               </span>
 
           
@@ -515,17 +520,17 @@
       
           <h1 id="设计架构"><a href="#设计架构" class="headerlink" title="设计架构"></a>设计架构</h1><h2 id="Scheduler"><a href="#Scheduler" class="headerlink" title="Scheduler"></a>Scheduler</h2><p>k8s的有两步调度策略</p>
 <ul>
-<li><p>预选策略(predicates)：强制性规则，遍历所有Node，选择满足要求的Node列表。v1.7支持15种策略</p>
-<ul>
+<li>预选策略(predicates)：强制性规则，遍历所有Node，选择满足要求的Node列表。v1.7支持15种策略<ul>
 <li>PodFitsResources：检查主机资源是否满足pod需求</li>
 <li>NoDiskConfilict：检查主机上的卷冲突</li>
 <li>MatchInterPodAffinity：检查pod和其他pod是否符合亲和性规则</li>
 </ul>
 </li>
-<li><p>优选策略(Priorities)：在预选策略的基础上，给Node打分排序，选出最优者。v1.7支持10个策略，每项策略对应一个权重，每项策略的得分乘以权重得到总分</p>
-<ul>
+<li>优选策略(Priorities)：在预选策略的基础上，给Node打分排序，选出最优者。v1.7支持10个策略，每项策略对应一个权重，每项策略的得分乘以权重得到总分<ul>
 <li>ImageLocalityPriority：根据主机上是否已具备Pod运行的环境来打分，得分计算：不存在所需镜像，返回0分，存在镜像，镜像越大得分越高</li>
 <li>LeastRequestedPriority：计算Pods需要的CPU和内存在当前节点可用资源的百分比，具有最小百分比的节点就是最优，得分计算公式：cpu((capacity – sum(requested)) * 10 / capacity) + memory((capacity – sum(requested)) * 10 / capacity) / 2</li>
+</ul>
+</li>
 </ul>
           <!--noindex-->
             <div class="post-button">
@@ -584,7 +589,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-10-25 10:59:15" itemprop="dateModified" datetime="2021-10-25T10:59:15+08:00">2021-10-25</time>
+                <time title="Modified: 2021-11-15 10:50:44" itemprop="dateModified" datetime="2021-11-15T10:50:44+08:00">2021-11-15</time>
               </span>
 
           
@@ -610,8 +615,14 @@
 <li>Google无疑是最有技术敏锐性和市场敏锐性的，早早的看到了Docker企业级市场的企图心，所以Google是第一个支持Docker的竞争对手—-CoreOS的Rocket容器，2014年四月份谷歌风险投资公司牵头对CoreOS进行了1200万美元的投资，目标明确—-对准docker。Google不再是Docker+ kubernetes,而是<strong>容器抽象</strong>+ kubernetes，即不止支持docker</li>
 <li>Redhat的OpenShift公有云还是OpenShift V2，V3采用Docker+k8s，很难从V2升级到V3。</li>
 </ul>
-<h2 id="Spark"><a href="#Spark" class="headerlink" title="Spark"></a>Spark</h2><p>Hadoop第一代产品使用HDFS，处理MapReduce作业的时候设计频繁的HDFS读写操作，如下图：<br><img src="/img/spark1.png" alt="mapreduce"><br>而Spark使用内存替代了使用HDFS保存中间结果，使用弹性分布数据集（RDD），使得分布式对象集合可以跨集群在内存中访问和保存，大大减少了作业加载数据的时间开销。当有数据丢失时，RDD会跟踪并重新计算得到丢失的数据。Spark的性能是MapReduce的40倍</p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2018/09/10/resource_scheduling/%E8%B5%84%E6%BA%90%E8%B0%83%E5%BA%A6/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -846,7 +857,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-10-25 10:59:15" itemprop="dateModified" datetime="2021-10-25T10:59:15+08:00">2021-10-25</time>
+                <time title="Modified: 2021-11-15 10:50:03" itemprop="dateModified" datetime="2021-11-15T10:50:03+08:00">2021-11-15</time>
               </span>
 
           
@@ -872,25 +883,16 @@
 <li>新建/data/crawl-es-data目录</li>
 <li>执行<code>sysctl -w vm.max_map_count=262144</code>将机器的<code>vm.max_map_count</code>调高一些</li>
 <li>DC上创建service，id为<code>menya/crawl-mesos-project/elsearch/esmaster</code>，网络类型选择<code>VirtualNetwork</code>，指定镜像并根据官方镜像说明，传入一些环境变量</li>
-<li>运行service<h3 id="配置node-data"><a href="#配置node-data" class="headerlink" title="配置node-data"></a>配置node-data</h3></li>
-<li>在n138上，新建/etc/elasticsearch/elasticsearch.yml<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">cluster.name:</span> <span class="string">elasticsearch_cluster</span></span><br><span class="line"><span class="attr">node.name:</span> <span class="string">node-data-1</span></span><br><span class="line"><span class="attr">node.master:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">node.data:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">http.port:</span> <span class="number">9200</span></span><br><span class="line"><span class="attr">transport.tcp.port:</span> <span class="number">9300</span></span><br><span class="line"><span class="attr">transport.type:</span> <span class="string">netty3</span></span><br><span class="line"><span class="attr">http.type:</span> <span class="string">netty3</span></span><br><span class="line"><span class="attr">network.host:</span> <span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span></span><br><span class="line"><span class="attr">network.publish_host:</span> <span class="string">esnode1.elsearch.crawl-mesos-project.menya.marathon.mesos</span></span><br><span class="line"><span class="attr">discovery.zen.ping.unicast.hosts:</span> [<span class="string">&quot;esmaster.elsearch.crawl-mesos-project.menya.marathon.mesos:9300&quot;</span>]</span><br><span class="line"><span class="attr">discovery.zen.ping_timeout:</span> <span class="string">3s</span></span><br></pre></td></tr></table></figure></li>
-<li>新建/data/crawl-es-data目录</li>
-<li>执行<code>sysctl -w vm.max_map_count=262144</code>将机器的<code>vm.max_map_count</code>调高一些</li>
-<li>DC上创建service，id为<code>menya/crawl-mesos-project/elsearch/esnode1</code>，网络类型选择<code>VirtualNetwork</code>，指定镜像并根据官方镜像说明，传入一些环境变量</li>
 <li>运行service</li>
-<li>同理，在n126上创建node-data-2。</li>
 </ul>
-<p>如此，就会创建一个包含node-master、node-data-1和node-data-2的elasticsearch集群。</p>
-<h3 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h3><p>n125–esmaster<br>n138–esnode1<br>n126–esnode2</p>
-<h3 id="坑"><a href="#坑" class="headerlink" title="坑"></a>坑</h3><ul>
-<li><code>sysctl -w vm.max_map_count=262144</code>一定要在elasticsearch容器运行的宿主机上执行，不然会报错说<code>vm.max_map_count</code>太小</li>
-<li>如果一直dataNode节点一直连接不上node-master<ul>
-<li>首先看dataNode节点解析的<code>esmaster.elsearch.crawl-mesos-project.menya.marathon.mesos</code>地址对不对，如果不对可能是DNS缓存的问题，重启一下dataNode</li>
-<li>如果地址解析正确，则有可能是超时响应，提示<code>time out</code>，则将超时时间设置长一点，如设置为3s：<code>discovery.zen.ping_timeout: 3s</code></li>
-</ul>
-</li>
-</ul>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2018/05/30/system_management/elasticsearch-configuration/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -940,7 +942,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-10-25 10:59:15" itemprop="dateModified" datetime="2021-10-25T10:59:15+08:00">2021-10-25</time>
+                <time title="Modified: 2021-11-15 10:50:55" itemprop="dateModified" datetime="2021-11-15T10:50:55+08:00">2021-11-15</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -976,23 +978,14 @@
 <li>cgroups 也是通过 VFS 把功能暴露给用户态的，cgroups 与 VFS 之间的衔接部分称之为 cgroups 文件系统。VFS本身就是用 c 语言实现的一套面向对象的接口。</li>
 <li>Linux中，用户可以使用mount命令挂载 cgroups 文件系统</li>
 </ul>
-<h2 id="cpu子系统和cpuacct子系统"><a href="#cpu子系统和cpuacct子系统" class="headerlink" title="cpu子系统和cpuacct子系统"></a>cpu子系统和cpuacct子系统</h2><ul>
-<li>cpu子系统用来做cpu资源隔离，而cpuacct子系统是用来做cpu资源统计的</li>
-<li>cpu子系统通过cpu.shares来保证任务最少可以使用的cpu资源数目</li>
-<li>在cgroup挂载目录/sys/fs/cgroup/cpu里面新建一个目录比如test，则test会被自动加入到cpu子系统中去<h3 id="让job运行在cgroup中"><a href="#让job运行在cgroup中" class="headerlink" title="让job运行在cgroup中"></a>让job运行在cgroup中</h3>安装libcgroup-tools （yum install libcgroup-tools），使用cgexec执行hello.sh脚本如下：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line">i=0</span><br><span class="line"><span class="keyword">while</span>(( <span class="variable">$i</span>&lt;10000 ))</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">  <span class="built_in">echo</span> <span class="string">&quot;hello <span class="variable">$i</span>\n&quot;</span></span><br><span class="line">  <span class="built_in">let</span> <span class="string">&quot;i++&quot;</span></span><br><span class="line">  sleep 1</span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
-执行<code>cgexec -g cpu:test ./hello.sh</code>，则hello.sh将运行在test cpu子系统中，进入/sys/fs/cgroup/test查看tasks可以看到hello.sh脚本运行时对应的pid</li>
-</ul>
-<h3 id="CPU子系统字段"><a href="#CPU子系统字段" class="headerlink" title="CPU子系统字段"></a>CPU子系统字段</h3><ul>
-<li>cpu.cfs_period_us 为cfs调度器的一个时间周期的长度，默认为100000，即100000ns=100ms</li>
-<li>cpu.cfs_quota_us 为只能使用0.5个cpu</li>
-<li>cpuacct.stat 报告cgroup的所有任务（包括其子孙层级中的所有任务）使用的用户和系统CPU时间。user和system代表用户态和内核态，单位为USER_HZ</li>
-</ul>
-<h3 id="如何计算容器CPU利用率"><a href="#如何计算容器CPU利用率" class="headerlink" title="如何计算容器CPU利用率"></a>如何计算容器CPU利用率</h3><p>Linux Kernel 将 CPU 使用的信息记录在了 /proc/stat 这个文件中，该文件中记录了，如下所示：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@sean ~]<span class="comment"># cat /proc/stat</span></span><br><span class="line">cpu  1344357 729 298522 107841813 41774 0 1754 0 0 0</span><br><span class="line">cpu0 1344357 729 298522 107841813 41774 0 1754 0 0 0</span><br><span class="line">intr 206534153 29 10 0 0 154 .......</span><br><span class="line">ctxt 317949799</span><br><span class="line">btime 1524823711</span><br><span class="line">processes 677986</span><br><span class="line">procs_running 3</span><br><span class="line">procs_blocked 0</span><br><span class="line">softirq 66031632 2 35326999 1 2928073 535817 0 32 0 0 27240708</span><br></pre></td></tr></table></figure>
-<p>该文件记录了所有进程花费的总的cpu时间，第一行所有项（user、nice、system、idle等）之和就是所有cpu从开机到现在的总CPU时间Tmachine。单位是纳秒</p>
-<p>容器使用的CPU时间Tcontainer可以从 cpuacct/cpuacct.usage 中获得，单位是纳秒；也可以从<code>cpuacct/stat</code>中获得，包括user和system，单位是 <code>USER_HZ</code>，一般为100，故<code>cpuacct/stat</code>中的值一般乘以<code>1/100</code>就是秒为单位。</p>
-<p>则容器的cpu利用率为：<code>(Tcontainer - prevTcontainer) / (Tmachine - prevTmachine)</code></p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2018/05/13/resource_scheduling/cgroups/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 

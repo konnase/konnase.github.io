@@ -28,7 +28,7 @@
 <meta property="og:description" content="Python Use ‘’.startswith() and ‘’.endswith() instead of string slicing to check for prefixes or suffixes.   startswith() and endswith() are cleaner and less error prone:   Yes: if foo.startswith(‘bar’">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2018-11-22T08:12:32.000Z">
-<meta property="article:modified_time" content="2021-10-25T02:59:15.961Z">
+<meta property="article:modified_time" content="2021-11-15T02:53:57.998Z">
 <meta property="article:author" content="Konnase Lee">
 <meta property="article:tag" content="code style">
 <meta name="twitter:card" content="summary">
@@ -224,7 +224,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-10-25 10:59:15" itemprop="dateModified" datetime="2021-10-25T10:59:15+08:00">2021-10-25</time>
+                <time title="Modified: 2021-11-15 10:53:57" itemprop="dateModified" datetime="2021-11-15T10:53:57+08:00">2021-11-15</time>
               </span>
 
           
@@ -256,6 +256,7 @@
 <h2 id="和-的用法"><a href="#和-的用法" class="headerlink" title="*和**的用法"></a>*和**的用法</h2><p>*args 表示接收一个tuple作为参数；\**kw 表示接收一个dict作为参数</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">sample</span>(<span class="params">a,*args,**kwargs</span>):</span></span><br><span class="line">  <span class="built_in">print</span> “a <span class="keyword">is</span> &#123;&#125;”.<span class="built_in">format</span>(a)</span><br><span class="line">  <span class="built_in">print</span> “*args <span class="keyword">is</span> a <span class="built_in">tuple</span> &#123;&#125;”.<span class="built_in">format</span>(args)</span><br><span class="line">  <span class="built_in">print</span> “**kwargs <span class="keyword">is</span> a dictionary &#123;&#125;”.<span class="built_in">format</span>(kwargs)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>sample(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,name=”rahul”,age=<span class="number">26</span>)</span><br><span class="line">a <span class="keyword">is</span> <span class="number">1</span></span><br><span class="line">*args <span class="keyword">is</span> a <span class="built_in">tuple</span> (<span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)</span><br><span class="line">**kwargs <span class="keyword">is</span> a dictionary &#123;‘age’: <span class="number">26</span>, ‘name’: ‘rahul’&#125;</span><br></pre></td></tr></table></figure></li>
 </ul>
+<span id="more"></span>
 
     </div>
 

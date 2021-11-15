@@ -17,9 +17,10 @@
   <entry>
     <title>shadowsocks 搭建</title>
     <url>/2018/01/04/shadowsocks-%E6%90%AD%E5%BB%BA/</url>
-    <content><![CDATA[<h2 id="switchyOmega-shadowsocks-chrome科学上网"><a href="#switchyOmega-shadowsocks-chrome科学上网" class="headerlink" title="switchyOmega+shadowsocks+chrome科学上网"></a>switchyOmega+shadowsocks+chrome科学上网</h2><p>使用ssr客户端，配置服务器信息后代理规则选择全局<br><img src="/img/proxy_rule.png" alt="image"></p>
+    <content><![CDATA[<h2 id="switchyOmega-shadowsocks-chrome科学上网"><a href="#switchyOmega-shadowsocks-chrome科学上网" class="headerlink" title="switchyOmega+shadowsocks+chrome科学上网"></a>switchyOmega+shadowsocks+chrome科学上网</h2><p>使用ssr客户端，配置服务器信息后代理规则选择全局<br><img src="/img/proxy_rule.png" alt="image"><br>系统代理设置为直连模式<br><img src="/img/system_proxy.png" alt="image"><br>打开选项设置，确保本地为1080<br><img src="/img/localport.png" alt="image"></p>
 <span id="more"></span>
-<p>系统代理设置为直连模式<br><img src="/img/system_proxy.png" alt="image"><br>打开选项设置，确保本地为1080<br><img src="/img/localport.png" alt="image"><br>进入chrome，安装SwitchyOmega（安装方法请另行搜索）。修改proxy情景模式（也可新建一个情景模式），代理协议http，服务器127.0.0.1，端口1080（注意此处与ssr客户端设置的端口保持一致）<br><img src="/img/changesituation.png" alt="image"><br>点击应用选项<br>切换到autoswitch，删除原先设置的条件（没有则忽略）。选中规则列表股则，下拉框选择刚更改的proxy。在规则列表格式处选择AutoProxy，并复制 <a href="https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt">https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt</a> 到规则列表网址中，点击立即更新情景模式，随后将自动更新情景模式<br><img src="/img/autoswitch.png" alt="image"><br>最后一步，点击switchyOmega，选择auto switch<br><img src="/img/chooseautoswitch.png" alt="image"><br>完事儿后，浏览Google，即可正常访问，速度较采用全局模式和pac模式要快很多，而且只是chrome走本地1080端口代理上网，其他应用均采用直连方式。</p>
+
+<p>进入chrome，安装SwitchyOmega（安装方法请另行搜索）。修改proxy情景模式（也可新建一个情景模式），代理协议http，服务器127.0.0.1，端口1080（注意此处与ssr客户端设置的端口保持一致）<br><img src="/img/changesituation.png" alt="image"><br>点击应用选项<br>切换到autoswitch，删除原先设置的条件（没有则忽略）。选中规则列表股则，下拉框选择刚更改的proxy。在规则列表格式处选择AutoProxy，并复制 <a href="https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt">https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt</a> 到规则列表网址中，点击立即更新情景模式，随后将自动更新情景模式<br><img src="/img/autoswitch.png" alt="image"><br>最后一步，点击switchyOmega，选择auto switch<br><img src="/img/chooseautoswitch.png" alt="image"><br>完事儿后，浏览Google，即可正常访问，速度较采用全局模式和pac模式要快很多，而且只是chrome走本地1080端口代理上网，其他应用均采用直连方式。</p>
 <p>有时候连接不上，可以修改ssr配置文件中的timeout的值，将其调大一点，因为一旦连接延时较高，超过设置的timeout值，服务器将不能连接上。</p>
 ]]></content>
       <categories>
@@ -50,6 +51,8 @@
 <h2 id="阿里四面"><a href="#阿里四面" class="headerlink" title="阿里四面"></a>阿里四面</h2><p>交叉面。感觉也是问简历上的东西。。</p>
 <h2 id="阿里五面"><a href="#阿里五面" class="headerlink" title="阿里五面"></a>阿里五面</h2><p>HR面。就是大是大非的问题，然后我问了下双十一的筹备工作，HR跟我说我有机会来感受的，也就是拿到offer了？</p>
 <p>过了好长一段时间才收到阿里的意向书，最终还是选择了阿里。</p>
+<span id="more"></span>
+
 <h1 id="腾讯"><a href="#腾讯" class="headerlink" title="腾讯"></a>腾讯</h1><h2 id="腾讯一面"><a href="#腾讯一面" class="headerlink" title="腾讯一面"></a>腾讯一面</h2><p>一开始聊项目。</p>
 <ul>
 <li>python的深拷贝和浅拷贝</li>
@@ -122,17 +125,15 @@
     <title>知识点整理与总结</title>
     <url>/2017/08/08/%E7%9F%A5%E8%AF%86%E7%82%B9%E6%95%B4%E7%90%86%E4%B8%8E%E6%80%BB%E7%BB%93/</url>
     <content><![CDATA[<h1 id="网络文件系统NFS："><a href="#网络文件系统NFS：" class="headerlink" title="网络文件系统NFS："></a>网络文件系统NFS：</h1><ul>
-<li><p>查看启动rpcbind服务的状态：<br>  ps -ef|grep rpcbind  </p>
-</li>
-<li><p>修改NFS服务的配置文件：<br>  sudo vi /etc/exports <br>其中中的最后一行为新添加的NFS配置，NFS配置信息格式如下：<br>&lt;共享目录&gt; [客户端1 选项（访问权限,用户映射,其他）] [客户端2 选项（访问权限,用户映射,其他）]  <br>如：/home/tos/shareDir 192.168.137.129(rw,no_root_squash,async)<br>客户端如果是 * ，表示所有主机都可以挂载</p>
-<span id="more"></span></li>
-<li><p>启动服务：<br>  sudo service nfs-kernel-server start <br>  查看运行状态：sudo service nfs-kernel-server status</p>
-<pre><code>  ps -ef|grep nfsd
+<li>查看启动rpcbind服务的状态：<br>  ps -ef|grep rpcbind  </li>
+<li>修改NFS服务的配置文件：<br>  sudo vi /etc/exports <br>  其中中的最后一行为新添加的NFS配置，NFS配置信息格式如下：<br>  &lt;共享目录&gt; [客户端1 选项（访问权限,用户映射,其他）] [客户端2 选项（访问权限,用户映射,其他）]<br>  如：/home/tos/shareDir 192.168.137.129(rw,no_root_squash,async)<br>  客户端如果是 * ，表示所有主机都可以挂载</li>
+<li>启动服务：<br>  sudo service nfs-kernel-server start <br>  查看运行状态：sudo service nfs-kernel-server status<pre><code>  ps -ef|grep nfsd
 </code></pre>
 </li>
-<li><p>查看共享的文件夹和目标主机：<br>  showmount –e</p>
-</li>
+<li>查看共享的文件夹和目标主机：<br>  showmount –e</li>
 </ul>
+<span id="more"></span>
+
 <h1 id="分布式文件系统Ceph："><a href="#分布式文件系统Ceph：" class="headerlink" title="分布式文件系统Ceph："></a>分布式文件系统Ceph：</h1><h2 id="Ceph-生态系统架构可以划分为四部分："><a href="#Ceph-生态系统架构可以划分为四部分：" class="headerlink" title="Ceph 生态系统架构可以划分为四部分："></a>Ceph 生态系统架构可以划分为四部分：</h2><ol>
 <li>Clients：客户端（数据用户）</li>
 <li>cmds：Metadata server cluster，元数据服务器（缓存和同步分布式元数据）</li>
@@ -167,6 +168,7 @@ Gateway
 <h2 id="提示在gfapi-h中找不到glfs-fallocate-方法"><a href="#提示在gfapi-h中找不到glfs-fallocate-方法" class="headerlink" title="提示在gfapi.h中找不到glfs_fallocate()方法    :"></a>提示在gfapi.h中找不到glfs_fallocate()方法    :</h2><p>更新glusterfs版本到3.8</p>
 <h2 id="Package-uuid-was-not-found-in-the-pkg-config-search-path-Perhaps-you-should-add-the-directory-containing-uuid-pc’-to-the-PKG-CONFIG-PATH-environment-variable-Package-‘uuid’-required-by-‘glusterfs-api’-not-found"><a href="#Package-uuid-was-not-found-in-the-pkg-config-search-path-Perhaps-you-should-add-the-directory-containing-uuid-pc’-to-the-PKG-CONFIG-PATH-environment-variable-Package-‘uuid’-required-by-‘glusterfs-api’-not-found" class="headerlink" title="Package uuid was not found in the pkg-config search path.Perhaps you should add the directory containing `uuid.pc’ to the PKG_CONFIG_PATH environment variable .Package ‘uuid’, required by ‘glusterfs-api’, not found   :"></a>Package uuid was not found in the pkg-config search path.Perhaps you should add the directory containing `uuid.pc’ to the PKG_CONFIG_PATH environment variable .Package ‘uuid’, required by ‘glusterfs-api’, not found   :</h2><p>执行:</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo apt-get install uuid-dev </span><br></pre></td></tr></table></figure>
+
 <h2 id="fatal-error-sys-acl-h-No-such-file-or-directory"><a href="#fatal-error-sys-acl-h-No-such-file-or-directory" class="headerlink" title="fatal error: sys/acl.h: No such file or directory"></a>fatal error: sys/acl.h: No such file or directory</h2><p>执行：  </p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo apt-get install uuid-dev libacl1-dev liblzo2-dev</span><br></pre></td></tr></table></figure>
 
@@ -188,6 +190,7 @@ Gateway
 
 <h2 id="安装docker"><a href="#安装docker" class="headerlink" title="安装docker"></a>安装docker</h2><p>如果之前装过docker则sudo apt-get remove docker docker-engine</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install \</span><br><span class="line">    linux-image-extra-$(uname -r) \</span><br><span class="line">    linux-image-extra-virtual</span><br><span class="line">sudo apt-get install \</span><br><span class="line">    apt-transport-https \</span><br><span class="line">    ca-certificates \</span><br><span class="line">    curl \</span><br><span class="line">    software-properties-common</span><br><span class="line">curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -</span><br><span class="line">sudo add-apt-repository \</span><br><span class="line">   <span class="string">&quot;deb [arch=amd64] https://download.docker.com/linux/ubuntu \</span></span><br><span class="line"><span class="string">   <span class="subst">$(lsb_release -cs)</span> \</span></span><br><span class="line"><span class="string">   stable&quot;</span></span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install docker-ce</span><br></pre></td></tr></table></figure>
+
 <h2 id="将用户加入docker-group中，使用docker时不用加sudo："><a href="#将用户加入docker-group中，使用docker时不用加sudo：" class="headerlink" title="将用户加入docker group中，使用docker时不用加sudo："></a>将用户加入docker group中，使用docker时不用加sudo：</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo groupadd docker</span><br><span class="line">sudo gpasswd -a <span class="variable">$&#123;USER&#125;</span> docker</span><br><span class="line">sudo service docker restart</span><br></pre></td></tr></table></figure>
 <p>注销登录后生效</p>
 <h2 id="往registry-push镜像时，time-Parse-方法出错：parsing-time-“2017-04-22T07-30-42Z”-extra-text"><a href="#往registry-push镜像时，time-Parse-方法出错：parsing-time-“2017-04-22T07-30-42Z”-extra-text" class="headerlink" title="往registry push镜像时，time.Parse()方法出错：parsing time “2017-04-22T07:30:42Z”: extra text:"></a>往registry push镜像时，time.Parse()方法出错：parsing time “2017-04-22T07:30:42Z”: extra text:</h2><p>解决办法：见问题15</p>
@@ -237,8 +240,6 @@ sudo apt-get install -f
     <title>经典算法</title>
     <url>/2018/03/07/%E7%BB%8F%E5%85%B8%E7%AE%97%E6%B3%95/</url>
     <content><![CDATA[<h2 id="A-Algorithm"><a href="#A-Algorithm" class="headerlink" title="A* Algorithm"></a>A* Algorithm</h2><p>该算法是一个求最短路径的算法，同Dijkstra算法类似，起始点到终点的距离f(M) = g(M) + h(M)，g(M)表示从起始点S走到M点的距离，h(M)表示从M点到终点的估计距离。算法的关键在h的估计上，可以采用欧氏距离、曼哈顿距离等距离度量方式。在采用特定的距离度量方式估计h(M)的值后，计算f(M)的值，并对f(M)的值进行排序，找到最小的f(M)对应的那个节点作为下一个节点。<br>与Dijkstra算法不同的是，Dijkstra算法是从未走过的节点中找到一个距离已走过的节点最近的节点作为下一个节点，如果A*算法不对f(M)进行排序，则跟Dijkstra算法类似，只是比Dijkstra多计算一个估计值。如果h=0，则A*算法类似于BFS算法，即不考虑终点，只考虑起始点，但可以保证给出最优解；如果g=0，s则A*算法类似于DFS，即不考虑起始点，一根筋的找离终点最近的下一个节点走，这样可能不会给出最优解。</p>
-<span id="more"></span>
-
 <h2 id="Fibonacci堆"><a href="#Fibonacci堆" class="headerlink" title="Fibonacci堆"></a>Fibonacci堆</h2><ol>
 <li>Fibonacci堆采用双向循环链表；</li>
 <li>去除最小节点后，将该节点的所有子节点都串联到根表中，然后将根表中度数相同的子树合并，直至没有度数相同的子树。</li>
@@ -247,6 +248,8 @@ sudo apt-get install -f
 <li>节点值增大：将值增大的节点的孩子添加到根链表中，如果值增大的节点不在根链表中，则将其也加入根链表中。然后对其父节点进行级联剪切；如果没有父节点，则判断是否需要更新堆得最小值。</li>
 <li>级联剪切的真正目的是为了防止”最小堆”由二叉树演化成链表。</li>
 </ol>
+<span id="more"></span>
+
 <h2 id="装箱问题"><a href="#装箱问题" class="headerlink" title="装箱问题"></a>装箱问题</h2><p>tabu 搜索，模拟退火，领域搜索，GRASP算法</p>
 <h2 id="基本知识"><a href="#基本知识" class="headerlink" title="基本知识"></a>基本知识</h2><p>一般50,000,000次循环用时在0.5s左右</p>
 <h3 id="STL"><a href="#STL" class="headerlink" title="STL"></a>STL</h3><h4 id="二分搜索"><a href="#二分搜索" class="headerlink" title="二分搜索"></a>二分搜索</h4><ul>
@@ -280,6 +283,7 @@ sudo apt-get install -f
 <h2 id="和-的用法"><a href="#和-的用法" class="headerlink" title="*和**的用法"></a>*和**的用法</h2><p>*args 表示接收一个tuple作为参数；\**kw 表示接收一个dict作为参数</p>
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">sample</span>(<span class="params">a,*args,**kwargs</span>):</span></span><br><span class="line">  <span class="built_in">print</span> “a <span class="keyword">is</span> &#123;&#125;”.<span class="built_in">format</span>(a)</span><br><span class="line">  <span class="built_in">print</span> “*args <span class="keyword">is</span> a <span class="built_in">tuple</span> &#123;&#125;”.<span class="built_in">format</span>(args)</span><br><span class="line">  <span class="built_in">print</span> “**kwargs <span class="keyword">is</span> a dictionary &#123;&#125;”.<span class="built_in">format</span>(kwargs)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>sample(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,name=”rahul”,age=<span class="number">26</span>)</span><br><span class="line">a <span class="keyword">is</span> <span class="number">1</span></span><br><span class="line">*args <span class="keyword">is</span> a <span class="built_in">tuple</span> (<span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)</span><br><span class="line">**kwargs <span class="keyword">is</span> a dictionary &#123;‘age’: <span class="number">26</span>, ‘name’: ‘rahul’&#125;</span><br></pre></td></tr></table></figure></li>
 </ul>
+<span id="more"></span>
 ]]></content>
       <tags>
         <tag>code style</tag>
@@ -289,10 +293,14 @@ sudo apt-get install -f
     <title>Mxnet</title>
     <url>/2018/09/16/deep_learning/Mxnet/</url>
     <content><![CDATA[<h1 id="Mxnet训练流程"><a href="#Mxnet训练流程" class="headerlink" title="Mxnet训练流程"></a>Mxnet训练流程</h1><ul>
-<li>定义好symbol：符号式编程，生成描述计算的计算图，Symbol API 这个包主要是用于提供神经网络的图和自动求导。使用c++写好的Symbol类，可进行加减乘除等符号运算。</li>
-<li>写好dataiter：如果是分布式训练，需要将训练数据平均切分到每台训练的机器上</li>
-<li>初始化参数：cpu or gpu、学习率、优化器参数、针对不同网络设置参数初始化方法、验证度量(evaluation metrics)、loss function、callbacks</li>
-<li>模型训练：<ul>
+<li><p>定义好symbol：符号式编程，生成描述计算的计算图，Symbol API 这个包主要是用于提供神经网络的图和自动求导。使用c++写好的Symbol类，可进行加减乘除等符号运算。</p>
+</li>
+<li><p>写好dataiter：如果是分布式训练，需要将训练数据平均切分到每台训练的机器上</p>
+</li>
+<li><p>初始化参数：cpu or gpu、学习率、优化器参数、针对不同网络设置参数初始化方法、验证度量(evaluation metrics)、loss function、callbacks</p>
+</li>
+<li><p>模型训练：</p>
+<ul>
 <li>创建Module: <figure class="highlight python"><table><tr><td class="code"><pre><span class="line">mod = mx.mod.Module(symbol=net,</span><br><span class="line">    context=mx.cpu(),</span><br><span class="line">    data_names=[<span class="string">&#x27;data&#x27;</span>],</span><br><span class="line">    label_names=[<span class="string">&#x27;softmax_label&#x27;</span>])</span><br></pre></td></tr></table></figure></li>
 <li>mod.fit():<ul>
 <li>mod.bind(): 分配内存，为计算做准备</li>
@@ -308,6 +316,8 @@ sudo apt-get install -f
 </ul>
 </li>
 </ul>
+<span id="more"></span>
+
 <h2 id="Mxnet参数服务器架构"><a href="#Mxnet参数服务器架构" class="headerlink" title="Mxnet参数服务器架构"></a>Mxnet参数服务器架构</h2><ul>
 <li>server节点可以跟其他server节点通信，每个server负责自己分到的参数，server group共同维持所有参数的更新</li>
 <li>worker节点之间没有通信，只跟<strong>自己对应的server</strong>进行通信</li>
@@ -326,6 +336,9 @@ sudo apt-get install -f
 <p>NCCL只能支持到8张GPU的深度学习训练（<a href="https://docs.nvidia.com/deeplearning/sdk/introduction/index.html#introduction">参见</a>）</p>
 <p>开发者文档<a href="https://devblogs.nvidia.com/scaling-deep-learning-training-nccl/">nccl2.3</a></p>
 <p>在<a href="https://devblogs.nvidia.com/massively-scale-deep-learning-training-nccl-2-4/">nccl2.4介绍文档</a>中提到NCCL的All Reduce操作被用于百度ring-all-reduce和Horovod这两个使用ring的分布式训练框架中来获取GPU之间的full bandwidth。但同时提到ring的缺点是随着GPU数目的增长，延迟也成线性增加。<strong>为什么延迟会呈线性增加？</strong>，很简单，因为每个GPU每次发送完一个chunk就必须等下一个chunk从另一张GPU发过来，整个过程（包括reduce scatter和all gather）总共需要发送2(n-1)次，则延时为2(n-1)的倍数。见<a href="https://images.nvidia.com/events/sc15/pdfs/NCCL-Woolley.pdf">NCCL collective示意图</a></p>
+<span id="more"></span>
+
+
 <h2 id="性能测试"><a href="#性能测试" class="headerlink" title="性能测试"></a>性能测试</h2><p>编译NVIDIA官方<a href="https://github.com/NVIDIA/nccl-tests">nccl-tests</a>，在8张Tesla V100 GPU机器上测试，GPU机器的拓扑如下：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">root@9a417caaf03b:~/nccl-tests<span class="comment"># nvidia-smi topo -m</span></span><br><span class="line">	GPU0	GPU1	GPU2	GPU3	GPU4	GPU5	GPU6	GPU7	CPU Affinity</span><br><span class="line">GPU0	 X 	NV1	NV1	NV2	SYS	SYS	NV2	SYS	0-95</span><br><span class="line">GPU1	NV1	 X 	NV2	NV1	SYS	SYS	SYS	NV2	0-95</span><br><span class="line">GPU2	NV1	NV2	 X 	NV2	NV1	SYS	SYS	SYS	0-95</span><br><span class="line">GPU3	NV2	NV1	NV2	 X 	SYS	NV1	SYS	SYS	0-95</span><br><span class="line">GPU4	SYS	SYS	NV1	SYS	 X 	NV2	NV1	NV2	0-95</span><br><span class="line">GPU5	SYS	SYS	SYS	NV1	NV2	 X 	NV2	NV1	0-95</span><br><span class="line">GPU6	NV2	SYS	SYS	SYS	NV1	NV2	 X 	NV1	0-95</span><br><span class="line">GPU7	SYS	NV2	SYS	SYS	NV2	NV1	NV1	 X 	0-95</span><br><span class="line"></span><br><span class="line">Legend:</span><br><span class="line"></span><br><span class="line">  X    = Self</span><br><span class="line">  SYS  = Connection traversing PCIe as well as the SMP interconnect between NUMA nodes (e.g., QPI/UPI)</span><br><span class="line">  NODE = Connection traversing PCIe as well as the interconnect between PCIe Host Bridges within a NUMA node</span><br><span class="line">  PHB  = Connection traversing PCIe as well as a PCIe Host Bridge (typically the CPU)</span><br><span class="line">  PXB  = Connection traversing multiple PCIe switches (without traversing the PCIe Host Bridge)</span><br><span class="line">  PIX  = Connection traversing a single PCIe switch</span><br><span class="line">  NV<span class="comment">#  = Connection traversing a bonded set of # NVLinks</span></span><br></pre></td></tr></table></figure>
 <p>执行nccl-tests里面的<code>all_reduce_perf</code>性能测试，如下：</p>
@@ -528,6 +541,8 @@ sudo apt-get install -f
 </ul>
 </li>
 </ul>
+<span id="more"></span>
+
 <h3 id="Data-Augmentation"><a href="#Data-Augmentation" class="headerlink" title="Data Augmentation"></a>Data Augmentation</h3><p>人工增加训练集的大小，包括反射(image reflection)、平移(translation)、旋转(rotation)、加噪声等方法从已有的数据中创造一批新的数据</p>
 <h3 id="Batch-Normalization"><a href="#Batch-Normalization" class="headerlink" title="Batch Normalization"></a>Batch Normalization</h3><p>CNN网络在训练的过程中，前一层的参数变化影响着后面层的变化（因为前面层的输出是后面的输入），而且这种影响会随着网络深度的增加而不断放大。在CNN训练时，绝大多数都采用mini-batch使用随机梯度下降算法进行训练，那么随着输入数据的不断变化，以及网络中参数不断调整，网络的各层输入数据的分布则会不断变化，那么各层在训练的过程中就需要不断的改变以适应这种新的数据分布，从而造成网络训练困难，难以拟合的问题。 </p>
 <p>BatchNorm的目的是将每一层的输入数据进行归一化(normalization)，使得每一层的数据分布是稳定的–均值0方差1，增加两个可学习的参数 β 和 γ ，对数据进行缩放和平移，从而达到加速训练的目的</p>
@@ -559,6 +574,8 @@ sudo apt-get install -f
 </ol>
 <h3 id="实验过程"><a href="#实验过程" class="headerlink" title="实验过程"></a>实验过程</h3><h4 id="k8s中cpuset的探索"><a href="#k8s中cpuset的探索" class="headerlink" title="k8s中cpuset的探索"></a>k8s中cpuset的探索</h4><p>为了找到PS具体使用的是哪几个cpu，尝试探索k8s对cpuset的使用。</p>
 <p>k8s中，容器 cpuset 中的 CPU 数量与 pod 规格中指定的整数型 CPU limit 相等。只要保证pod属于 Guaranteed QoS（即limits和requests相等）且cpu的资源值为大于等于1的整数值，则该pod就会被cpu manager（从 1.10 版本开始，作为 beta 特性默认开启）分配两个独占的cpu。</p>
+<span id="more"></span>
+
 <p>源码如下：</p>
 <figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// pkg/kubelet/cm/cpumanager/policy_static.go</span></span><br><span class="line"><span class="comment">// 判断一个pod是否为Guaranteed QoS，并且cpu申请值是否为整数</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">guaranteedCPUs</span><span class="params">(pod *v1.Pod, container *v1.Container)</span> <span class="title">int</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> v1qos.GetPodQOS(pod) != v1.PodQOSGuaranteed &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">    &#125;</span><br><span class="line">    cpuQuantity := container.Resources.Requests[v1.ResourceCPU]</span><br><span class="line">    <span class="keyword">if</span> cpuQuantity.Value()*<span class="number">1000</span> != cpuQuantity.MilliValue() &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// Safe downcast to do for all systems with &lt; 2.1 billion CPUs.</span></span><br><span class="line">    <span class="comment">// Per the language spec, `int` is guaranteed to be at least 32 bits wide.</span></span><br><span class="line">    <span class="comment">// https://golang.org/ref/spec#Numeric_types</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">int</span>(cpuQuantity.Value())</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// pkg/kubelet/cm/cpumanager/cpu_manager.go</span></span><br><span class="line"><span class="comment">// 同步cpuset的状态，</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *manager)</span> <span class="title">reconcileState</span><span class="params">()</span> <span class="params">(success []reconciledContainer, failure []reconciledContainer)</span></span> &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    klog.V(<span class="number">4</span>).Infof(<span class="string">&quot;[cpumanager] reconcileState: updating container (pod: %s, container: %s, container id: %s, cpuset: \&quot;%v\&quot;)&quot;</span>, pod.Name, container.Name, containerID, cset)</span><br><span class="line">    err = m.updateContainerCPUSet(containerID, cset)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        klog.Errorf(<span class="string">&quot;[cpumanager] reconcileState: failed to update container (pod: %s, container: %s, container id: %s, cpuset: \&quot;%v\&quot;, error: %v)&quot;</span>, pod.Name, container.Name, containerID, cset, err)</span><br><span class="line">        failure = <span class="built_in">append</span>(failure, reconciledContainer&#123;pod.Name, container.Name, containerID&#125;)</span><br><span class="line">        <span class="keyword">continue</span></span><br><span class="line">    &#125;</span><br><span class="line">    success = <span class="built_in">append</span>(success, reconciledContainer&#123;pod.Name, container.Name, containerID&#125;)</span><br><span class="line">    <span class="comment">// ... </span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *manager)</span> <span class="title">updateContainerCPUSet</span><span class="params">(containerID <span class="keyword">string</span>, cpus cpuset.CPUSet)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    <span class="comment">// <span class="doctag">TODO:</span> Consider adding a `ResourceConfigForContainer` helper in</span></span><br><span class="line">    <span class="comment">// helpers_linux.go similar to what exists for pods.</span></span><br><span class="line">    <span class="comment">// It would be better to pass the full container resources here instead of</span></span><br><span class="line">    <span class="comment">// this patch-like partial resources.</span></span><br><span class="line">    <span class="keyword">return</span> m.containerRuntime.UpdateContainerResources(</span><br><span class="line">        containerID,</span><br><span class="line">        &amp;runtimeapi.LinuxContainerResources&#123;</span><br><span class="line">            CpusetCpus: cpus.String(),</span><br><span class="line">        &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>实验环境为167集群，共20个逻辑cpu，分布在两个numa node上。PS是处于Guaranteed QoS状态，而且cpu=2，<strong>但是通过<code>docker inspect</code>怎么看不到CpusetCpus字段被设置了？</strong>，直接去cgroups中查看PS对应的pod的<code>cpuset.cpus</code>的值是给的<code>0-19</code>，表示每个cpu都有可能用到，很奇怪。</p>
@@ -638,12 +655,14 @@ sudo apt-get install -f
     <title>Maven学习笔记</title>
     <url>/2017/11/05/java_spring/Maven%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
     <content><![CDATA[<h2 id="TheNEXUS-Maven-By-Example"><a href="#TheNEXUS-Maven-By-Example" class="headerlink" title="TheNEXUS Maven By Example"></a>TheNEXUS Maven By Example</h2><h3 id="Question"><a href="#Question" class="headerlink" title="Question"></a>Question</h3><ol>
-<li>5.6节提到的依赖中设置scope为provided：This tells Maven that the JAR is “provided” by the container and thus should not be included in the WAR. 是什么意思？<span id="more"></span></li>
+<li>5.6节提到的依赖中设置scope为provided：This tells Maven that the JAR is “provided” by the container and thus should not be included in the WAR. 是什么意思？</li>
 <li>第六章结合了Weather Module和Web Module，其中，在Web Module中加入了Weather的依赖，并添加了WeatherService服务，该服务中的retrieveFormat方法同Main中的start方法完成相同的工作。Web Module中新增WeatherServlet，里面的doGet方法完成实现对http请求的处理，请求天气数据并返回结果到页面展示。</li>
 <li>当Maven执行一个有子模块的project的时候，Maven首先加载parent POM，然后定位所有的子模块。然后将所有的POM交给Maven Reactor，负责分析模块之间的依赖，确保以相应的顺序编译和安装相互依赖的模块。</li>
 <li>第六章运行 mvn jetty:run的时候，提示找不到simple-weather-08-SNAPSHOT.jar这个包。而且Yahoo的weather.yahooapis.com网站访问不了。</li>
 <li>web.xml和weather-servlet.xml都是自动加载的吗？</li>
 </ol>
+<span id="more"></span>
+
 <h3 id="第七章对象关系"><a href="#第七章对象关系" class="headerlink" title="第七章对象关系"></a>第七章对象关系</h3><p><img src="/img/multimodule-web-spring_projects.png" alt="image"></p>
 <ul>
 <li>SimpleModel：由Weather、Condition、Atmosphere、Location、Wind对象组成。主要是向simple-weather提供Weather对象，simple-wather解析XML后会生成Weather对象。在simple-persist的DAO中将Weather对象存储到数据库中。</li>
@@ -669,8 +688,10 @@ sudo apt-get install -f
 <h3 id="shiro的三大核心组件"><a href="#shiro的三大核心组件" class="headerlink" title="shiro的三大核心组件"></a>shiro的三大核心组件</h3><ol>
 <li>Subject：即当前用户，在权限管理的应用程序里往往需要知道谁能够操作什么，谁拥有操作该程序的权利，shiro中则需要通过Subject来提供基础的当前用户信息，Subject 不仅仅代表某个用户，也可以是第三方进程、后台帐户（Daemon Account）或其他类似事物。</li>
 <li>SecurityManager：即所有Subject的管理者，这是Shiro框架的核心组件，可以把他看做是一个Shiro框架的全局管理组件，用于调度各种Shiro框架的服务。</li>
-<li>Realms：域，Shiro 从从 Realm 获取安全数据（如用户、角色、权限），就是说 SecurityManager 要验证用户身份，那么它需要从Realm获取相应的用户进行比较以确定用户身份是否合法；也需要从 Realm得到用户相应的角色/权限进行验证用户是否能进行操作；可以把Realm看成DataSource，即安全数据源。Realms则是用户的信息认证器和用户的权限人证器，我们需要自己来实现Realms来自定义的管理我们自己系统内部的权限规则。<span id="more"></span></li>
+<li>Realms：域，Shiro 从从 Realm 获取安全数据（如用户、角色、权限），就是说 SecurityManager 要验证用户身份，那么它需要从Realm获取相应的用户进行比较以确定用户身份是否合法；也需要从 Realm得到用户相应的角色/权限进行验证用户是否能进行操作；可以把Realm看成DataSource，即安全数据源。Realms则是用户的信息认证器和用户的权限人证器，我们需要自己来实现Realms来自定义的管理我们自己系统内部的权限规则。</li>
 </ol>
+<span id="more"></span>
+
 <h3 id="自定义Realm："><a href="#自定义Realm：" class="headerlink" title="自定义Realm："></a>自定义Realm：</h3><p><a href="https://github.com/swinglife/shiro_ex">shiro_example</a><br><a href="http://blog.csdn.net/swingpyzf/article/details/46342023/#reply">原博客地址</a></p>
 <p>Shiro默认提供的Realm如下图所示：<br><img src="http://wiki.jikexueyuan.com/project/shiro/images/5.png" alt="image"><br>开发的时候选择继承自org.apache.shiro.realm.AuthorizingRealm， 本例中，继承自AuthorizingRealm并重写方法：</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/*** </span></span><br><span class="line"><span class="comment">     * 获取授权信息 </span></span><br><span class="line"><span class="comment">     */</span>  </span><br><span class="line">    <span class="meta">@Override</span>  </span><br><span class="line">    <span class="function"><span class="keyword">protected</span> AuthorizationInfo <span class="title">doGetAuthorizationInfo</span><span class="params">(PrincipalCollection pc)</span> </span>&#123;  </span><br><span class="line">        <span class="comment">//根据自己系统规则的需要编写获取授权信息，这里为了快速入门只获取了用户对应角色的资源url信息  </span></span><br><span class="line">        String username = (String) pc.fromRealm(getName()).iterator().next();  </span><br><span class="line">        <span class="keyword">if</span> (username != <span class="keyword">null</span>) &#123;  </span><br><span class="line">            List&lt;String&gt; pers = accountService.getPermissionsByUserName(username);  </span><br><span class="line">            <span class="keyword">if</span> (pers != <span class="keyword">null</span> &amp;&amp; !pers.isEmpty()) &#123;  </span><br><span class="line">                SimpleAuthorizationInfo info = <span class="keyword">new</span> SimpleAuthorizationInfo();  </span><br><span class="line">                <span class="keyword">for</span> (String each : pers) &#123;  </span><br><span class="line">                    <span class="comment">//将权限资源添加到用户信息中  </span></span><br><span class="line">                    info.addStringPermission(each);  </span><br><span class="line">                &#125;  </span><br><span class="line">                <span class="keyword">return</span> info;  </span><br><span class="line">            &#125;  </span><br><span class="line">        &#125;  </span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;  </span><br><span class="line">    &#125;  </span><br><span class="line">    <span class="comment">/*** </span></span><br><span class="line"><span class="comment">     * 获取认证信息 </span></span><br><span class="line"><span class="comment">     */</span>  </span><br><span class="line">    <span class="meta">@Override</span>  </span><br><span class="line">    <span class="function"><span class="keyword">protected</span> AuthenticationInfo <span class="title">doGetAuthenticationInfo</span><span class="params">(AuthenticationToken at)</span> <span class="keyword">throws</span> AuthenticationException </span>&#123;  </span><br><span class="line">        UsernamePasswordToken token = (UsernamePasswordToken) at;  </span><br><span class="line">        <span class="comment">// 通过表单接收的用户名  </span></span><br><span class="line">        String username = token.getUsername();  </span><br><span class="line">        <span class="keyword">if</span> (username != <span class="keyword">null</span> &amp;&amp; !<span class="string">&quot;&quot;</span>.equals(username)) &#123;  </span><br><span class="line">            User user = accountService.getUserByUserName(username);  </span><br><span class="line">            <span class="keyword">if</span> (user != <span class="keyword">null</span>) &#123;  </span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">new</span> SimpleAuthenticationInfo(user.getUsername(), user.getPassword(), getName());  </span><br><span class="line">            &#125;  </span><br><span class="line">        &#125;  </span><br><span class="line">  </span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;  </span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
@@ -762,8 +783,6 @@ sudo apt-get install -f
     <title>Spring相关知识</title>
     <url>/2017/07/24/java_spring/Spring%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86/</url>
     <content><![CDATA[<h2 id="传统MVC控制器与RESTful-Web-Service控制器的不同"><a href="#传统MVC控制器与RESTful-Web-Service控制器的不同" class="headerlink" title="传统MVC控制器与RESTful Web Service控制器的不同"></a>传统MVC控制器与RESTful Web Service控制器的不同</h2><p> 传统MVC控制器返回的是一个数据的视图（Model），而RESTful Web Service控制器返回的是Json格式的对象</p>
-<span id="more"></span>
-<hr>
 <h2 id="Spring的模块"><a href="#Spring的模块" class="headerlink" title="Spring的模块"></a>Spring的模块</h2><p><img src="/img/spring-overview.png" alt="image"></p>
 <ul>
 <li>上图中每个小单元都至少对应一个jar包，提供相应的API供使用。使用Maven工具管理Spring项目时，这些需要用到的jar包集中在用户目录下的.m2文件夹下，而不是包含在项目中。</li>
@@ -780,6 +799,9 @@ sudo apt-get install -f
 </blockquote>
 </li>
 </ul>
+<span id="more"></span>
+
+
 <h2 id="Spring的注解"><a href="#Spring的注解" class="headerlink" title="Spring的注解"></a>Spring的注解</h2><ul>
 <li>@component 泛指组件，当组件不好归类的时候，我们可以使用这个注解进行标注，作用是将对象实例化到Spring容器中</li>
 <li>@Service用于标注业务层组件；@Controller用于标注控制层组件（如struts中的action）；@Repository用于标注数据访问组件，即DAO组件，使用jpa访问数据库时，Repository类实现了很多数据库查询操作，方便用户进行数据库操作。</li>
@@ -951,6 +973,8 @@ sudo apt-get install -f
 <li>cgroups 也是通过 VFS 把功能暴露给用户态的，cgroups 与 VFS 之间的衔接部分称之为 cgroups 文件系统。VFS本身就是用 c 语言实现的一套面向对象的接口。</li>
 <li>Linux中，用户可以使用mount命令挂载 cgroups 文件系统</li>
 </ul>
+<span id="more"></span>
+
 <h2 id="cpu子系统和cpuacct子系统"><a href="#cpu子系统和cpuacct子系统" class="headerlink" title="cpu子系统和cpuacct子系统"></a>cpu子系统和cpuacct子系统</h2><ul>
 <li>cpu子系统用来做cpu资源隔离，而cpuacct子系统是用来做cpu资源统计的</li>
 <li>cpu子系统通过cpu.shares来保证任务最少可以使用的cpu资源数目</li>
@@ -1032,20 +1056,20 @@ sudo apt-get install -f
     <url>/2018/09/10/resource_scheduling/kubernetes/</url>
     <content><![CDATA[<h1 id="设计架构"><a href="#设计架构" class="headerlink" title="设计架构"></a>设计架构</h1><h2 id="Scheduler"><a href="#Scheduler" class="headerlink" title="Scheduler"></a>Scheduler</h2><p>k8s的有两步调度策略</p>
 <ul>
-<li><p>预选策略(predicates)：强制性规则，遍历所有Node，选择满足要求的Node列表。v1.7支持15种策略</p>
-<ul>
+<li>预选策略(predicates)：强制性规则，遍历所有Node，选择满足要求的Node列表。v1.7支持15种策略<ul>
 <li>PodFitsResources：检查主机资源是否满足pod需求</li>
 <li>NoDiskConfilict：检查主机上的卷冲突</li>
 <li>MatchInterPodAffinity：检查pod和其他pod是否符合亲和性规则</li>
 </ul>
 </li>
-<li><p>优选策略(Priorities)：在预选策略的基础上，给Node打分排序，选出最优者。v1.7支持10个策略，每项策略对应一个权重，每项策略的得分乘以权重得到总分</p>
-<ul>
+<li>优选策略(Priorities)：在预选策略的基础上，给Node打分排序，选出最优者。v1.7支持10个策略，每项策略对应一个权重，每项策略的得分乘以权重得到总分<ul>
 <li>ImageLocalityPriority：根据主机上是否已具备Pod运行的环境来打分，得分计算：不存在所需镜像，返回0分，存在镜像，镜像越大得分越高</li>
 <li>LeastRequestedPriority：计算Pods需要的CPU和内存在当前节点可用资源的百分比，具有最小百分比的节点就是最优，得分计算公式：cpu((capacity – sum(requested)) * 10 / capacity) + memory((capacity – sum(requested)) * 10 / capacity) / 2</li>
 </ul>
-<span id="more"></span></li>
+</li>
 </ul>
+<span id="more"></span>
+
 <h2 id="Serviceaccount"><a href="#Serviceaccount" class="headerlink" title="Serviceaccount"></a>Serviceaccount</h2><p>一个角色拥有指定的资源权限（可以访问k8s里面的哪些资源，如pods、sercices等）和功能权限（CRUD），通过将RoleBinding将一个role绑定到某个serviceaccount上，即可让资源可通过serviceaccount来访问。关系图如下：<br><img src="/img/resource--role.png" alt="image"></p>
 <h2 id="NodeStatus"><a href="#NodeStatus" class="headerlink" title="NodeStatus"></a>NodeStatus</h2><p>在所有的 zones 都不健康（也即集群中没有健康 node）的极端情况下，node controller 将假设 master 的连接出了某些问题，它将停止所有删除动作直到一些连接恢复</p>
 <h2 id="containerd-架构"><a href="#containerd-架构" class="headerlink" title="containerd 架构"></a>containerd 架构</h2><p><a href="https://containerd.io/">https://containerd.io/</a><br><img src="/img/architecture.png" alt="architecture"></p>
@@ -1069,6 +1093,8 @@ sudo apt-get install -f
 <li>Google无疑是最有技术敏锐性和市场敏锐性的，早早的看到了Docker企业级市场的企图心，所以Google是第一个支持Docker的竞争对手—-CoreOS的Rocket容器，2014年四月份谷歌风险投资公司牵头对CoreOS进行了1200万美元的投资，目标明确—-对准docker。Google不再是Docker+ kubernetes,而是<strong>容器抽象</strong>+ kubernetes，即不止支持docker</li>
 <li>Redhat的OpenShift公有云还是OpenShift V2，V3采用Docker+k8s，很难从V2升级到V3。</li>
 </ul>
+<span id="more"></span>
+
 <h2 id="Spark"><a href="#Spark" class="headerlink" title="Spark"></a>Spark</h2><p>Hadoop第一代产品使用HDFS，处理MapReduce作业的时候设计频繁的HDFS读写操作，如下图：<br><img src="/img/spark1.png" alt="mapreduce"><br>而Spark使用内存替代了使用HDFS保存中间结果，使用弹性分布数据集（RDD），使得分布式对象集合可以跨集群在内存中访问和保存，大大减少了作业加载数据的时间开销。当有数据丢失时，RDD会跟踪并重新计算得到丢失的数据。Spark的性能是MapReduce的40倍</p>
 ]]></content>
       <tags>
@@ -1184,7 +1210,11 @@ sudo apt-get install -f
 <li>新建/data/crawl-es-data目录</li>
 <li>执行<code>sysctl -w vm.max_map_count=262144</code>将机器的<code>vm.max_map_count</code>调高一些</li>
 <li>DC上创建service，id为<code>menya/crawl-mesos-project/elsearch/esmaster</code>，网络类型选择<code>VirtualNetwork</code>，指定镜像并根据官方镜像说明，传入一些环境变量</li>
-<li>运行service<h3 id="配置node-data"><a href="#配置node-data" class="headerlink" title="配置node-data"></a>配置node-data</h3></li>
+<li>运行service</li>
+</ul>
+<span id="more"></span>
+
+<h3 id="配置node-data"><a href="#配置node-data" class="headerlink" title="配置node-data"></a>配置node-data</h3><ul>
 <li>在n138上，新建/etc/elasticsearch/elasticsearch.yml<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">cluster.name:</span> <span class="string">elasticsearch_cluster</span></span><br><span class="line"><span class="attr">node.name:</span> <span class="string">node-data-1</span></span><br><span class="line"><span class="attr">node.master:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">node.data:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">http.port:</span> <span class="number">9200</span></span><br><span class="line"><span class="attr">transport.tcp.port:</span> <span class="number">9300</span></span><br><span class="line"><span class="attr">transport.type:</span> <span class="string">netty3</span></span><br><span class="line"><span class="attr">http.type:</span> <span class="string">netty3</span></span><br><span class="line"><span class="attr">network.host:</span> <span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span></span><br><span class="line"><span class="attr">network.publish_host:</span> <span class="string">esnode1.elsearch.crawl-mesos-project.menya.marathon.mesos</span></span><br><span class="line"><span class="attr">discovery.zen.ping.unicast.hosts:</span> [<span class="string">&quot;esmaster.elsearch.crawl-mesos-project.menya.marathon.mesos:9300&quot;</span>]</span><br><span class="line"><span class="attr">discovery.zen.ping_timeout:</span> <span class="string">3s</span></span><br></pre></td></tr></table></figure></li>
 <li>新建/data/crawl-es-data目录</li>
 <li>执行<code>sysctl -w vm.max_map_count=262144</code>将机器的<code>vm.max_map_count</code>调高一些</li>
@@ -1211,10 +1241,9 @@ sudo apt-get install -f
     <title>win10 ubuntu子系统的学习心得</title>
     <url>/2017/07/23/system_management/win10-ubuntu%E5%AD%90%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%AD%A6%E4%B9%A0%E5%BF%83%E5%BE%97/</url>
     <content><![CDATA[<h2 id="Ubuntu子系统的文件存放位置"><a href="#Ubuntu子系统的文件存放位置" class="headerlink" title="Ubuntu子系统的文件存放位置"></a>Ubuntu子系统的文件存放位置</h2><blockquote>
-<p>网上搜索说在C:\Users\lqp19\AppData\Local\lxss目录下面，但本机上没有这个目录</p>
-</blockquote>
+<p>网上搜索说在C:\Users\lqp19\AppData\Local\lxss目录下面，但本机上没有这个目录<br><img src="/img/p1.PNG" alt="image"></p>
 <span id="more"></span>
-<p><img src="/img/p1.PNG" alt="image"></p>
+</blockquote>
 <h2 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h2><blockquote>
 <p>每次进入Ubuntu子系统，都需要将/etc/profile文件中的配置重新生效一次，否则配置的诸如JAVA_HOME、TOMACAT_HOME等环境变量都不能识别，而且执行完：source /etc/profile 之后，terminal中的字体颜色也会随着变化 </p>
 </blockquote>
@@ -1264,7 +1293,10 @@ sudo apt-get install glusterfs-server
     <title>容器网络</title>
     <url>/2019/08/30/system_management/%E5%AE%B9%E5%99%A8%E7%BD%91%E7%BB%9C/</url>
     <content><![CDATA[<h2 id="网关"><a href="#网关" class="headerlink" title="网关"></a>网关</h2><p>负责转发源ip地址的请求到目标ip地址。当路由表中将网关设置为<code>0.0.0.0</code>时，表示源ip地址直连网卡。</p>
-<h2 id="跨主机网络-overlay-network"><a href="#跨主机网络-overlay-network" class="headerlink" title="跨主机网络 - overlay network"></a>跨主机网络 - overlay network</h2><h3 id="flannel"><a href="#flannel" class="headerlink" title="flannel"></a>flannel</h3><p>整个过程参见张磊的极客课程<strong>深入剖析Kubernetes 32~35章节</strong><br>基于UDP的跨主机通信的基本原理如图所示：<br><img src="/img/system_management/flannel-udp-network.png"><br>可以看到每次数据从一个主机发出去的之前会进行三次用户态和内核态的切换(container0 - docker0, flannel0 - flanneld, flanneld - eth0)，非常耗时。所以后来被VXLAN（虚拟可扩展局域网）所取代，如图所示：<br><img src="/img/system_management/flannel-network.png"><br>docker0和flannel0之间通过路由表进行协作。</p>
+<h2 id="跨主机网络-overlay-network"><a href="#跨主机网络-overlay-network" class="headerlink" title="跨主机网络 - overlay network"></a>跨主机网络 - overlay network</h2><h3 id="flannel"><a href="#flannel" class="headerlink" title="flannel"></a>flannel</h3><p>整个过程参见张磊的极客课程<strong>深入剖析Kubernetes 32~35章节</strong><br>基于UDP的跨主机通信的基本原理如图所示：<br><img src="/img/system_management/flannel-udp-network.png"></p>
+<span id="more"></span>
+
+<p>可以看到每次数据从一个主机发出去的之前会进行三次用户态和内核态的切换(container0 - docker0, flannel0 - flanneld, flanneld - eth0)，非常耗时。所以后来被VXLAN（虚拟可扩展局域网）所取代，如图所示：<br><img src="/img/system_management/flannel-network.png"><br>docker0和flannel0之间通过路由表进行协作。</p>
 <p>在k8s中，有一个单独的网桥来代替docker0，它的名字叫cni网桥，在宿主机上的默认设备名称为<code>cni0</code>，查看route，可以看到10.244.1.0/24网段都会经过<code>cni0</code>路由，而10.244.0.0/24、10.244.2.0/24，10.244.3.0/24都会经过<code>flannel.1</code>路由。<code>flannel.1</code>是VXLAN中的一个VTEP设备。</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">[root@n167 ~]<span class="comment"># route -n</span></span><br><span class="line">Kernel IP routing table</span><br><span class="line">Destination     Gateway         Genmask         Flags Metric Ref    Use Iface</span><br><span class="line">0.0.0.0         210.28.132.1    0.0.0.0         UG    100    0        0 em1</span><br><span class="line">10.0.0.0        0.0.0.0         254.0.0.0       U     100    0        0 em2</span><br><span class="line">10.0.1.0        0.0.0.0         255.255.255.0   U     100    0        0 p2p1</span><br><span class="line">10.244.0.0      10.244.0.0      255.255.255.0   UG    0      0        0 flannel.1</span><br><span class="line">10.244.1.0      0.0.0.0         255.255.255.0   U     0      0        0 cni0</span><br><span class="line">10.244.2.0      10.244.2.0      255.255.255.0   UG    0      0        0 flannel.1</span><br><span class="line">10.244.3.0      10.244.3.0      255.255.255.0   UG    0      0        0 flannel.1</span><br><span class="line">172.17.0.0      0.0.0.0         255.255.0.0     U     0      0        0 docker0</span><br><span class="line">210.28.132.0    0.0.0.0         255.255.255.0   U     100    0        0 em1</span><br></pre></td></tr></table></figure>
 

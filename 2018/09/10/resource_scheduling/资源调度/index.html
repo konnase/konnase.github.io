@@ -29,7 +29,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://konnase.github.io/img/spark1.png">
 <meta property="article:published_time" content="2018-09-10T08:00:00.000Z">
-<meta property="article:modified_time" content="2021-10-25T02:59:15.957Z">
+<meta property="article:modified_time" content="2021-11-15T02:50:44.440Z">
 <meta property="article:author" content="Konnase Lee">
 <meta property="article:tag" content="scheduling">
 <meta name="twitter:card" content="summary">
@@ -226,7 +226,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-10-25 10:59:15" itemprop="dateModified" datetime="2021-10-25T10:59:15+08:00">2021-10-25</time>
+                <time title="Modified: 2021-11-15 10:50:44" itemprop="dateModified" datetime="2021-11-15T10:50:44+08:00">2021-11-15</time>
               </span>
 
           
@@ -252,6 +252,8 @@
 <li>Google无疑是最有技术敏锐性和市场敏锐性的，早早的看到了Docker企业级市场的企图心，所以Google是第一个支持Docker的竞争对手—-CoreOS的Rocket容器，2014年四月份谷歌风险投资公司牵头对CoreOS进行了1200万美元的投资，目标明确—-对准docker。Google不再是Docker+ kubernetes,而是<strong>容器抽象</strong>+ kubernetes，即不止支持docker</li>
 <li>Redhat的OpenShift公有云还是OpenShift V2，V3采用Docker+k8s，很难从V2升级到V3。</li>
 </ul>
+<span id="more"></span>
+
 <h2 id="Spark"><a href="#Spark" class="headerlink" title="Spark"></a>Spark</h2><p>Hadoop第一代产品使用HDFS，处理MapReduce作业的时候设计频繁的HDFS读写操作，如下图：<br><img src="/img/spark1.png" alt="mapreduce"><br>而Spark使用内存替代了使用HDFS保存中间结果，使用弹性分布数据集（RDD），使得分布式对象集合可以跨集群在内存中访问和保存，大大减少了作业加载数据的时间开销。当有数据丢失时，RDD会跟踪并重新计算得到丢失的数据。Spark的性能是MapReduce的40倍</p>
 
     </div>

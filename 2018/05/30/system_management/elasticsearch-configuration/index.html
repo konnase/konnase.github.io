@@ -28,7 +28,7 @@
 <meta property="og:description" content="DC上配置elasticsearch配置node-master 在n125上，新建&#x2F;etc&#x2F;elasticsearch&#x2F;elasticsearch.yml123456789101112cluster.name: elasticsearch_clusternode.name: node-masternode.master: truenode.data: truehttp.port: 9200tran">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2018-05-30T05:43:48.000Z">
-<meta property="article:modified_time" content="2021-10-25T02:59:15.932Z">
+<meta property="article:modified_time" content="2021-11-15T02:50:03.009Z">
 <meta property="article:author" content="Konnase Lee">
 <meta property="article:tag" content="elasticsearch">
 <meta name="twitter:card" content="summary">
@@ -224,7 +224,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-10-25 10:59:15" itemprop="dateModified" datetime="2021-10-25T10:59:15+08:00">2021-10-25</time>
+                <time title="Modified: 2021-11-15 10:50:03" itemprop="dateModified" datetime="2021-11-15T10:50:03+08:00">2021-11-15</time>
               </span>
 
           
@@ -250,7 +250,11 @@
 <li>新建/data/crawl-es-data目录</li>
 <li>执行<code>sysctl -w vm.max_map_count=262144</code>将机器的<code>vm.max_map_count</code>调高一些</li>
 <li>DC上创建service，id为<code>menya/crawl-mesos-project/elsearch/esmaster</code>，网络类型选择<code>VirtualNetwork</code>，指定镜像并根据官方镜像说明，传入一些环境变量</li>
-<li>运行service<h3 id="配置node-data"><a href="#配置node-data" class="headerlink" title="配置node-data"></a>配置node-data</h3></li>
+<li>运行service</li>
+</ul>
+<span id="more"></span>
+
+<h3 id="配置node-data"><a href="#配置node-data" class="headerlink" title="配置node-data"></a>配置node-data</h3><ul>
 <li>在n138上，新建/etc/elasticsearch/elasticsearch.yml<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">cluster.name:</span> <span class="string">elasticsearch_cluster</span></span><br><span class="line"><span class="attr">node.name:</span> <span class="string">node-data-1</span></span><br><span class="line"><span class="attr">node.master:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">node.data:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">http.port:</span> <span class="number">9200</span></span><br><span class="line"><span class="attr">transport.tcp.port:</span> <span class="number">9300</span></span><br><span class="line"><span class="attr">transport.type:</span> <span class="string">netty3</span></span><br><span class="line"><span class="attr">http.type:</span> <span class="string">netty3</span></span><br><span class="line"><span class="attr">network.host:</span> <span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span></span><br><span class="line"><span class="attr">network.publish_host:</span> <span class="string">esnode1.elsearch.crawl-mesos-project.menya.marathon.mesos</span></span><br><span class="line"><span class="attr">discovery.zen.ping.unicast.hosts:</span> [<span class="string">&quot;esmaster.elsearch.crawl-mesos-project.menya.marathon.mesos:9300&quot;</span>]</span><br><span class="line"><span class="attr">discovery.zen.ping_timeout:</span> <span class="string">3s</span></span><br></pre></td></tr></table></figure></li>
 <li>新建/data/crawl-es-data目录</li>
 <li>执行<code>sysctl -w vm.max_map_count=262144</code>将机器的<code>vm.max_map_count</code>调高一些</li>

@@ -20,17 +20,17 @@
     var CONFIG = {"hostname":"konnase.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":true},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="传统MVC控制器与RESTful Web Service控制器的不同 传统MVC控制器返回的是一个数据的视图（Model），而RESTful Web Service控制器返回的是Json格式的对象">
+  <meta name="description" content="传统MVC控制器与RESTful Web Service控制器的不同 传统MVC控制器返回的是一个数据的视图（Model），而RESTful Web Service控制器返回的是Json格式的对象 Spring的模块  上图中每个小单元都至少对应一个jar包，提供相应的API供使用。使用Maven工具管理Spring项目时，这些需要用到的jar包集中在用户目录下的.m2文件夹下，而不是包含在项目中">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Spring相关知识">
 <meta property="og:url" content="https://konnase.github.io/2017/07/24/java_spring/Spring%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86/index.html">
 <meta property="og:site_name" content="Konnase Lee">
-<meta property="og:description" content="传统MVC控制器与RESTful Web Service控制器的不同 传统MVC控制器返回的是一个数据的视图（Model），而RESTful Web Service控制器返回的是Json格式的对象">
+<meta property="og:description" content="传统MVC控制器与RESTful Web Service控制器的不同 传统MVC控制器返回的是一个数据的视图（Model），而RESTful Web Service控制器返回的是Json格式的对象 Spring的模块  上图中每个小单元都至少对应一个jar包，提供相应的API供使用。使用Maven工具管理Spring项目时，这些需要用到的jar包集中在用户目录下的.m2文件夹下，而不是包含在项目中">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://konnase.github.io/img/spring-overview.png">
 <meta property="og:image" content="https://konnase.github.io/img/springmvc.png">
 <meta property="article:published_time" content="2017-07-24T03:50:56.000Z">
-<meta property="article:modified_time" content="2021-10-25T02:59:15.914Z">
+<meta property="article:modified_time" content="2021-11-15T02:52:34.222Z">
 <meta property="article:author" content="Konnase Lee">
 <meta property="article:tag" content="spring">
 <meta property="article:tag" content="annotation">
@@ -229,7 +229,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-10-25 10:59:15" itemprop="dateModified" datetime="2021-10-25T10:59:15+08:00">2021-10-25</time>
+                <time title="Modified: 2021-11-15 10:52:34" itemprop="dateModified" datetime="2021-11-15T10:52:34+08:00">2021-11-15</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -260,8 +260,6 @@
 
       
         <h2 id="传统MVC控制器与RESTful-Web-Service控制器的不同"><a href="#传统MVC控制器与RESTful-Web-Service控制器的不同" class="headerlink" title="传统MVC控制器与RESTful Web Service控制器的不同"></a>传统MVC控制器与RESTful Web Service控制器的不同</h2><p> 传统MVC控制器返回的是一个数据的视图（Model），而RESTful Web Service控制器返回的是Json格式的对象</p>
-<span id="more"></span>
-<hr>
 <h2 id="Spring的模块"><a href="#Spring的模块" class="headerlink" title="Spring的模块"></a>Spring的模块</h2><p><img src="/img/spring-overview.png" alt="image"></p>
 <ul>
 <li>上图中每个小单元都至少对应一个jar包，提供相应的API供使用。使用Maven工具管理Spring项目时，这些需要用到的jar包集中在用户目录下的.m2文件夹下，而不是包含在项目中。</li>
@@ -278,6 +276,9 @@
 </blockquote>
 </li>
 </ul>
+<span id="more"></span>
+
+
 <h2 id="Spring的注解"><a href="#Spring的注解" class="headerlink" title="Spring的注解"></a>Spring的注解</h2><ul>
 <li>@component 泛指组件，当组件不好归类的时候，我们可以使用这个注解进行标注，作用是将对象实例化到Spring容器中</li>
 <li>@Service用于标注业务层组件；@Controller用于标注控制层组件（如struts中的action）；@Repository用于标注数据访问组件，即DAO组件，使用jpa访问数据库时，Repository类实现了很多数据库查询操作，方便用户进行数据库操作。</li>

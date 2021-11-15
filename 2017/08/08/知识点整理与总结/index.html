@@ -20,15 +20,15 @@
     var CONFIG = {"hostname":"konnase.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":true},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="网络文件系统NFS： 查看启动rpcbind服务的状态：  ps -ef|grep rpcbind    修改NFS服务的配置文件：  sudo vi &#x2F;etc&#x2F;exports 其中中的最后一行为新添加的NFS配置，NFS配置信息格式如下：&lt;共享目录&gt; [客户端1 选项（访问权限,用户映射,其他）] [客户端2 选项（访问权限,用户映射,其他）]  如：&#x2F;home&#x2F;tos&#x2F;shareD">
+  <meta name="description" content="网络文件系统NFS： 查看启动rpcbind服务的状态：  ps -ef|grep rpcbind   修改NFS服务的配置文件：  sudo vi &#x2F;etc&#x2F;exports   其中中的最后一行为新添加的NFS配置，NFS配置信息格式如下：  &lt;共享目录&gt; [客户端1 选项（访问权限,用户映射,其他）] [客户端2 选项（访问权限,用户映射,其他）]  如：&#x2F;home&#x2F;tos&#x2F;sha">
 <meta property="og:type" content="article">
 <meta property="og:title" content="知识点整理与总结">
 <meta property="og:url" content="https://konnase.github.io/2017/08/08/%E7%9F%A5%E8%AF%86%E7%82%B9%E6%95%B4%E7%90%86%E4%B8%8E%E6%80%BB%E7%BB%93/index.html">
 <meta property="og:site_name" content="Konnase Lee">
-<meta property="og:description" content="网络文件系统NFS： 查看启动rpcbind服务的状态：  ps -ef|grep rpcbind    修改NFS服务的配置文件：  sudo vi &#x2F;etc&#x2F;exports 其中中的最后一行为新添加的NFS配置，NFS配置信息格式如下：&lt;共享目录&gt; [客户端1 选项（访问权限,用户映射,其他）] [客户端2 选项（访问权限,用户映射,其他）]  如：&#x2F;home&#x2F;tos&#x2F;shareD">
+<meta property="og:description" content="网络文件系统NFS： 查看启动rpcbind服务的状态：  ps -ef|grep rpcbind   修改NFS服务的配置文件：  sudo vi &#x2F;etc&#x2F;exports   其中中的最后一行为新添加的NFS配置，NFS配置信息格式如下：  &lt;共享目录&gt; [客户端1 选项（访问权限,用户映射,其他）] [客户端2 选项（访问权限,用户映射,其他）]  如：&#x2F;home&#x2F;tos&#x2F;sha">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2017-08-08T09:33:58.000Z">
-<meta property="article:modified_time" content="2021-10-25T02:59:15.960Z">
+<meta property="article:modified_time" content="2021-11-15T02:55:19.515Z">
 <meta property="article:author" content="Konnase Lee">
 <meta name="twitter:card" content="summary">
 
@@ -223,7 +223,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-10-25 10:59:15" itemprop="dateModified" datetime="2021-10-25T10:59:15+08:00">2021-10-25</time>
+                <time title="Modified: 2021-11-15 10:55:19" itemprop="dateModified" datetime="2021-11-15T10:55:19+08:00">2021-11-15</time>
               </span>
 
           
@@ -245,17 +245,15 @@
 
       
         <h1 id="网络文件系统NFS："><a href="#网络文件系统NFS：" class="headerlink" title="网络文件系统NFS："></a>网络文件系统NFS：</h1><ul>
-<li><p>查看启动rpcbind服务的状态：<br>  ps -ef|grep rpcbind  </p>
-</li>
-<li><p>修改NFS服务的配置文件：<br>  sudo vi /etc/exports <br>其中中的最后一行为新添加的NFS配置，NFS配置信息格式如下：<br>&lt;共享目录&gt; [客户端1 选项（访问权限,用户映射,其他）] [客户端2 选项（访问权限,用户映射,其他）]  <br>如：/home/tos/shareDir 192.168.137.129(rw,no_root_squash,async)<br>客户端如果是 * ，表示所有主机都可以挂载</p>
-<span id="more"></span></li>
-<li><p>启动服务：<br>  sudo service nfs-kernel-server start <br>  查看运行状态：sudo service nfs-kernel-server status</p>
-<pre><code>  ps -ef|grep nfsd
+<li>查看启动rpcbind服务的状态：<br>  ps -ef|grep rpcbind  </li>
+<li>修改NFS服务的配置文件：<br>  sudo vi /etc/exports <br>  其中中的最后一行为新添加的NFS配置，NFS配置信息格式如下：<br>  &lt;共享目录&gt; [客户端1 选项（访问权限,用户映射,其他）] [客户端2 选项（访问权限,用户映射,其他）]<br>  如：/home/tos/shareDir 192.168.137.129(rw,no_root_squash,async)<br>  客户端如果是 * ，表示所有主机都可以挂载</li>
+<li>启动服务：<br>  sudo service nfs-kernel-server start <br>  查看运行状态：sudo service nfs-kernel-server status<pre><code>  ps -ef|grep nfsd
 </code></pre>
 </li>
-<li><p>查看共享的文件夹和目标主机：<br>  showmount –e</p>
-</li>
+<li>查看共享的文件夹和目标主机：<br>  showmount –e</li>
 </ul>
+<span id="more"></span>
+
 <h1 id="分布式文件系统Ceph："><a href="#分布式文件系统Ceph：" class="headerlink" title="分布式文件系统Ceph："></a>分布式文件系统Ceph：</h1><h2 id="Ceph-生态系统架构可以划分为四部分："><a href="#Ceph-生态系统架构可以划分为四部分：" class="headerlink" title="Ceph 生态系统架构可以划分为四部分："></a>Ceph 生态系统架构可以划分为四部分：</h2><ol>
 <li>Clients：客户端（数据用户）</li>
 <li>cmds：Metadata server cluster，元数据服务器（缓存和同步分布式元数据）</li>
@@ -290,6 +288,7 @@ Gateway
 <h2 id="提示在gfapi-h中找不到glfs-fallocate-方法"><a href="#提示在gfapi-h中找不到glfs-fallocate-方法" class="headerlink" title="提示在gfapi.h中找不到glfs_fallocate()方法    :"></a>提示在gfapi.h中找不到glfs_fallocate()方法    :</h2><p>更新glusterfs版本到3.8</p>
 <h2 id="Package-uuid-was-not-found-in-the-pkg-config-search-path-Perhaps-you-should-add-the-directory-containing-uuid-pc’-to-the-PKG-CONFIG-PATH-environment-variable-Package-‘uuid’-required-by-‘glusterfs-api’-not-found"><a href="#Package-uuid-was-not-found-in-the-pkg-config-search-path-Perhaps-you-should-add-the-directory-containing-uuid-pc’-to-the-PKG-CONFIG-PATH-environment-variable-Package-‘uuid’-required-by-‘glusterfs-api’-not-found" class="headerlink" title="Package uuid was not found in the pkg-config search path.Perhaps you should add the directory containing `uuid.pc’ to the PKG_CONFIG_PATH environment variable .Package ‘uuid’, required by ‘glusterfs-api’, not found   :"></a>Package uuid was not found in the pkg-config search path.Perhaps you should add the directory containing `uuid.pc’ to the PKG_CONFIG_PATH environment variable .Package ‘uuid’, required by ‘glusterfs-api’, not found   :</h2><p>执行:</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install uuid-dev </span><br></pre></td></tr></table></figure>
+
 <h2 id="fatal-error-sys-acl-h-No-such-file-or-directory"><a href="#fatal-error-sys-acl-h-No-such-file-or-directory" class="headerlink" title="fatal error: sys/acl.h: No such file or directory"></a>fatal error: sys/acl.h: No such file or directory</h2><p>执行：  </p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install uuid-dev libacl1-dev liblzo2-dev</span><br></pre></td></tr></table></figure>
 
@@ -311,6 +310,7 @@ Gateway
 
 <h2 id="安装docker"><a href="#安装docker" class="headerlink" title="安装docker"></a>安装docker</h2><p>如果之前装过docker则sudo apt-get remove docker docker-engine</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install \</span><br><span class="line">    linux-image-extra-$(uname -r) \</span><br><span class="line">    linux-image-extra-virtual</span><br><span class="line">sudo apt-get install \</span><br><span class="line">    apt-transport-https \</span><br><span class="line">    ca-certificates \</span><br><span class="line">    curl \</span><br><span class="line">    software-properties-common</span><br><span class="line">curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -</span><br><span class="line">sudo add-apt-repository \</span><br><span class="line">   <span class="string">&quot;deb [arch=amd64] https://download.docker.com/linux/ubuntu \</span></span><br><span class="line"><span class="string">   <span class="subst">$(lsb_release -cs)</span> \</span></span><br><span class="line"><span class="string">   stable&quot;</span></span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install docker-ce</span><br></pre></td></tr></table></figure>
+
 <h2 id="将用户加入docker-group中，使用docker时不用加sudo："><a href="#将用户加入docker-group中，使用docker时不用加sudo：" class="headerlink" title="将用户加入docker group中，使用docker时不用加sudo："></a>将用户加入docker group中，使用docker时不用加sudo：</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo groupadd docker</span><br><span class="line">sudo gpasswd -a <span class="variable">$&#123;USER&#125;</span> docker</span><br><span class="line">sudo service docker restart</span><br></pre></td></tr></table></figure>
 <p>注销登录后生效</p>
 <h2 id="往registry-push镜像时，time-Parse-方法出错：parsing-time-“2017-04-22T07-30-42Z”-extra-text"><a href="#往registry-push镜像时，time-Parse-方法出错：parsing-time-“2017-04-22T07-30-42Z”-extra-text" class="headerlink" title="往registry push镜像时，time.Parse()方法出错：parsing time “2017-04-22T07:30:42Z”: extra text:"></a>往registry push镜像时，time.Parse()方法出错：parsing time “2017-04-22T07:30:42Z”: extra text:</h2><p>解决办法：见问题15</p>

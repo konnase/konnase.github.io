@@ -384,7 +384,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-10-25 10:59:15" itemprop="dateModified" datetime="2021-10-25T10:59:15+08:00">2021-10-25</time>
+                <time title="Modified: 2021-11-15 10:52:08" itemprop="dateModified" datetime="2021-11-15T10:52:08+08:00">2021-11-15</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -418,7 +418,8 @@
 <h3 id="shiro的三大核心组件"><a href="#shiro的三大核心组件" class="headerlink" title="shiro的三大核心组件"></a>shiro的三大核心组件</h3><ol>
 <li>Subject：即当前用户，在权限管理的应用程序里往往需要知道谁能够操作什么，谁拥有操作该程序的权利，shiro中则需要通过Subject来提供基础的当前用户信息，Subject 不仅仅代表某个用户，也可以是第三方进程、后台帐户（Daemon Account）或其他类似事物。</li>
 <li>SecurityManager：即所有Subject的管理者，这是Shiro框架的核心组件，可以把他看做是一个Shiro框架的全局管理组件，用于调度各种Shiro框架的服务。</li>
-<li>Realms：域，Shiro 从从 Realm 获取安全数据（如用户、角色、权限），就是说 SecurityManager 要验证用户身份，那么它需要从Realm获取相应的用户进行比较以确定用户身份是否合法；也需要从 Realm得到用户相应的角色/权限进行验证用户是否能进行操作；可以把Realm看成DataSource，即安全数据源。Realms则是用户的信息认证器和用户的权限人证器，我们需要自己来实现Realms来自定义的管理我们自己系统内部的权限规则。
+<li>Realms：域，Shiro 从从 Realm 获取安全数据（如用户、角色、权限），就是说 SecurityManager 要验证用户身份，那么它需要从Realm获取相应的用户进行比较以确定用户身份是否合法；也需要从 Realm得到用户相应的角色/权限进行验证用户是否能进行操作；可以把Realm看成DataSource，即安全数据源。Realms则是用户的信息认证器和用户的权限人证器，我们需要自己来实现Realms来自定义的管理我们自己系统内部的权限规则。</li>
+</ol>
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2017/11/15/java_spring/Shiro%E6%9D%83%E9%99%90%E6%8E%A7%E5%88%B6/#more" rel="contents">
@@ -660,7 +661,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-10-25 10:59:15" itemprop="dateModified" datetime="2021-10-25T10:59:15+08:00">2021-10-25</time>
+                <time title="Modified: 2021-11-15 10:51:49" itemprop="dateModified" datetime="2021-11-15T10:51:49+08:00">2021-11-15</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -691,7 +692,12 @@
 
       
           <h2 id="TheNEXUS-Maven-By-Example"><a href="#TheNEXUS-Maven-By-Example" class="headerlink" title="TheNEXUS Maven By Example"></a>TheNEXUS Maven By Example</h2><h3 id="Question"><a href="#Question" class="headerlink" title="Question"></a>Question</h3><ol>
-<li>5.6节提到的依赖中设置scope为provided：This tells Maven that the JAR is “provided” by the container and thus should not be included in the WAR. 是什么意思？
+<li>5.6节提到的依赖中设置scope为provided：This tells Maven that the JAR is “provided” by the container and thus should not be included in the WAR. 是什么意思？</li>
+<li>第六章结合了Weather Module和Web Module，其中，在Web Module中加入了Weather的依赖，并添加了WeatherService服务，该服务中的retrieveFormat方法同Main中的start方法完成相同的工作。Web Module中新增WeatherServlet，里面的doGet方法完成实现对http请求的处理，请求天气数据并返回结果到页面展示。</li>
+<li>当Maven执行一个有子模块的project的时候，Maven首先加载parent POM，然后定位所有的子模块。然后将所有的POM交给Maven Reactor，负责分析模块之间的依赖，确保以相应的顺序编译和安装相互依赖的模块。</li>
+<li>第六章运行 mvn jetty:run的时候，提示找不到simple-weather-08-SNAPSHOT.jar这个包。而且Yahoo的weather.yahooapis.com网站访问不了。</li>
+<li>web.xml和weather-servlet.xml都是自动加载的吗？</li>
+</ol>
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2017/11/05/java_spring/Maven%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/#more" rel="contents">
@@ -749,7 +755,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-10-25 10:59:15" itemprop="dateModified" datetime="2021-10-25T10:59:15+08:00">2021-10-25</time>
+                <time title="Modified: 2021-11-15 10:55:19" itemprop="dateModified" datetime="2021-11-15T10:55:19+08:00">2021-11-15</time>
               </span>
 
           
@@ -771,9 +777,13 @@
 
       
           <h1 id="网络文件系统NFS："><a href="#网络文件系统NFS：" class="headerlink" title="网络文件系统NFS："></a>网络文件系统NFS：</h1><ul>
-<li><p>查看启动rpcbind服务的状态：<br>  ps -ef|grep rpcbind  </p>
+<li>查看启动rpcbind服务的状态：<br>  ps -ef|grep rpcbind  </li>
+<li>修改NFS服务的配置文件：<br>  sudo vi /etc/exports <br>  其中中的最后一行为新添加的NFS配置，NFS配置信息格式如下：<br>  &lt;共享目录&gt; [客户端1 选项（访问权限,用户映射,其他）] [客户端2 选项（访问权限,用户映射,其他）]<br>  如：/home/tos/shareDir 192.168.137.129(rw,no_root_squash,async)<br>  客户端如果是 * ，表示所有主机都可以挂载</li>
+<li>启动服务：<br>  sudo service nfs-kernel-server start <br>  查看运行状态：sudo service nfs-kernel-server status<pre><code>  ps -ef|grep nfsd
+</code></pre>
 </li>
-<li><p>修改NFS服务的配置文件：<br>  sudo vi /etc/exports <br>其中中的最后一行为新添加的NFS配置，NFS配置信息格式如下：<br>&lt;共享目录&gt; [客户端1 选项（访问权限,用户映射,其他）] [客户端2 选项（访问权限,用户映射,其他）]  <br>如：/home/tos/shareDir 192.168.137.129(rw,no_root_squash,async)<br>客户端如果是 * ，表示所有主机都可以挂载</p>
+<li>查看共享的文件夹和目标主机：<br>  showmount –e</li>
+</ul>
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2017/08/08/%E7%9F%A5%E8%AF%86%E7%82%B9%E6%95%B4%E7%90%86%E4%B8%8E%E6%80%BB%E7%BB%93/#more" rel="contents">
@@ -1011,7 +1021,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-10-25 10:59:15" itemprop="dateModified" datetime="2021-10-25T10:59:15+08:00">2021-10-25</time>
+                <time title="Modified: 2021-11-15 10:52:34" itemprop="dateModified" datetime="2021-11-15T10:52:34+08:00">2021-11-15</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -1042,6 +1052,22 @@
 
       
           <h2 id="传统MVC控制器与RESTful-Web-Service控制器的不同"><a href="#传统MVC控制器与RESTful-Web-Service控制器的不同" class="headerlink" title="传统MVC控制器与RESTful Web Service控制器的不同"></a>传统MVC控制器与RESTful Web Service控制器的不同</h2><p> 传统MVC控制器返回的是一个数据的视图（Model），而RESTful Web Service控制器返回的是Json格式的对象</p>
+<h2 id="Spring的模块"><a href="#Spring的模块" class="headerlink" title="Spring的模块"></a>Spring的模块</h2><p><img src="/img/spring-overview.png" alt="image"></p>
+<ul>
+<li>上图中每个小单元都至少对应一个jar包，提供相应的API供使用。使用Maven工具管理Spring项目时，这些需要用到的jar包集中在用户目录下的.m2文件夹下，而不是包含在项目中。</li>
+<li> 7个模块<blockquote>
+<ol>
+<li>Spring Core：核心容器的主要组件是BeanFactory，BeanFactory使用的是IoC模式</li>
+<li>Spring Context：向Spring框架提供上下文信息的一个配置文件</li>
+<li>Spring AOP：面向切面的编程</li>
+<li>Spring DAO：数据访问层的设计机制，DAO模式是业务逻辑层和持久存储层之间的抽象层，避免持久化代码和业务逻辑混合在一起。</li>
+<li>Spring ORM：对象/关系映射（Object/Relation Mapping），指的是自动将java对象状态映射到关系数据库中的数据上。</li>
+<li>Spring Web：为基于Web的应用程序提供上下文</li>
+<li>Spring MVC：控制器将接收请求，执行更新模型的操作，然后通知视图关于模型更改的消息，依据请求的状态以及请求的控制器，可以决定显示哪个视图。</li>
+</ol>
+</blockquote>
+</li>
+</ul>
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2017/07/24/java_spring/Spring%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86/#more" rel="contents">
