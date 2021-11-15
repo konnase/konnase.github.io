@@ -23,18 +23,18 @@
   <meta name="description" content="实验实验目标 搞清楚ps架构通信的时候是不是都会走QPI总线，跨numa node？ PS在哪些cpu上跑也影响着通信的效率。尝试找到每个PS跑在哪几个cpu上  实验过程k8s中cpuset的探索为了找到PS具体使用的是哪几个cpu，尝试探索k8s对cpuset的使用。 k8s中，容器 cpuset 中的 CPU 数量与 pod 规格中指定的整数型 CPU limit 相等。只要保证pod属于">
 <meta property="og:type" content="article">
 <meta property="og:title" content="参数服务器架构">
-<meta property="og:url" content="https://konnase.github.io/2020/01/03/deep_learning/%E5%8F%82%E6%95%B0%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%9E%B6%E6%9E%84/index.html">
+<meta property="og:url" content="https://konnase.github.io/2020/01/03/machine_learning/%E5%8F%82%E6%95%B0%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%9E%B6%E6%9E%84/index.html">
 <meta property="og:site_name" content="Konnase Lee">
 <meta property="og:description" content="实验实验目标 搞清楚ps架构通信的时候是不是都会走QPI总线，跨numa node？ PS在哪些cpu上跑也影响着通信的效率。尝试找到每个PS跑在哪几个cpu上  实验过程k8s中cpuset的探索为了找到PS具体使用的是哪几个cpu，尝试探索k8s对cpuset的使用。 k8s中，容器 cpuset 中的 CPU 数量与 pod 规格中指定的整数型 CPU limit 相等。只要保证pod属于">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://konnase.github.io/2020/01/03/img/deep_learning/cpuset.png">
+<meta property="og:image" content="https://konnase.github.io/img/deep_learning/cpuset.png">
 <meta property="article:published_time" content="2020-01-03T08:21:41.000Z">
-<meta property="article:modified_time" content="2021-11-15T02:52:48.050Z">
+<meta property="article:modified_time" content="2021-11-15T11:35:43.480Z">
 <meta property="article:author" content="Konnase Lee">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://konnase.github.io/2020/01/03/img/deep_learning/cpuset.png">
+<meta name="twitter:image" content="https://konnase.github.io/img/deep_learning/cpuset.png">
 
-<link rel="canonical" href="https://konnase.github.io/2020/01/03/deep_learning/%E5%8F%82%E6%95%B0%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%9E%B6%E6%9E%84/">
+<link rel="canonical" href="https://konnase.github.io/2020/01/03/machine_learning/%E5%8F%82%E6%95%B0%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%9E%B6%E6%9E%84/">
 
 
 <script id="page-configurations">
@@ -195,7 +195,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="https://konnase.github.io/2020/01/03/deep_learning/%E5%8F%82%E6%95%B0%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%9E%B6%E6%9E%84/">
+    <link itemprop="mainEntityOfPage" href="https://konnase.github.io/2020/01/03/machine_learning/%E5%8F%82%E6%95%B0%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%9E%B6%E6%9E%84/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -225,11 +225,11 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-11-15 10:52:48" itemprop="dateModified" datetime="2021-11-15T10:52:48+08:00">2021-11-15</time>
+                <time title="Modified: 2021-11-15 19:35:43" itemprop="dateModified" datetime="2021-11-15T19:35:43+08:00">2021-11-15</time>
               </span>
 
           
-            <span id="/2020/01/03/deep_learning/%E5%8F%82%E6%95%B0%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%9E%B6%E6%9E%84/" class="post-meta-item leancloud_visitors" data-flag-title="参数服务器架构" title="Views">
+            <span id="/2020/01/03/machine_learning/%E5%8F%82%E6%95%B0%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%9E%B6%E6%9E%84/" class="post-meta-item leancloud_visitors" data-flag-title="参数服务器架构" title="Views">
               <span class="post-meta-item-icon">
                 <i class="fa fa-eye"></i>
               </span>
@@ -256,21 +256,33 @@
 
 <p>源码如下：</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// pkg/kubelet/cm/cpumanager/policy_static.go</span></span><br><span class="line"><span class="comment">// 判断一个pod是否为Guaranteed QoS，并且cpu申请值是否为整数</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">guaranteedCPUs</span><span class="params">(pod *v1.Pod, container *v1.Container)</span> <span class="title">int</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> v1qos.GetPodQOS(pod) != v1.PodQOSGuaranteed &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">    &#125;</span><br><span class="line">    cpuQuantity := container.Resources.Requests[v1.ResourceCPU]</span><br><span class="line">    <span class="keyword">if</span> cpuQuantity.Value()*<span class="number">1000</span> != cpuQuantity.MilliValue() &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// Safe downcast to do for all systems with &lt; 2.1 billion CPUs.</span></span><br><span class="line">    <span class="comment">// Per the language spec, `int` is guaranteed to be at least 32 bits wide.</span></span><br><span class="line">    <span class="comment">// https://golang.org/ref/spec#Numeric_types</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">int</span>(cpuQuantity.Value())</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// pkg/kubelet/cm/cpumanager/cpu_manager.go</span></span><br><span class="line"><span class="comment">// 同步cpuset的状态，</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *manager)</span> <span class="title">reconcileState</span><span class="params">()</span> <span class="params">(success []reconciledContainer, failure []reconciledContainer)</span></span> &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    klog.V(<span class="number">4</span>).Infof(<span class="string">&quot;[cpumanager] reconcileState: updating container (pod: %s, container: %s, container id: %s, cpuset: \&quot;%v\&quot;)&quot;</span>, pod.Name, container.Name, containerID, cset)</span><br><span class="line">    err = m.updateContainerCPUSet(containerID, cset)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        klog.Errorf(<span class="string">&quot;[cpumanager] reconcileState: failed to update container (pod: %s, container: %s, container id: %s, cpuset: \&quot;%v\&quot;, error: %v)&quot;</span>, pod.Name, container.Name, containerID, cset, err)</span><br><span class="line">        failure = <span class="built_in">append</span>(failure, reconciledContainer&#123;pod.Name, container.Name, containerID&#125;)</span><br><span class="line">        <span class="keyword">continue</span></span><br><span class="line">    &#125;</span><br><span class="line">    success = <span class="built_in">append</span>(success, reconciledContainer&#123;pod.Name, container.Name, containerID&#125;)</span><br><span class="line">    <span class="comment">// ... </span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *manager)</span> <span class="title">updateContainerCPUSet</span><span class="params">(containerID <span class="keyword">string</span>, cpus cpuset.CPUSet)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    <span class="comment">// <span class="doctag">TODO:</span> Consider adding a `ResourceConfigForContainer` helper in</span></span><br><span class="line">    <span class="comment">// helpers_linux.go similar to what exists for pods.</span></span><br><span class="line">    <span class="comment">// It would be better to pass the full container resources here instead of</span></span><br><span class="line">    <span class="comment">// this patch-like partial resources.</span></span><br><span class="line">    <span class="keyword">return</span> m.containerRuntime.UpdateContainerResources(</span><br><span class="line">        containerID,</span><br><span class="line">        &amp;runtimeapi.LinuxContainerResources&#123;</span><br><span class="line">            CpusetCpus: cpus.String(),</span><br><span class="line">        &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>实验环境为167集群，共20个逻辑cpu，分布在两个numa node上。PS是处于Guaranteed QoS状态，而且cpu=2，<strong>但是通过<code>docker inspect</code>怎么看不到CpusetCpus字段被设置了？</strong>，直接去cgroups中查看PS对应的pod的<code>cpuset.cpus</code>的值是给的<code>0-19</code>，表示每个cpu都有可能用到，很奇怪。</p>
-<p>尝试通过docker直接绑定一组cpuset：<code>docker run --rm --cpuset-cpus 0-3 nginx:alpine</code>，查看<code>docker inspect [container-id]</code>，<code>CpusetCpus</code>字段是有设置的，查看cgroups中该容器对应的<code>cpuset.cpus</code>的值也是<code>0-3</code><br><img src="../../img/deep_learning/cpuset.png" alt="cpuset"></p>
-<p>查看<code>/var/lib/kubelet/config.yaml</code>里面给出的kubelet的启动参数中，<code>cpuManagerPolicy=none</code>，表示通过操作系统调度器CFS配额来提供Guaranteed Pod的cpu使用限制，而前面提到的满足条件的Pod会被分配独占cpu的策略是cpu manager提供的另一种<code>static</code>策略，而kubelet默认开启的是<code>none</code> 策略。</p>
+
+<p>实验环境为167集群，共20个逻辑cpu，分布在两个numa node上。PS是处于Guaranteed QoS状态，而且cpu=2，<strong>但是通过 <code>docker inspect</code>怎么看不到CpusetCpus字段被设置了？</strong>，直接去cgroups中查看PS对应的pod的 <code>cpuset.cpus</code>的值是给的 <code>0-19</code>，表示每个cpu都有可能用到，很奇怪。</p>
+<p>尝试通过docker直接绑定一组cpuset：<code>docker run --rm --cpuset-cpus 0-3 nginx:alpine</code>，查看 <code>docker inspect [container-id]</code>，<code>CpusetCpus</code>字段是有设置的，查看cgroups中该容器对应的 <code>cpuset.cpus</code>的值也是 <code>0-3</code><br><img src="/img/deep_learning/cpuset.png" alt="cpuset"></p>
+<p>查看 <code>/var/lib/kubelet/config.yaml</code>里面给出的kubelet的启动参数中，<code>cpuManagerPolicy=none</code>，表示通过操作系统调度器CFS配额来提供Guaranteed Pod的cpu使用限制，而前面提到的满足条件的Pod会被分配独占cpu的策略是cpu manager提供的另一种 <code>static</code>策略，而kubelet默认开启的是 <code>none</code> 策略。</p>
 <p>单机n33，Resnet50：</p>
 <ol>
-<li>单作业 1 ps 1 worker：113 images/sec (gpu 7)<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># gpu rxpci txpci</span></span><br><span class="line"><span class="comment"># Idx  MB/s  MB/s</span></span><br><span class="line">    7  4863   414</span><br><span class="line">    7  6454   827</span><br><span class="line">    7  5580  2530</span><br></pre></td></tr></table></figure></li>
-<li>单作业 3 ps 1 worker：113 images/sec (gpu 7)</li>
-<li>单作业 3 ps 2 worker：103 images/sec (gpu 0 4)</li>
-<li>单作业 3 ps 3 worker：<ol>
-<li>3 * 93 images/sec (gpu 2 14 15) （一开始速度只有80不到，到2000 batches后稳定）<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># gpu rxpci txpci</span></span><br><span class="line"><span class="comment"># Idx  MB/s  MB/s</span></span><br><span class="line">   15  5172  2415</span><br><span class="line">    2  6131   978</span><br><span class="line">   14  4241   603</span><br><span class="line">   15  4032   141</span><br><span class="line">    2  2033   135</span><br><span class="line">   14  2284   584</span><br></pre></td></tr></table></figure></li>
-<li>3 * 96 images/sec (gpu 1 11 13)<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># gpu rxpci txpci</span></span><br><span class="line"><span class="comment"># Idx  MB/s  MB/s</span></span><br><span class="line">    1  5426  1395</span><br><span class="line">   11  5598   933</span><br><span class="line">   13  5745   596</span><br><span class="line">    1  2231   256</span><br><span class="line">   11  5812   784</span><br><span class="line">   13  6150  2869</span><br></pre></td></tr></table></figure></li>
-<li>3 * 84 images/sec (gpu 4 7 10)（速度从93降到83）<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># gpu rxpci txpci</span></span><br><span class="line"><span class="comment"># Idx  MB/s  MB/s</span></span><br><span class="line">    4    63   229</span><br><span class="line">    7   450     0</span><br><span class="line">   10   394   169</span><br><span class="line">    4  5789   669</span><br><span class="line">    7  1357   151</span><br><span class="line">   10  1593     0</span><br></pre></td></tr></table></figure></li>
-</ol>
+<li><p>单作业 1 ps 1 worker：113 images/sec (gpu 7)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># gpu rxpci txpci</span></span><br><span class="line"><span class="comment"># Idx  MB/s  MB/s</span></span><br><span class="line">    7  4863   414</span><br><span class="line">    7  6454   827</span><br><span class="line">    7  5580  2530</span><br></pre></td></tr></table></figure></li>
+<li><p>单作业 3 ps 1 worker：113 images/sec (gpu 7)</p>
 </li>
-<li>两作业3 ps 2 worker：96 images/sec （gpu 0 4 vs 10 14） <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">   <span class="comment"># gpu rxpci txpci</span></span><br><span class="line"><span class="comment"># Idx  MB/s  MB/s</span></span><br><span class="line">    0  6591  2638</span><br><span class="line">    4  5704   916</span><br><span class="line">   10  8900   725</span><br><span class="line">   14  5124   322</span><br></pre></td></tr></table></figure></li>
+<li><p>单作业 3 ps 2 worker：103 images/sec (gpu 0 4)</p>
+</li>
+<li><p>单作业 3 ps 3 worker：</p>
+<ol>
+<li>3 * 93 images/sec (gpu 2 14 15) （一开始速度只有80不到，到2000 batches后稳定）</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># gpu rxpci txpci</span></span><br><span class="line"><span class="comment"># Idx  MB/s  MB/s</span></span><br><span class="line">   15  5172  2415</span><br><span class="line">    2  6131   978</span><br><span class="line">   14  4241   603</span><br><span class="line">   15  4032   141</span><br><span class="line">    2  2033   135</span><br><span class="line">   14  2284   584</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li>3 * 96 images/sec (gpu 1 11 13)</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># gpu rxpci txpci</span></span><br><span class="line"><span class="comment"># Idx  MB/s  MB/s</span></span><br><span class="line">    1  5426  1395</span><br><span class="line">   11  5598   933</span><br><span class="line">   13  5745   596</span><br><span class="line">    1  2231   256</span><br><span class="line">   11  5812   784</span><br><span class="line">   13  6150  2869</span><br></pre></td></tr></table></figure>
+<ol>
+<li>3 * 84 images/sec (gpu 4 7 10)（速度从93降到83）</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># gpu rxpci txpci</span></span><br><span class="line"><span class="comment"># Idx  MB/s  MB/s</span></span><br><span class="line">    4    63   229</span><br><span class="line">    7   450     0</span><br><span class="line">   10   394   169</span><br><span class="line">    4  5789   669</span><br><span class="line">    7  1357   151</span><br><span class="line">   10  1593     0</span><br></pre></td></tr></table></figure></li>
+<li><p>两作业3 ps 2 worker：96 images/sec （gpu 0 4 vs 10 14）</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># gpu rxpci txpci</span></span><br><span class="line"><span class="comment"># Idx  MB/s  MB/s</span></span><br><span class="line">    0  6591  2638</span><br><span class="line">    4  5704   916</span><br><span class="line">   10  8900   725</span><br><span class="line">   14  5124   322</span><br></pre></td></tr></table></figure></li>
 </ol>
 
     </div>
@@ -287,7 +299,7 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2019/09/26/deep_learning/NCCL/" rel="prev" title="NCCL">
+    <a href="/2019/09/26/machine_learning/NCCL/" rel="prev" title="NCCL">
       <i class="fa fa-chevron-left"></i> NCCL
     </a></div>
       <div class="post-nav-item">
@@ -373,13 +385,13 @@
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-count">6</span>
         <span class="site-state-item-name">categories</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">57</span>
+        <span class="site-state-item-count">58</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>

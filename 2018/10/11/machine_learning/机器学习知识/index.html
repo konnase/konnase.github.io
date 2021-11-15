@@ -20,23 +20,20 @@
     var CONFIG = {"hostname":"konnase.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":true},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="神经网络相关内容神经网络 多层神经网络需要非线性映射。如果全连接层没有非线性部分，只有线性部分，那么计算之后，线性的多层神经网络其实可以转换成一层的神经网络。故加入非线性层，多层神经网络才有意义。 为防止使用sigmoid激活函数可能导致的梯度消失问题，激活函数一般取relu函数 每个神经元都是由输入图片（或者语音等）和该神经元所在层的前面所有层的连接矩阵（如卷积核）决定的，所以一个神经元其实就是">
+  <meta name="description" content="矩阵运算曲面拟合形如二次多项式：$f(x, y) &#x3D; a_{20}x^2 + a_{02}y^2 + a_{11}xy + a_{10}x + a_{01}y + a_{00}$使用最小二乘法计算系数矩阵a，即使得计算值和真实值之间的误差平方和最小 得到矩阵形如：$$\left[ \begin{matrix}   x_1^2 &amp; y_1^2 &amp; x_1y_1 &amp; x_1 &amp;">
 <meta property="og:type" content="article">
-<meta property="og:title" content="神经网络相关">
-<meta property="og:url" content="https://konnase.github.io/2019/01/13/deep_learning/neural-network/index.html">
+<meta property="og:title" content="机器学习知识">
+<meta property="og:url" content="https://konnase.github.io/2018/10/11/machine_learning/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%9F%A5%E8%AF%86/index.html">
 <meta property="og:site_name" content="Konnase Lee">
-<meta property="og:description" content="神经网络相关内容神经网络 多层神经网络需要非线性映射。如果全连接层没有非线性部分，只有线性部分，那么计算之后，线性的多层神经网络其实可以转换成一层的神经网络。故加入非线性层，多层神经网络才有意义。 为防止使用sigmoid激活函数可能导致的梯度消失问题，激活函数一般取relu函数 每个神经元都是由输入图片（或者语音等）和该神经元所在层的前面所有层的连接矩阵（如卷积核）决定的，所以一个神经元其实就是">
+<meta property="og:description" content="矩阵运算曲面拟合形如二次多项式：$f(x, y) &#x3D; a_{20}x^2 + a_{02}y^2 + a_{11}xy + a_{10}x + a_{01}y + a_{00}$使用最小二乘法计算系数矩阵a，即使得计算值和真实值之间的误差平方和最小 得到矩阵形如：$$\left[ \begin{matrix}   x_1^2 &amp; y_1^2 &amp; x_1y_1 &amp; x_1 &amp;">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://konnase.github.io/img/resnet_params.png">
-<meta property="article:published_time" content="2019-01-13T08:17:11.000Z">
-<meta property="article:modified_time" content="2021-11-15T02:53:42.861Z">
+<meta property="article:published_time" content="2018-10-11T05:48:39.000Z">
+<meta property="article:modified_time" content="2021-10-25T02:59:15.949Z">
 <meta property="article:author" content="Konnase Lee">
-<meta property="article:tag" content="deep learning">
-<meta property="article:tag" content="neural network">
+<meta property="article:tag" content="machine learnig">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://konnase.github.io/img/resnet_params.png">
 
-<link rel="canonical" href="https://konnase.github.io/2019/01/13/deep_learning/neural-network/">
+<link rel="canonical" href="https://konnase.github.io/2018/10/11/machine_learning/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%9F%A5%E8%AF%86/">
 
 
 <script id="page-configurations">
@@ -49,7 +46,7 @@
   };
 </script>
 
-  <title>神经网络相关 | Konnase Lee</title>
+  <title>机器学习知识 | Konnase Lee</title>
   
 
 
@@ -197,7 +194,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="https://konnase.github.io/2019/01/13/deep_learning/neural-network/">
+    <link itemprop="mainEntityOfPage" href="https://konnase.github.io/2018/10/11/machine_learning/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%9F%A5%E8%AF%86/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -210,7 +207,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          神经网络相关
+          机器学习知识
         </h1>
 
         <div class="post-meta">
@@ -220,18 +217,18 @@
               </span>
               <span class="post-meta-item-text">Posted on</span>
 
-              <time title="Created: 2019-01-13 16:17:11" itemprop="dateCreated datePublished" datetime="2019-01-13T16:17:11+08:00">2019-01-13</time>
+              <time title="Created: 2018-10-11 13:48:39" itemprop="dateCreated datePublished" datetime="2018-10-11T13:48:39+08:00">2018-10-11</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-11-15 10:53:42" itemprop="dateModified" datetime="2021-11-15T10:53:42+08:00">2021-11-15</time>
+                <time title="Modified: 2021-10-25 10:59:15" itemprop="dateModified" datetime="2021-10-25T10:59:15+08:00">2021-10-25</time>
               </span>
 
           
-            <span id="/2019/01/13/deep_learning/neural-network/" class="post-meta-item leancloud_visitors" data-flag-title="神经网络相关" title="Views">
+            <span id="/2018/10/11/machine_learning/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%9F%A5%E8%AF%86/" class="post-meta-item leancloud_visitors" data-flag-title="机器学习知识" title="Views">
               <span class="post-meta-item-icon">
                 <i class="fa fa-eye"></i>
               </span>
@@ -248,38 +245,12 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="神经网络相关内容"><a href="#神经网络相关内容" class="headerlink" title="神经网络相关内容"></a>神经网络相关内容</h2><h3 id="神经网络"><a href="#神经网络" class="headerlink" title="神经网络"></a>神经网络</h3><ul>
-<li>多层神经网络需要非线性映射。如果全连接层没有非线性部分，只有线性部分，那么计算之后，线性的多层神经网络其实可以转换成一层的神经网络。故加入非线性层，多层神经网络才有意义。</li>
-<li>为防止使用sigmoid激活函数可能导致的梯度消失问题，激活函数一般取relu函数</li>
-<li>每个神经元都是由输入图片（或者语音等）和该神经元所在层的前面所有层的连接矩阵（如卷积核）决定的，所以一个神经元其实就是一个变量，而连接矩阵是一组固定的权值，输入图片的不同会使该神经元输出不同的值。因此模型才能预测不同的图片所属的不同分类。我们保存的模型其实主要就是模型的连接矩阵，这也是神经网络训练过程中需要学习的</li>
-</ul>
-<h3 id="提高验证准确性的方法"><a href="#提高验证准确性的方法" class="headerlink" title="提高验证准确性的方法"></a>提高验证准确性的方法</h3><ul>
-<li>增加数据集：Adding more data augmentations often reduces the gap between training and validation accuracy. Data augmentation could be reduced in epochs closer to the end.</li>
-<li>初始学习率设置大一点：Start with a large learning rate and keep it large for a long time. For example, in CIFAR10, you could keep the learning rate at 0.1 for the first 200 epochs and then reduce it to 0.01.</li>
-<li>batch size不能太大：Do not use a batch size that is too large, especially batch size &gt;&gt; number of classes.<ul>
-<li>batch_size增大，会使训练速度加快，不过太大会导致learning rate不好调，因为lr和batch size之间不是线性关系</li>
-<li>batch_size太小，模型训练的慢</li>
-</ul>
-</li>
-</ul>
+        <h1 id="矩阵运算"><a href="#矩阵运算" class="headerlink" title="矩阵运算"></a>矩阵运算</h1><h2 id="曲面拟合"><a href="#曲面拟合" class="headerlink" title="曲面拟合"></a>曲面拟合</h2><p>形如二次多项式：<br>$f(x, y) = a_{20}x^2 + a_{02}y^2 + a_{11}xy + a_{10}x + a_{01}y + a_{00}$<br>使用最小二乘法计算系数矩阵a，即使得计算值和真实值之间的误差平方和最小</p>
+<p>得到矩阵形如：<br>$$\left[<br> \begin{matrix}<br>   x_1^2 &amp; y_1^2 &amp; x_1y_1 &amp; x_1 &amp; y_1 &amp; 1 \<br>   . &amp; . &amp; . &amp; .&amp; . &amp; .\<br>   . &amp; . &amp; . &amp; .&amp; . &amp; . \<br>   . &amp; . &amp; . &amp; .&amp; . &amp; . \<br>   x_m^2 &amp; y_1^2 &amp; x_my_m &amp; x_m &amp; y_m &amp; 1<br>  \end{matrix}<br>  \right]<br>  \left[<br> \begin{matrix}<br>   a_{20}  \<br>   a_{02} \<br>   a_{11}  \<br>   a_{10}  \<br>   a_{01} \<br>   a_{00}<br>  \end{matrix}<br>  \right] =<br>  \left[<br> \begin{matrix}<br>   f(x_1, y_1)  \<br>   . \<br>   .  \<br>   .  \<br>   f(x_m, y_m)<br>  \end{matrix}<br>  \right]$$</p>
 <span id="more"></span>
 
-<h3 id="Data-Augmentation"><a href="#Data-Augmentation" class="headerlink" title="Data Augmentation"></a>Data Augmentation</h3><p>人工增加训练集的大小，包括反射(image reflection)、平移(translation)、旋转(rotation)、加噪声等方法从已有的数据中创造一批新的数据</p>
-<h3 id="Batch-Normalization"><a href="#Batch-Normalization" class="headerlink" title="Batch Normalization"></a>Batch Normalization</h3><p>CNN网络在训练的过程中，前一层的参数变化影响着后面层的变化（因为前面层的输出是后面的输入），而且这种影响会随着网络深度的增加而不断放大。在CNN训练时，绝大多数都采用mini-batch使用随机梯度下降算法进行训练，那么随着输入数据的不断变化，以及网络中参数不断调整，网络的各层输入数据的分布则会不断变化，那么各层在训练的过程中就需要不断的改变以适应这种新的数据分布，从而造成网络训练困难，难以拟合的问题。 </p>
-<p>BatchNorm的目的是将每一层的输入数据进行归一化(normalization)，使得每一层的数据分布是稳定的–均值0方差1，增加两个可学习的参数 β 和 γ ，对数据进行缩放和平移，从而达到加速训练的目的</p>
-<h3 id="momentum"><a href="#momentum" class="headerlink" title="momentum"></a>momentum</h3><p>用来加速训练过程的。引入momentum后，采用如下公式：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">v = mu * v - learning_rate * dw</span><br><span class="line">w = w + v</span><br></pre></td></tr></table></figure>
-<p>v初始为0，mu是一个超参数，一般设置为0.9。这样理解：如果上一次v和这一次的负梯度方向是相同的，则w下降的幅度会加大，从而使收敛的速度加快；反之，w下降的幅度会减小，收敛的速度减慢。</p>
-<h3 id="Softmax函数"><a href="#Softmax函数" class="headerlink" title="Softmax函数"></a>Softmax函数</h3><p>即归一化指数函数，Softmax函数将向量等比例压缩到[0,1]之间，且保证所有元素之和为1。在多分类问题中用作输出层。<br>$$ softmax(i) = \frac{e^i}{\sum_{j}e^j} $$</p>
-<p>向量里面的每个元素都可能取到，只是取到的概率由softmax函数求出的值给出。</p>
-<p>在做反向传播的时候，也很方便，只需将softmax算出来的类别向量对应的真正结果的那一维减一就可以了。比如通过若干层的计算，最后得到的某个训练样本的向量的分数是[ 1, 5, 3 ],那softmax计算出来的概率就是$[\frac{e^1}{e^1 + e^3 + e^5},\frac{e^5}{e^1 + e^3 + e^5},\frac{e^3}{e^1 + e^3 + e^5}]=[ 0.015, 0.866, 0.117 ]$，如果这个样本正确的分类是第二个的话，那么计算出来的偏导就是$[ 0.015, 0.866 - 1, 0.117 ] = [ 0.015, -0.134, 0.117 ]$，然后根据这个偏导做反向传播，更新参数值。</p>
-<h3 id="resnet模型"><a href="#resnet模型" class="headerlink" title="resnet模型"></a>resnet模型</h3><p><img src="/img/resnet_params.png"></p>
-<h3 id="反向传播是一张图片处理完成之后就开始还是等待一个batch处理完之后开始？"><a href="#反向传播是一张图片处理完成之后就开始还是等待一个batch处理完之后开始？" class="headerlink" title="反向传播是一张图片处理完成之后就开始还是等待一个batch处理完之后开始？"></a>反向传播是一张图片处理完成之后就开始还是等待一个batch处理完之后开始？</h3><p><strong>答案是等待一个batch处理完之后开始。</strong>从Mxnet代码可以看出：module.forward_backward方法里就两句话：self.forward(batch) 和self.backward。</p>
-<h3 id="反向传播使用多少个loss？"><a href="#反向传播使用多少个loss？" class="headerlink" title="反向传播使用多少个loss？"></a>反向传播使用多少个loss？</h3><p>一个batch处理完之后做backward，先拿到forward时产生的batch_size个loss，如果选择sgd来做梯度下降，那么sgd选择多少个loss做backward？<strong>答案是会将batch_size个loss平均之后做backward</strong>，因为这里使用的sgd是mini-batch sgd，即一个mini-batch完成前向处理后，将loss平均之后做backward，而不是只使用其中一个loss做backward。</p>
-<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
-<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/lhanchao/article/details/70308092">深度学习–Batch Normalization 算法介绍</a></li>
-<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/superCally/article/details/54234115">Softmax的理解和应用</a></li>
-</ul>
+<p>由<br>$$<br>A.a = y<br>$$<br>$$<br>A^T.A.a = A^T.y<br>$$<br>$$<br>a = (A^T.A)^{-1}.A^T.y<br>$$<br>即可求出系数矩阵a</p>
+<h2 id="非负最小二乘（NNLS）"><a href="#非负最小二乘（NNLS）" class="headerlink" title="非负最小二乘（NNLS）"></a>非负最小二乘（NNLS）</h2><p>解$argmin_x ||A.x - b||_2$问题<br>调用scipy.optimize.nnls(A, b)，即可求得使上式结果最小的x。对上一节提到的多项式问题，这里的x就是待求的系数矩阵a，而A矩阵就是多项式构造的矩阵，b就是函数结果f。</p>
 
     </div>
 
@@ -289,8 +260,7 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/deep-learning/" rel="tag"># deep learning</a>
-              <a href="/tags/neural-network/" rel="tag"># neural network</a>
+              <a href="/tags/machine-learnig/" rel="tag"># machine learnig</a>
           </div>
 
         
@@ -299,12 +269,12 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2018/12/20/deep_learning/Tensorflow/" rel="prev" title="Tensorflow">
-      <i class="fa fa-chevron-left"></i> Tensorflow
+    <a href="/2018/09/16/machine_learning/Mxnet/" rel="prev" title="Mxnet">
+      <i class="fa fa-chevron-left"></i> Mxnet
     </a></div>
       <div class="post-nav-item">
-    <a href="/2019/06/16/%E5%AE%9E%E4%B9%A0%E9%9D%A2%E7%BB%8F/" rel="next" title="实习面经">
-      实习面经 <i class="fa fa-chevron-right"></i>
+    <a href="/2018/11/14/java_spring/Spring%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%862/" rel="next" title="Spring相关知识2">
+      Spring相关知识2 <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
@@ -364,7 +334,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9B%B8%E5%85%B3%E5%86%85%E5%AE%B9"><span class="nav-number">1.</span> <span class="nav-text">神经网络相关内容</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C"><span class="nav-number">1.1.</span> <span class="nav-text">神经网络</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8F%90%E9%AB%98%E9%AA%8C%E8%AF%81%E5%87%86%E7%A1%AE%E6%80%A7%E7%9A%84%E6%96%B9%E6%B3%95"><span class="nav-number">1.2.</span> <span class="nav-text">提高验证准确性的方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Data-Augmentation"><span class="nav-number">1.3.</span> <span class="nav-text">Data Augmentation</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Batch-Normalization"><span class="nav-number">1.4.</span> <span class="nav-text">Batch Normalization</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#momentum"><span class="nav-number">1.5.</span> <span class="nav-text">momentum</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Softmax%E5%87%BD%E6%95%B0"><span class="nav-number">1.6.</span> <span class="nav-text">Softmax函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#resnet%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.7.</span> <span class="nav-text">resnet模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E6%98%AF%E4%B8%80%E5%BC%A0%E5%9B%BE%E7%89%87%E5%A4%84%E7%90%86%E5%AE%8C%E6%88%90%E4%B9%8B%E5%90%8E%E5%B0%B1%E5%BC%80%E5%A7%8B%E8%BF%98%E6%98%AF%E7%AD%89%E5%BE%85%E4%B8%80%E4%B8%AAbatch%E5%A4%84%E7%90%86%E5%AE%8C%E4%B9%8B%E5%90%8E%E5%BC%80%E5%A7%8B%EF%BC%9F"><span class="nav-number">1.8.</span> <span class="nav-text">反向传播是一张图片处理完成之后就开始还是等待一个batch处理完之后开始？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E4%BD%BF%E7%94%A8%E5%A4%9A%E5%B0%91%E4%B8%AAloss%EF%BC%9F"><span class="nav-number">1.9.</span> <span class="nav-text">反向传播使用多少个loss？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-number">2.</span> <span class="nav-text">参考文献</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%9F%A9%E9%98%B5%E8%BF%90%E7%AE%97"><span class="nav-number">1.</span> <span class="nav-text">矩阵运算</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9B%B2%E9%9D%A2%E6%8B%9F%E5%90%88"><span class="nav-number">1.1.</span> <span class="nav-text">曲面拟合</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9D%9E%E8%B4%9F%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%EF%BC%88NNLS%EF%BC%89"><span class="nav-number">1.2.</span> <span class="nav-text">非负最小二乘（NNLS）</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -385,13 +355,13 @@
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-count">6</span>
         <span class="site-state-item-name">categories</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">57</span>
+        <span class="site-state-item-count">58</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>

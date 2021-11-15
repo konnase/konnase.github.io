@@ -109,11 +109,14 @@
 </ul>
 </li>
 </ul>
-<h3 id="线性判别分析"><a href="#线性判别分析" class="headerlink" title="线性判别分析"></a>线性判别分析</h3><p>利用LDA对数据进行降维操作，考虑到了样本类别，是一种典型的监督降维技术。LDA考虑的重点是使投影后的样本在新的空间上需要有最大的类间距离和最小的类内距离。度量类间距离常用的方法是使用投影后两个类别的均值点之间的距离；度量类内距离常用的方法是使用投影后同一类别之间的数据的方差。用类间距离比上类内距离得：<br>$$J(w)=\frac{w^T S_b w}{w^T S_w w}$$<br>最大化J(w)就能同时最大化类间距离和最小化类内距离。其中\(S_b\)表示类间散度矩阵，\(S_w\)表示类内散度矩阵。使用广义特征值问题求解得：<br>$$S_w^{-1}S_bw = \lambda w$$<br>求解\(S_w^{-1}S_b\)的特征值和特征向量，然后如同PCA一样将原始数据降到m维。</p>
+<h3 id="线性判别分析"><a href="#线性判别分析" class="headerlink" title="线性判别分析"></a>线性判别分析</h3><p>利用LDA对数据进行降维操作，考虑到了样本类别，是一种典型的监督降维技术。LDA考虑的重点是使投影后的样本在新的空间上需要有最大的类间距离和最小的类内距离。度量类间距离常用的方法是使用投影后两个类别的均值点之间的距离；度量类内距离常用的方法是使用投影后同一类别之间的数据的方差。用类间距离比上类内距离得：<br>$$J(w)=\frac{w^T S_b w}{w^T S_w w}$$<br>最大化J(w)就能同时最大化类间距离和最小化类内距离。其中$S_b$表示类间散度矩阵，$S_w$表示类内散度矩阵。使用广义特征值问题求解得：<br>$$S_w^{-1}S_bw = \lambda w$$<br>求解$S_w^{-1}S_b$的特征值和特征向量，然后如同PCA一样将原始数据降到m维。</p>
 <h2 id="NCA（近邻成分分析）"><a href="#NCA（近邻成分分析）" class="headerlink" title="NCA（近邻成分分析）"></a>NCA（近邻成分分析）</h2><p>NCA是度量学习中经常使用的方法，通过学习一个度量矩阵M来度量样本集中两两样例之间的距离。一般采用梯度下降的方法来拟合度量矩阵M。当M是一个低秩矩阵的时候，可以通过对M进行特征值分解，找到一组正交基，这一组正交基可以组成一个变换矩阵P，P中正交基的数目为矩阵M的秩r，显然r&lt;d（d为原属性数）。则变换矩阵P可用于降维。</p>
 <h2 id="三种降维方法的对比"><a href="#三种降维方法的对比" class="headerlink" title="三种降维方法的对比"></a>三种降维方法的对比</h2><p>PCA是不考虑样本类别输出的无监督降维技术。它主要考察的是数据在投影到新的样本空间后数据之间的方差最大，即投影后的数据的离散程度最高。而不同于PCA的是，LDA在进行投影的时候还考虑到原始样本的类别，而且LDA还假设某一类别的类条件概率密度函数是均值不同、方差相同的高斯分布。LDA是一种监督降维技术。NCA学习出来的降维矩阵P没有复杂的矩阵运算（计算协方差），也无需对样本空间分布进行特定的假设。</p>
 <h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p>[1] 周志华. 机器学习 : = Machine learning[M]. 清华大学出版社, 2016.<br>[2] <a href="https://blog.csdn.net/HLBoy_happy/article/details/77146012lda">https://blog.csdn.net/HLBoy_happy/article/details/77146012lda</a><br>[3] <a href="https://zhuanlan.zhihu.com/p/27899927?group_id=869893271453863936">https://zhuanlan.zhihu.com/p/27899927?group_id=869893271453863936</a></p>
 ]]></content>
+      <categories>
+        <category>Machine Learning</category>
+      </categories>
       <tags>
         <tag>pca</tag>
         <tag>nca</tag>
@@ -235,6 +238,9 @@ sudo apt-get install -f
 <h2 id="docker-registry加速"><a href="#docker-registry加速" class="headerlink" title="docker registry加速"></a>docker registry加速</h2><p>在/etc/docker/daemon.json中加入：</p>
 <figure class="highlight json"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;registry-mirrors&quot;</span>: [<span class="string">&quot;http://hub-mirror.c.163.com&quot;</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 ]]></content>
+      <tags>
+        <tag>system</tag>
+      </tags>
   </entry>
   <entry>
     <title>经典算法</title>
@@ -290,313 +296,6 @@ sudo apt-get install -f
       </tags>
   </entry>
   <entry>
-    <title>Mxnet</title>
-    <url>/2018/09/16/deep_learning/Mxnet/</url>
-    <content><![CDATA[<h1 id="Mxnet训练流程"><a href="#Mxnet训练流程" class="headerlink" title="Mxnet训练流程"></a>Mxnet训练流程</h1><ul>
-<li><p>定义好symbol：符号式编程，生成描述计算的计算图，Symbol API 这个包主要是用于提供神经网络的图和自动求导。使用c++写好的Symbol类，可进行加减乘除等符号运算。</p>
-</li>
-<li><p>写好dataiter：如果是分布式训练，需要将训练数据平均切分到每台训练的机器上</p>
-</li>
-<li><p>初始化参数：cpu or gpu、学习率、优化器参数、针对不同网络设置参数初始化方法、验证度量(evaluation metrics)、loss function、callbacks</p>
-</li>
-<li><p>模型训练：</p>
-<ul>
-<li>创建Module: <figure class="highlight python"><table><tr><td class="code"><pre><span class="line">mod = mx.mod.Module(symbol=net,</span><br><span class="line">    context=mx.cpu(),</span><br><span class="line">    data_names=[<span class="string">&#x27;data&#x27;</span>],</span><br><span class="line">    label_names=[<span class="string">&#x27;softmax_label&#x27;</span>])</span><br></pre></td></tr></table></figure></li>
-<li>mod.fit():<ul>
-<li>mod.bind(): 分配内存，为计算做准备</li>
-<li>mod.inst_prams(): 初始化module参数</li>
-<li>mod.init_optimizer(): 初始化优化器，默认sgd</li>
-<li>mod.metri.create(): 创建evaluation metric</li>
-<li>mod.forward(): 前向传播计算</li>
-<li>mod.update_metric(): 更新预测精度</li>
-<li>mod.backward(): 反向传播，更新计算梯度</li>
-<li>mod.update(): 更新参数</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<span id="more"></span>
-
-<h2 id="Mxnet参数服务器架构"><a href="#Mxnet参数服务器架构" class="headerlink" title="Mxnet参数服务器架构"></a>Mxnet参数服务器架构</h2><ul>
-<li>server节点可以跟其他server节点通信，每个server负责自己分到的参数，server group共同维持所有参数的更新</li>
-<li>worker节点之间没有通信，只跟<strong>自己对应的server</strong>进行通信</li>
-<li>每个worker group有一个task scheduler，负责向worker分配任务，并且监控worker的运行情况。当有新的worker加入或者退出，task scheduler 负责重新分配任务。</li>
-</ul>
-<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p><a href="https://www.cnblogs.com/heguanyou/p/7868596.html">MXnet之ps-lite及parameter server原理</a></p>
-]]></content>
-      <tags>
-        <tag>mxnet</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>NCCL</title>
-    <url>/2019/09/26/deep_learning/NCCL/</url>
-    <content><![CDATA[<h1 id="NCCL"><a href="#NCCL" class="headerlink" title="NCCL"></a>NCCL</h1><h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><p>NVIDIA Collective Communication Library是一个GPU拓扑感知的，提供了多GPU collective通信的库。</p>
-<p>NCCL只能支持到8张GPU的深度学习训练（<a href="https://docs.nvidia.com/deeplearning/sdk/introduction/index.html#introduction">参见</a>）</p>
-<p>开发者文档<a href="https://devblogs.nvidia.com/scaling-deep-learning-training-nccl/">nccl2.3</a></p>
-<p>在<a href="https://devblogs.nvidia.com/massively-scale-deep-learning-training-nccl-2-4/">nccl2.4介绍文档</a>中提到NCCL的All Reduce操作被用于百度ring-all-reduce和Horovod这两个使用ring的分布式训练框架中来获取GPU之间的full bandwidth。但同时提到ring的缺点是随着GPU数目的增长，延迟也成线性增加。<strong>为什么延迟会呈线性增加？</strong>，很简单，因为每个GPU每次发送完一个chunk就必须等下一个chunk从另一张GPU发过来，整个过程（包括reduce scatter和all gather）总共需要发送2(n-1)次，则延时为2(n-1)的倍数。见<a href="https://images.nvidia.com/events/sc15/pdfs/NCCL-Woolley.pdf">NCCL collective示意图</a></p>
-<span id="more"></span>
-
-
-<h2 id="性能测试"><a href="#性能测试" class="headerlink" title="性能测试"></a>性能测试</h2><p>编译NVIDIA官方<a href="https://github.com/NVIDIA/nccl-tests">nccl-tests</a>，在8张Tesla V100 GPU机器上测试，GPU机器的拓扑如下：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">root@9a417caaf03b:~/nccl-tests<span class="comment"># nvidia-smi topo -m</span></span><br><span class="line">	GPU0	GPU1	GPU2	GPU3	GPU4	GPU5	GPU6	GPU7	CPU Affinity</span><br><span class="line">GPU0	 X 	NV1	NV1	NV2	SYS	SYS	NV2	SYS	0-95</span><br><span class="line">GPU1	NV1	 X 	NV2	NV1	SYS	SYS	SYS	NV2	0-95</span><br><span class="line">GPU2	NV1	NV2	 X 	NV2	NV1	SYS	SYS	SYS	0-95</span><br><span class="line">GPU3	NV2	NV1	NV2	 X 	SYS	NV1	SYS	SYS	0-95</span><br><span class="line">GPU4	SYS	SYS	NV1	SYS	 X 	NV2	NV1	NV2	0-95</span><br><span class="line">GPU5	SYS	SYS	SYS	NV1	NV2	 X 	NV2	NV1	0-95</span><br><span class="line">GPU6	NV2	SYS	SYS	SYS	NV1	NV2	 X 	NV1	0-95</span><br><span class="line">GPU7	SYS	NV2	SYS	SYS	NV2	NV1	NV1	 X 	0-95</span><br><span class="line"></span><br><span class="line">Legend:</span><br><span class="line"></span><br><span class="line">  X    = Self</span><br><span class="line">  SYS  = Connection traversing PCIe as well as the SMP interconnect between NUMA nodes (e.g., QPI/UPI)</span><br><span class="line">  NODE = Connection traversing PCIe as well as the interconnect between PCIe Host Bridges within a NUMA node</span><br><span class="line">  PHB  = Connection traversing PCIe as well as a PCIe Host Bridge (typically the CPU)</span><br><span class="line">  PXB  = Connection traversing multiple PCIe switches (without traversing the PCIe Host Bridge)</span><br><span class="line">  PIX  = Connection traversing a single PCIe switch</span><br><span class="line">  NV<span class="comment">#  = Connection traversing a bonded set of # NVLinks</span></span><br></pre></td></tr></table></figure>
-<p>执行nccl-tests里面的<code>all_reduce_perf</code>性能测试，如下：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">root@9a417caaf03b:~/nccl-tests<span class="comment"># ./build/all_reduce_perf -b 8 -e 128M -f 2 -g 8</span></span><br><span class="line"><span class="comment"># nThread 1 nGpus 8 minBytes 8 maxBytes 134217728 step: 2(factor) warmup iters: 5 iters: 20 validation: 1</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Using devices</span></span><br><span class="line"><span class="comment">#   Rank  0 Pid    746 on 9a417caaf03b device  0 [0x4f] Tesla V100-SXM2-16GB</span></span><br><span class="line"><span class="comment">#   Rank  1 Pid    746 on 9a417caaf03b device  1 [0x50] Tesla V100-SXM2-16GB</span></span><br><span class="line"><span class="comment">#   Rank  2 Pid    746 on 9a417caaf03b device  2 [0x5f] Tesla V100-SXM2-16GB</span></span><br><span class="line"><span class="comment">#   Rank  3 Pid    746 on 9a417caaf03b device  3 [0x60] Tesla V100-SXM2-16GB</span></span><br><span class="line"><span class="comment">#   Rank  4 Pid    746 on 9a417caaf03b device  4 [0xb1] Tesla V100-SXM2-16GB</span></span><br><span class="line"><span class="comment">#   Rank  5 Pid    746 on 9a417caaf03b device  5 [0xb2] Tesla V100-SXM2-16GB</span></span><br><span class="line"><span class="comment">#   Rank  6 Pid    746 on 9a417caaf03b device  6 [0xdb] Tesla V100-SXM2-16GB</span></span><br><span class="line"><span class="comment">#   Rank  7 Pid    746 on 9a417caaf03b device  7 [0xdc] Tesla V100-SXM2-16GB</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#                                                     out-of-place                       in-place</span></span><br><span class="line"><span class="comment">#       size         count    type   redop     time   algbw   busbw  error     time   algbw   busbw  error</span></span><br><span class="line"><span class="comment">#        (B)    (elements)                     (us)  (GB/s)  (GB/s)            (us)  (GB/s)  (GB/s)</span></span><br><span class="line">           8             2   <span class="built_in">float</span>     sum    48.46    0.00    0.00  1e-07    48.17    0.00    0.00  1e-07</span><br><span class="line">          16             4   <span class="built_in">float</span>     sum    48.61    0.00    0.00  6e-08    49.16    0.00    0.00  6e-08</span><br><span class="line">          32             8   <span class="built_in">float</span>     sum    48.48    0.00    0.00  6e-08    48.14    0.00    0.00  6e-08</span><br><span class="line">          64            16   <span class="built_in">float</span>     sum    48.92    0.00    0.00  6e-08    48.50    0.00    0.00  6e-08</span><br><span class="line">         128            32   <span class="built_in">float</span>     sum    48.13    0.00    0.00  6e-08    48.25    0.00    0.00  6e-08</span><br><span class="line">         256            64   <span class="built_in">float</span>     sum    48.47    0.01    0.01  6e-08    48.50    0.01    0.01  6e-08</span><br><span class="line">         512           128   <span class="built_in">float</span>     sum    48.56    0.01    0.02  6e-08    48.29    0.01    0.02  6e-08</span><br><span class="line">        1024           256   <span class="built_in">float</span>     sum    48.88    0.02    0.04  2e-07    48.83    0.02    0.04  2e-07</span><br><span class="line">        2048           512   <span class="built_in">float</span>     sum    49.40    0.04    0.07  2e-07    49.15    0.04    0.07  2e-07</span><br><span class="line">        4096          1024   <span class="built_in">float</span>     sum    49.13    0.08    0.15  2e-07    48.97    0.08    0.15  2e-07</span><br><span class="line">        8192          2048   <span class="built_in">float</span>     sum    49.14    0.17    0.29  2e-07    49.25    0.17    0.29  2e-07</span><br><span class="line">       16384          4096   <span class="built_in">float</span>     sum    50.35    0.33    0.57  2e-07    49.77    0.33    0.58  2e-07</span><br><span class="line">       32768          8192   <span class="built_in">float</span>     sum    51.06    0.64    1.12  2e-07    50.78    0.65    1.13  2e-07</span><br><span class="line">       65536         16384   <span class="built_in">float</span>     sum    52.78    1.24    2.17  2e-07    52.64    1.24    2.18  2e-07</span><br><span class="line">      131072         32768   <span class="built_in">float</span>     sum    56.56    2.32    4.06  2e-07    55.63    2.36    4.12  2e-07</span><br><span class="line">      262144         65536   <span class="built_in">float</span>     sum    60.26    4.35    7.61  2e-07    59.48    4.41    7.71  2e-07</span><br><span class="line">      524288        131072   <span class="built_in">float</span>     sum    61.48    8.53   14.92  2e-07    61.34    8.55   14.96  2e-07</span><br><span class="line">     1048576        262144   <span class="built_in">float</span>     sum    89.27   11.75   20.56  2e-07    88.45   11.85   20.75  2e-07</span><br><span class="line">     2097152        524288   <span class="built_in">float</span>     sum    119.6   17.53   30.68  2e-07    116.7   17.97   31.45  2e-07</span><br><span class="line">     4194304       1048576   <span class="built_in">float</span>     sum    147.4   28.45   49.79  2e-07    145.1   28.91   50.59  2e-07</span><br><span class="line">     8388608       2097152   <span class="built_in">float</span>     sum    203.8   41.16   72.03  2e-07    204.0   41.12   71.97  2e-07</span><br><span class="line">    16777216       4194304   <span class="built_in">float</span>     sum    324.1   51.77   90.59  2e-07    325.7   51.51   90.14  2e-07</span><br><span class="line">    33554432       8388608   <span class="built_in">float</span>     sum    550.8   60.92  106.62  2e-07    553.3   60.64  106.12  2e-07</span><br><span class="line">    67108864      16777216   <span class="built_in">float</span>     sum    992.7   67.60  118.30  2e-07    995.0   67.45  118.04  2e-07</span><br><span class="line">   134217728      33554432   <span class="built_in">float</span>     sum   1818.8   73.80  129.14  2e-07   1821.9   73.67  128.92  2e-07</span><br><span class="line"><span class="comment"># Out of bounds values : 0 OK</span></span><br><span class="line"><span class="comment"># Avg bus bandwidth    : 25.9598</span></span><br><span class="line"><span class="comment">#</span></span><br></pre></td></tr></table></figure>
-
-<ul>
-<li><p><code>algbw = S/t</code>，<code>S</code>表示数据量，<code>t</code>表示操作完<code>S</code>数据量所用时间。这里操作可以使all reduce、all gather等<code>collective operation</code>。以128MB数据测试结果为例：<code>algbw = 134217728/(1818.8*10^(-6))/1000^3 = 73.80  GB/s</code>。</p>
-</li>
-<li><p><code>busbw = algbw * 2(n-1)/n</code>，<code>n</code>表示<code>collective operation</code>中节点的个数，在这里即为<code>./build/all_reduce_perf -b 8 -e 128M -f 2 -g 8</code>参数<code>-g</code>的值，即GPU的数目。</p>
-</li>
-</ul>
-<h2 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h2><h3 id="ncclAllReduce是如何进行GPU间通信的？"><a href="#ncclAllReduce是如何进行GPU间通信的？" class="headerlink" title="ncclAllReduce是如何进行GPU间通信的？"></a>ncclAllReduce是如何进行GPU间通信的？</h3><p>按照ring的形式还是tree的形式？查看<a href="http://on-demand.gputechconf.com/gtc/2017/presentation/s7155-jeaugey-nccl.pdf">gtc 2017 nccl 2.0 report</a>，其中描述了nccl使用ring的形式在GPU之间交换数据，如下图：<br><img src="/img/deep_learning/nccl-move-data-using-ring.jpg"><br>同时，nccl 2.0在单线程调用多device时增加了手动调用的verb ncclGroupStart/ncclGroupEnd<br><img src="/img/deep_learning/nccl2.0-group-device-call.jpg"><br>可以看看知乎上的一个回答，介绍<a href="https://www.zhihu.com/question/63219175">nccl的设计和实验</a></p>
-<p>在nccl 2.4中引入了double binary trees，见<a href="https://devblogs.nvidia.com/massively-scale-deep-learning-training-nccl-2-4/">nccl2.4介绍文档</a>，从效果来看延迟改善了不少，如下图：<br><img src="/img/deep_learning/Summit-Latency.png"><br>double binary trees有待进一步研究</p>
-<h3 id="ncclAllReduce是如何构造一条带宽最大的环？"><a href="#ncclAllReduce是如何构造一条带宽最大的环？" class="headerlink" title="ncclAllReduce是如何构造一条带宽最大的环？"></a>ncclAllReduce是如何构造一条带宽最大的环？</h3><p>nccl 2.4及以前版本中有一个环境变量<code>NCCL_RINGS</code>可以用来覆盖NCCL构造的GPU环，见<a href="https://docs.nvidia.com/deeplearning/sdk/nccl-developer-guide/docs/env.html#nccl-rings">NCCL_RINGS</a></p>
-<p>nccl 2.5之后可以通过设置<a href="https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/env.html#nccl-algo"><code>NCCL_ALGO</code></a>环境变量可以指定nccl使用collective operation 的算法，默认为<code>Tree,Ring,Collnet</code>，猜测这是按照优先级排列的。</p>
-]]></content>
-      <tags>
-        <tag>deep learnig</tag>
-        <tag>all reduce</tag>
-        <tag>NCCL</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Tensorflow</title>
-    <url>/2018/12/20/deep_learning/Tensorflow/</url>
-    <content><![CDATA[<h1 id="1-模型"><a href="#1-模型" class="headerlink" title="1. 模型"></a>1. 模型</h1><h2 id="1-1-Graph-and-Session"><a href="#1-1-Graph-and-Session" class="headerlink" title="1.1. Graph and Session"></a>1.1. Graph and Session</h2><p>在分布式参数服务器架构训练中，<code>tf.train.replica_device_setter(ps_tasks=3)</code>可以用来指定将tf.Variable的放置位置，比如：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">with</span> tf.device(tf.train.replica_device_setter(ps_tasks=<span class="number">3</span>)):</span><br><span class="line">  <span class="comment"># tf.Variable objects are, by default, placed on tasks in &quot;/job:ps&quot; in a</span></span><br><span class="line">  <span class="comment"># round-robin fashion. And only Variable ops are placed on ps tasks</span></span><br><span class="line">  w_0 = tf.Variable(...)  <span class="comment"># placed on &quot;/job:ps/task:0&quot;</span></span><br><span class="line">  b_0 = tf.Variable(...)  <span class="comment"># placed on &quot;/job:ps/task:1&quot;</span></span><br><span class="line">  w_1 = tf.Variable(...)  <span class="comment"># placed on &quot;/job:ps/task:2&quot;</span></span><br><span class="line">  b_1 = tf.Variable(...)  <span class="comment"># placed on &quot;/job:ps/task:0&quot;</span></span><br><span class="line"></span><br><span class="line">  input_data = tf.placeholder(tf.float32)     <span class="comment"># placed on &quot;/job:worker&quot;</span></span><br><span class="line">  layer_0 = tf.matmul(input_data, w_0) + b_0  <span class="comment"># placed on &quot;/job:worker&quot;</span></span><br><span class="line">  layer_1 = tf.matmul(layer_0, w_1) + b_1     <span class="comment"># placed on &quot;/job:worker&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># or place worker</span></span><br><span class="line"><span class="keyword">with</span> tf.device(tf.train.replica_device_setter( </span><br><span class="line">                       worker_device=<span class="string">&#x27;/job:worker/task:&#x27;</span>+task_idx, </span><br><span class="line">                       clustercluster=cluster)):</span><br><span class="line">        <span class="comment"># build your model here as if you only were using a single machine</span></span><br><span class="line">        <span class="keyword">with</span> tf.Session(server.target):</span><br><span class="line">            <span class="comment"># train your model here </span></span><br></pre></td></tr></table></figure>
-<p>tf.Variable 对象默认是放在ps上的，也只有Varibale是放在ps上的</p>
-<p>ps上面只是存储了模型的参数，多个ps会将模型的参数拆分之后分别进行存储，workers计算参数更新之后，会将相应的参数发送到对应的ps上去。</p>
-<p><code>tf.train.replica_device_setter</code>会返回一个device function，用于<code>with tf.device(device_function)</code>：在Operation对象构造时自动给Operation对象</p>
-<span id="more"></span>
-
-<h3 id="1-1-1-概念"><a href="#1-1-1-概念" class="headerlink" title="1.1.1. 概念"></a>1.1.1. 概念</h3><ul>
-<li>client：编写代码的程序，client里面构造了tf.Graph，并构建tf.Session来启动训练</li>
-<li>tf.Session：Tensorflow使用tf.Session类来表示client程序（通常为Python）与c++运行时之间的连接。<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Create a default in-process session.</span></span><br><span class="line"><span class="keyword">with</span> tf.Session() <span class="keyword">as</span> sess:</span><br><span class="line">    <span class="comment"># ...</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Create a remote session.</span></span><br><span class="line"><span class="keyword">with</span> tf.Session(<span class="string">&quot;grpc://example.org:2222&quot;</span>):</span><br><span class="line">    <span class="comment"># ...</span></span><br></pre></td></tr></table></figure></li>
-<li>cluster：对于一个cluster，由tf.train.ClusterSpec指定，里面包含了一些Server，Server又可以分为两种job（ps和worker），每个job可以有多个tasks</li>
-</ul>
-<h2 id="1-2-数据并行"><a href="#1-2-数据并行" class="headerlink" title="1.2. 数据并行"></a>1.2. 数据并行</h2><p>数据并行分为图内复制和图间复制，</p>
-<h3 id="1-2-1-in-graph-replication"><a href="#1-2-1-in-graph-replication" class="headerlink" title="1.2.1. in-graph replication"></a>1.2.1. in-graph replication</h3><p>图内复制中所有的Operation都在一张tf.Graph中；用一个客户端来生成Graph， 把所有tf.Operation分配到所有的ps和worker上。一般是单机多卡的训练。</p>
-<h3 id="1-2-2-between-graph-replication"><a href="#1-2-2-between-graph-replication" class="headerlink" title="1.2.2. between-graph replication"></a>1.2.2. between-graph replication</h3><p>每个/job/worker的task都有独立的client，参数通过tf.trian.replica_device_setter复制到task中，而每个worker上都会有模型计算部分的副本</p>
-<p>框架  代码过程<br>参数更新的时候的通信</p>
-]]></content>
-      <tags>
-        <tag>deep learnig</tag>
-        <tag>tensorflow</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>分布式深度学习资源调度</title>
-    <url>/2018/09/14/deep_learning/deep_learning_scheduling/</url>
-    <content><![CDATA[<h2 id="分布式机器学习相关会议"><a href="#分布式机器学习相关会议" class="headerlink" title="分布式机器学习相关会议"></a>分布式机器学习相关会议</h2><ul>
-<li>各大机器学习会议上（NIPS， ICML，ICLR）</li>
-<li>各大系统会议上（SOSP，OSDI，ATC，EuroSys，SoCC）</li>
-<li>应用对应的顶级会议上（CVPR，KDD）</li>
-</ul>
-<h2 id="常用的深度学习数据集"><a href="#常用的深度学习数据集" class="headerlink" title="常用的深度学习数据集"></a>常用的深度学习数据集</h2><ul>
-<li>ImageNet：15 million 带标签的高分辨率224*224的RGB图像，共22,000catagories，1.2TB</li>
-<li>ImageNet 2012: 1.2 million 带标签的高分辨率224*224的RGB图像，共1,000个分类，138GB；50,000张测试图像，1,000个分类</li>
-<li>MNIST：输入是28*28是的二值图，输出是0-9这是个数字，60,000 训练图像，10,000测试图像</li>
-<li>Cifar-10：由60,000张32*32的RGB彩色图片构成，共10个分类。50,000张训练，10,000张测试（交叉验证）</li>
-</ul>
-<h2 id="现有的一些分布式深度学习平台"><a href="#现有的一些分布式深度学习平台" class="headerlink" title="现有的一些分布式深度学习平台"></a>现有的一些分布式深度学习平台</h2><ul>
-<li>腾讯的Mariana</li>
-<li>Google的DistBelif</li>
-<li>微软的Adam</li>
-</ul>
-<span id="more"></span>
-
-<h2 id="分布式机器学习的研究领域"><a href="#分布式机器学习的研究领域" class="headerlink" title="分布式机器学习的研究领域"></a>分布式机器学习的研究领域</h2><h3 id="从统计、优化理论、优化算法角度来做"><a href="#从统计、优化理论、优化算法角度来做" class="headerlink" title="从统计、优化理论、优化算法角度来做"></a>从统计、优化理论、优化算法角度来做</h3><p>关注以下问题：通过分布式并行或其他方法加速训练后，这个新算法还能保证收敛到之前相同的最优值（或者一个满意的最优值）吗？在分布式环境下，收敛能有多快，比非分布式训练快多少？收敛的有多接近，和单机上跑出来的最优解一样吗？收敛需要什么假设？<em>应该怎么设计训练过程</em>（比如，怎么抽样数据、怎么更新参数）从而保证能接近某个最优解，同时还保证加速？</p>
-<h3 id="从机器学习的模型角度"><a href="#从机器学习的模型角度" class="headerlink" title="从机器学习的模型角度"></a>从机器学习的模型角度</h3><p>修改原有的模型；提出新的模型；</p>
-<h3 id="优化方向"><a href="#优化方向" class="headerlink" title="优化方向"></a>优化方向</h3><ul>
-<li><p>异步训练：参数服务器架构；减小通信开销（计算开销&lt;&lt;通信开销）</p>
-</li>
-<li><p>数据并行：将数据分成很多小块，加快训练模型；要求数据之间没有依赖性</p>
-</li>
-<li><p>模型并行：如何划分模型？模型之间的关联性要考虑</p>
-<p>Petuum和Tensorflow既支持数据并行也支持模型并行</p>
-<ul>
-<li>将CNN中的不同层放到不同的device(CPU or GPU)上这样拆分使得参数被分配到多个device上，对参数量巨大的模型就可以提供很好的支持</li>
-<li>将CNN中某一层拆开放到不同的device上实现难度较大</li>
-</ul>
-</li>
-<li><p>对反向传播算法的重调度：使计算时间和通信时间尽可能重叠</p>
-</li>
-<li><p>模型更新：对于全连接层，反向传播的时候，下一层计算的$\Delta w$</p>
-</li>
-</ul>
-<h3 id="并行收敛算法满足的假设"><a href="#并行收敛算法满足的假设" class="headerlink" title="并行收敛算法满足的假设"></a>并行收敛算法满足的假设</h3><ul>
-<li>训练程序的计算任务集中在参数更新函数上</li>
-<li>每个iteration，数据之间没有依赖性</li>
-<li>每个iteration开始之前，每个计算节点需要比较容易的拿到模型参数；每个节点计算完成之后，需要比较容易的将梯度收集起来应用于参数更新:<br>$ \theta(t+1) = \theta(t) - \alpha * \Delta(\theta(t),D_p(t)) $</li>
-</ul>
-<p>前两个条件容易满足，但第三个条件在多机环境下涉及网络通讯，如何保证参数共享以及梯度同步成了保证第三个条件要解决的核心问题。</p>
-<h3 id="All-reduce并行算法"><a href="#All-reduce并行算法" class="headerlink" title="All reduce并行算法"></a>All reduce并行算法</h3><p>设数据量为 X，N GPUs，如果使用一个main gpu来做参数更新并把更新之后的参数再发送会其他worker，则此过程交换的参数为<code>2*X*(N-1)</code></p>
-<p>这是 Baidu Silicon Valley AI Lab在GTC 2017上提出了allreduce的实现算法，一些分析如下：</p>
-<h4 id="Multi-Tower-Scaling"><a href="#Multi-Tower-Scaling" class="headerlink" title="Multi-Tower Scaling"></a>Multi-Tower Scaling</h4><p><a href="http://on-demand.gputechconf.com/gtc/2017/presentation/s7543-andrew-gibiansky-effectively-scakukbg-deep-learning-frameworks.pdf">Effectively scaling deep learning framework</a>提到分布式训练中网络开销巨大，计算节点之间传递的参数数目太多，如果网络带宽不大，传输开销很大，影响扩展性。</p>
-<p>下图指出使用一个main gpu来做参数同步的话，在他们的benchmark中，使用Titan X Maxwell GPU计算单个gpu发来的参数耗时在300ms左右，如果N的数目巨大，这将成为巨大的瓶颈。同时，通信开销在(N-1)/3 s，表明通信开销也是随N的数目线性增长。<br><img src="/img/communication_overhead.png" alt="communication overhead"><br>下图指出随着N的数目的增大，花在通信上的开销的比列越来越大<br><img src="/img/communication_overhead_1.png" alt="communication overhead"><br>遂提出了ring all reduce算法来解决高communication overhead的问题</p>
-<h5 id="采用allreduce方式后"><a href="#采用allreduce方式后" class="headerlink" title="采用allreduce方式后"></a>采用allreduce方式后</h5><p>  <img src="/img/pscl_fig_2_allreduce.png" alt="allreduce"><br>  <img src="/img/pscl_fig_4_allreduce.png" alt="allreduce"><br>  <img src="/img/pscl_fig_5_allreduce.png" alt="allreduce"></p>
-<p>  Process 1-4上面分别由4个chunk</p>
-<ul>
-<li>scatter reduce: 执行完N-1步之后，每个Process上都会有一个完整的chunk（比如Process 4上包含了c_11, c_21, c_31和c_41，即所有进程的chunk 1）</li>
-<li>all gather: 然后将完整的chunk overwrite到其他不含有完整chunk的Process上</li>
-</ul>
-<p>  每个GPU会迭代2(N-1)次，并在每次迭代中发送 X/N 大小的数据。则完成一次reduce过程交换的参数量为<code>2*X*(N-1)/N</code></p>
-<h5 id="Scaling-with-tensorflow"><a href="#Scaling-with-tensorflow" class="headerlink" title="Scaling with tensorflow"></a>Scaling with tensorflow</h5><p>  下图指出，Baidu在tensorflow的训练流图中的back prop 和weight update之间增加了ring allreduce，使用MPI实现GPUs之间的参数传递</p>
-<p>  <img src="/img/scaling_with_tensorflow.png" alt="scaling with tensorflow"></p>
-<p>  结果是使用40个GPUs，训练速度几乎呈线性增长</p>
-<h2 id="分布式深度学习调度"><a href="#分布式深度学习调度" class="headerlink" title="分布式深度学习调度"></a>分布式深度学习调度</h2><h3 id="多任务调度"><a href="#多任务调度" class="headerlink" title="多任务调度"></a>多任务调度</h3><p>深度学习作业都是运行时间较长的作业，所以一般一个timeslot都会比较大，比如可能40 min或者1 hour</p>
-<h3 id="深度学习集群的异构性"><a href="#深度学习集群的异构性" class="headerlink" title="深度学习集群的异构性"></a>深度学习集群的异构性</h3><p>每个深度学习集群包括多个infiniband区域，每个infiniband又由多个机架（rack）组成。不同的机架上可能会安装有不同的加速设备（比如GPU、TPU、FPGA等）。这些加速设备可能会有一个PCIe接口，更进一步，可能会使用不同供应商特制的连接技术进行交互。这些设备或是直接与CPU连接，或是通过PCIe交换机与CPU连接。<br>资源管理系统使用configuration set来描述设备类型、一个server上的设备拓扑和一个infiniband区域内的网络拓扑，scheduler使用bitmap获取设备资源用量以及表达资源请求量。</p>
-<h4 id="单个训练作业的性能"><a href="#单个训练作业的性能" class="headerlink" title="单个训练作业的性能"></a>单个训练作业的性能</h4><p>单个job，如果拥有多个GPU，将job打包的越紧密，训练效果会越好。不过有些模型（如inception V3）可以忍受较为松散的packing</p>
-<h4 id="多个训练作业间的干扰"><a href="#多个训练作业间的干扰" class="headerlink" title="多个训练作业间的干扰"></a>多个训练作业间的干扰</h4><p>深度学习作业依赖于GPU做计算加速，但是它还是要通过PCIe总线与CPU频繁的通信。因此，在同一server上的多个jobs之间会存在干扰。不同jobs放置的越近，干扰越大，则性能下降得更多<br><img src="/img/inter_job_inference.png" alt="inter_job_inference"></p>
-<h4 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h4><p>job scheduler利用资源抽象视图，在调度的时候考虑数据本地性和设备拓扑结构。集群空闲时，将jobs分散到集群中来避免干扰；集群高负荷时，将jobs pack得更紧凑，来给多GPU的jobs腾出空间</p>
-<h3 id="CPU的重要性"><a href="#CPU的重要性" class="headerlink" title="CPU的重要性"></a>CPU的重要性</h3><p>在GPU训练中，CPU也扮演者重要的角色，下图说明CPU对训练性能的影响<br><img src="/img/cpu_demand_to_reach_max_perf.png" alt="cpu_demand_to_reach_max_perf"></p>
-<p>像Tensorflow会将GPU上的计算和CPU上的数据处理overlap起来，这样使得：如果GPU分配的好，即计算很快，那么CPU的用量将会很高</p>
-<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
-<li><a href="https://zhuanlan.zhihu.com/p/30976469">张昊的知乎专栏</a></li>
-<li>[technologies behind distributed deep learning allreduce]distributed(<a href="https://preferredresearch.jp/2018/07/10/technologies-behind--deep-learning-allreduce/">https://preferredresearch.jp/2018/07/10/technologies-behind--deep-learning-allreduce/</a>)</li>
-<li><a href="https://www.sigops.org/src/srcsosp2017/sosp17src-final35.pdf">All you need to know about scheduling deep learning jobs</a></li>
-<li><a href="https://dl.acm.org/citation.cfm?id=3275445">Scheduling CPU for GPU-based Deep Learning Jobs</a></li>
-</ul>
-]]></content>
-      <tags>
-        <tag>deep learnig</tag>
-        <tag>scheduling</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>分布式深度学习系统</title>
-    <url>/2018/08/01/deep_learning/%E5%88%86%E5%B8%83%E5%BC%8F%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%B3%BB%E7%BB%9F/</url>
-    <content><![CDATA[<h2 id="分布式深度学习系统"><a href="#分布式深度学习系统" class="headerlink" title="分布式深度学习系统"></a>分布式深度学习系统</h2><ul>
-<li>模型(model)、参数(parameter)、训练数据(data)都需要分布式并行处理</li>
-<li>迭代次数=数据集大小/batchsize，也即batch的数目；每轮迭代前，worker会从ps pull最新的参数</li>
-<li>一轮迭代过后，即训练完一个batch后，做反向传播、参数更新</li>
-</ul>
-<h3 id="《More-Effective-Distributed-ML-via-a-Stale-Synchronous-Parallel-Parameter-Server》（NIPS’13）"><a href="#《More-Effective-Distributed-ML-via-a-Stale-Synchronous-Parallel-Parameter-Server》（NIPS’13）" class="headerlink" title="《More Effective Distributed ML via a Stale Synchronous Parallel Parameter Server》（NIPS’13）"></a>《More Effective Distributed ML via a Stale Synchronous Parallel Parameter Server》（NIPS’13）</h3><p>本文基于Parameter Server模型提出SSP(Stale Synchronous Parallel)模型，解决异步训练中会出现同步问题。主要思路是在每个worker本地建立一个cache，存储参数，worker从本地cache读取参数而不是向ps请求参数，这样减缓了worker等待参数更新的时间。而本地cache的参数与ps的同步则单独处理。</p>
-<p>SSP在同步和异步之间进行了折中，以兼顾quality和quantity。即每个worker在迭代的时候都有一个clock counter，记录当前迭代到哪一步了，给定一个阈值s，SSP满足以下规则：</p>
-<ul>
-<li>最快worker和最慢worker之间相差的迭代步不能超过s，否则最快的迭代步将强制等待最慢的worker。</li>
-<li>一个clock为c的worker提交一个更新的时候，这个更新的时间戳就是c。</li>
-<li>当一个clock为c的worker从cache读取一个更新的时候，它读取的参数更新最坏也是<code>c-s-1</code>时间戳之前所有的参数。</li>
-<li>一个worker读取的更新总会比自己产生的所有结果更新。</li>
-</ul>
-<p>当s=0时，就是完全同步；当s等于无穷大时，就是完全异步。</p>
-<span id="more"></span>
-
-<h3 id="《Project-Adam-Building-an-Efficient-and-Scalable-Deep-Learning-Training-System》（OSDI‘14）"><a href="#《Project-Adam-Building-an-Efficient-and-Scalable-Deep-Learning-Training-System》（OSDI‘14）" class="headerlink" title="《Project Adam: Building an Efficient and Scalable Deep Learning Training System》（OSDI‘14）"></a>《Project Adam: Building an Efficient and Scalable Deep Learning Training System》（OSDI‘14）</h3><p>这是微软研究院的一份工作，主要是对深度神经网络训练图像识别任务的底层进行了优化，包括以下几点：</p>
-<ul>
-<li>数据预处理：提前完成图像的转换（包括平移、反射、旋转），将图像加载进内存。这样能减少数据预处理的时间</li>
-<li>模型训练：<ul>
-<li>多线程不加锁训练：因为DNN的池化层的带来的弹性性能，使得DNN可以忍受小的噪声，所以一些陈旧的权值(weight)不会影响最终的收敛</li>
-<li>处理数据本地性问题：实现了Windows Socket API，相当于一个全局内存地址，减少内存的拷贝，每次只需要给出一个数据的指针即可定位不同机器上的数据的位置</li>
-<li>优化浮点运算</li>
-<li>降低滞后机器的影响：为避免速度较快的机器上出现线程等待滞后机器上的数据，允许线程并行处理多个image；在判断训练epoch是否结束的时候，判断如果75%的模型副本（即workers）完成处理了就当作一个训练epoch结束了。</li>
-<li>减少worker与ps之间传递的参数的数目：对于全连接层，worker直接将激活函数和误差项发送给ps，让ps进行参数的更新。假设M是上一层神经元的个数，N是下一层神经元的个数，则最终worker和ps之间传递的参数的数目从M*N降到了k*(M+N)<br>对全局的参数服务器也进行了优化</li>
-</ul>
-</li>
-</ul>
-<p>实验结果显示Adam异步训练MNIST TOP-1准确率提升了0.24%，这是一个巨大的提升，并且推翻了在卷积领域公认的知识–异步会导致模型预测的准确度降低。同时，ImageNet 22K训练集上，使用4个image server，48个训练机器（分为16个模型副本，每个副本包含3台机器），和10个ps，共62台机器。较之前最好的结果（使用2000台机器训练一周得到Top-1准确率为13.6%），Adam 的Top-1准确率一天就超过了13.6%，训练完用时10天，准确率达到29.8%。</p>
-<p>很多技术值得借鉴，像数据预处理、减少内存拷贝、减少worker和ps之间传递的参数的数目等，这些技术都能很好的减少模型收敛的时间。</p>
-<h3 id="并行计算"><a href="#并行计算" class="headerlink" title="并行计算"></a>并行计算</h3><p>SSP模型是基于BSP(Bulk Synchronous Parallel)模型-整体同步模型的一个改进，是一个分布式存储的MIMD（多指令流多数据流）模型。BSP模型是每次迭代之后一个大同步，而SSP模型更像是一个流水线模型。</p>
-<h3 id="《STRADS-A-Distributed-Framework-for-Scheduled-Model-Parallel-Machine-Learning》（EuroSys’16）"><a href="#《STRADS-A-Distributed-Framework-for-Scheduled-Model-Parallel-Machine-Learning》（EuroSys’16）" class="headerlink" title="《STRADS: A Distributed Framework for Scheduled Model Parallel Machine Learning》（EuroSys’16）"></a>《STRADS: A Distributed Framework for Scheduled Model Parallel Machine Learning》（EuroSys’16）</h3><p>提出了一种调度的模型并行化(Scheduled Model Parallelism)，即在将模型切分到不同的节点上之前，考虑模型之间的依赖（不考虑依赖可能导致错误），以及模型收敛的速率，使得模型收敛的速率更快。SchMP允许将模型并行算法分成控制组件和更新组件，控制组件负责依赖检查和设置优先权；更新组件在由控制组件规定的并行调度中执行迭代ML更新。</p>
-<h3 id="《Poseidon-An-Efficient-Communication-Architecture-for-Distributed-Deep-Learning-on-GPU-Clusters》（ATC’17）"><a href="#《Poseidon-An-Efficient-Communication-Architecture-for-Distributed-Deep-Learning-on-GPU-Clusters》（ATC’17）" class="headerlink" title="《Poseidon: An Efficient Communication Architecture for Distributed Deep Learning on GPU Clusters》（ATC’17）"></a>《Poseidon: An Efficient Communication Architecture for Distributed Deep Learning on GPU Clusters》（ATC’17）</h3><p>解决分布式GPU训练中的网络带宽问题</p>
-<p>文中提出分布式深度学习其中的两点限制：</p>
-<ul>
-<li>模型更新时可能会是一个很大的矩阵，在将模型更新发送到ps的时候会占满网络带宽</li>
-<li>由于DNN的迭代性质，会在训练完一个epoch之后进行参数更新。这样会带来通信的暴增，而其他时间没有通信<br>本文旨在减小每次更新时矩阵的大小；以及对矩阵进行划分，通过重新调度，使参数更新不发生在同一时刻</li>
-<li>DWBP（分布式无等待反向传播算法）用来做通信的负载均衡</li>
-<li>SACP（structure-aware communication protocol）用来最小化通信负载<ul>
-<li>每两个worker之间建立p2p连接</li>
-<li>SFB(sufficient factor broadcast)利用p2p连接在worker之间交换parameters<ul>
-<li>这一点和Adam里面减少worker与ps之间传递的参数的数目的措施有点类似，不过Adam是worker和ps之间交换</li>
-<li>设p个worker，k为batch size，Adam总的通信开销为p*k*(M+N)+p*M*N</li>
-<li>SFB的通信开销为$(p-1)^2<em>k</em>(M+N)$</li>
-</ul>
-</li>
-<li>SACP<br>同时支持CPU和GPU训练</li>
-</ul>
-</li>
-</ul>
-<h3 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h3><p><a href="https://zhuanlan.zhihu.com/p/30976469">张昊的知乎专栏</a><br><a href="http://jcf94.com/2017/12/20/2017-12-20-distributeddl/">http://jcf94.com/2017/12/20/2017-12-20-distributeddl/</a></p>
-]]></content>
-      <tags>
-        <tag>deep learnig</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>神经网络相关</title>
-    <url>/2019/01/13/deep_learning/neural-network/</url>
-    <content><![CDATA[<h2 id="神经网络相关内容"><a href="#神经网络相关内容" class="headerlink" title="神经网络相关内容"></a>神经网络相关内容</h2><h3 id="神经网络"><a href="#神经网络" class="headerlink" title="神经网络"></a>神经网络</h3><ul>
-<li>多层神经网络需要非线性映射。如果全连接层没有非线性部分，只有线性部分，那么计算之后，线性的多层神经网络其实可以转换成一层的神经网络。故加入非线性层，多层神经网络才有意义。</li>
-<li>为防止使用sigmoid激活函数可能导致的梯度消失问题，激活函数一般取relu函数</li>
-<li>每个神经元都是由输入图片（或者语音等）和该神经元所在层的前面所有层的连接矩阵（如卷积核）决定的，所以一个神经元其实就是一个变量，而连接矩阵是一组固定的权值，输入图片的不同会使该神经元输出不同的值。因此模型才能预测不同的图片所属的不同分类。我们保存的模型其实主要就是模型的连接矩阵，这也是神经网络训练过程中需要学习的</li>
-</ul>
-<h3 id="提高验证准确性的方法"><a href="#提高验证准确性的方法" class="headerlink" title="提高验证准确性的方法"></a>提高验证准确性的方法</h3><ul>
-<li>增加数据集：Adding more data augmentations often reduces the gap between training and validation accuracy. Data augmentation could be reduced in epochs closer to the end.</li>
-<li>初始学习率设置大一点：Start with a large learning rate and keep it large for a long time. For example, in CIFAR10, you could keep the learning rate at 0.1 for the first 200 epochs and then reduce it to 0.01.</li>
-<li>batch size不能太大：Do not use a batch size that is too large, especially batch size &gt;&gt; number of classes.<ul>
-<li>batch_size增大，会使训练速度加快，不过太大会导致learning rate不好调，因为lr和batch size之间不是线性关系</li>
-<li>batch_size太小，模型训练的慢</li>
-</ul>
-</li>
-</ul>
-<span id="more"></span>
-
-<h3 id="Data-Augmentation"><a href="#Data-Augmentation" class="headerlink" title="Data Augmentation"></a>Data Augmentation</h3><p>人工增加训练集的大小，包括反射(image reflection)、平移(translation)、旋转(rotation)、加噪声等方法从已有的数据中创造一批新的数据</p>
-<h3 id="Batch-Normalization"><a href="#Batch-Normalization" class="headerlink" title="Batch Normalization"></a>Batch Normalization</h3><p>CNN网络在训练的过程中，前一层的参数变化影响着后面层的变化（因为前面层的输出是后面的输入），而且这种影响会随着网络深度的增加而不断放大。在CNN训练时，绝大多数都采用mini-batch使用随机梯度下降算法进行训练，那么随着输入数据的不断变化，以及网络中参数不断调整，网络的各层输入数据的分布则会不断变化，那么各层在训练的过程中就需要不断的改变以适应这种新的数据分布，从而造成网络训练困难，难以拟合的问题。 </p>
-<p>BatchNorm的目的是将每一层的输入数据进行归一化(normalization)，使得每一层的数据分布是稳定的–均值0方差1，增加两个可学习的参数 β 和 γ ，对数据进行缩放和平移，从而达到加速训练的目的</p>
-<h3 id="momentum"><a href="#momentum" class="headerlink" title="momentum"></a>momentum</h3><p>用来加速训练过程的。引入momentum后，采用如下公式：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">v = mu * v - learning_rate * dw</span><br><span class="line">w = w + v</span><br></pre></td></tr></table></figure>
-<p>v初始为0，mu是一个超参数，一般设置为0.9。这样理解：如果上一次v和这一次的负梯度方向是相同的，则w下降的幅度会加大，从而使收敛的速度加快；反之，w下降的幅度会减小，收敛的速度减慢。</p>
-<h3 id="Softmax函数"><a href="#Softmax函数" class="headerlink" title="Softmax函数"></a>Softmax函数</h3><p>即归一化指数函数，Softmax函数将向量等比例压缩到[0,1]之间，且保证所有元素之和为1。在多分类问题中用作输出层。<br>$$ softmax(i) = \frac{e^i}{\sum_{j}e^j} $$</p>
-<p>向量里面的每个元素都可能取到，只是取到的概率由softmax函数求出的值给出。</p>
-<p>在做反向传播的时候，也很方便，只需将softmax算出来的类别向量对应的真正结果的那一维减一就可以了。比如通过若干层的计算，最后得到的某个训练样本的向量的分数是[ 1, 5, 3 ],那softmax计算出来的概率就是$[\frac{e^1}{e^1 + e^3 + e^5},\frac{e^5}{e^1 + e^3 + e^5},\frac{e^3}{e^1 + e^3 + e^5}]=[ 0.015, 0.866, 0.117 ]$，如果这个样本正确的分类是第二个的话，那么计算出来的偏导就是$[ 0.015, 0.866 - 1, 0.117 ] = [ 0.015, -0.134, 0.117 ]$，然后根据这个偏导做反向传播，更新参数值。</p>
-<h3 id="resnet模型"><a href="#resnet模型" class="headerlink" title="resnet模型"></a>resnet模型</h3><p><img src="/img/resnet_params.png"></p>
-<h3 id="反向传播是一张图片处理完成之后就开始还是等待一个batch处理完之后开始？"><a href="#反向传播是一张图片处理完成之后就开始还是等待一个batch处理完之后开始？" class="headerlink" title="反向传播是一张图片处理完成之后就开始还是等待一个batch处理完之后开始？"></a>反向传播是一张图片处理完成之后就开始还是等待一个batch处理完之后开始？</h3><p><strong>答案是等待一个batch处理完之后开始。</strong>从Mxnet代码可以看出：module.forward_backward方法里就两句话：self.forward(batch) 和self.backward。</p>
-<h3 id="反向传播使用多少个loss？"><a href="#反向传播使用多少个loss？" class="headerlink" title="反向传播使用多少个loss？"></a>反向传播使用多少个loss？</h3><p>一个batch处理完之后做backward，先拿到forward时产生的batch_size个loss，如果选择sgd来做梯度下降，那么sgd选择多少个loss做backward？<strong>答案是会将batch_size个loss平均之后做backward</strong>，因为这里使用的sgd是mini-batch sgd，即一个mini-batch完成前向处理后，将loss平均之后做backward，而不是只使用其中一个loss做backward。</p>
-<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
-<li><a href="https://blog.csdn.net/lhanchao/article/details/70308092">深度学习–Batch Normalization 算法介绍</a></li>
-<li><a href="https://blog.csdn.net/superCally/article/details/54234115">Softmax的理解和应用</a></li>
-</ul>
-]]></content>
-      <tags>
-        <tag>deep learning</tag>
-        <tag>neural network</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>参数服务器架构</title>
-    <url>/2020/01/03/deep_learning/%E5%8F%82%E6%95%B0%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%9E%B6%E6%9E%84/</url>
-    <content><![CDATA[<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="实验目标"><a href="#实验目标" class="headerlink" title="实验目标"></a>实验目标</h3><ol>
-<li><strong>搞清楚ps架构通信的时候是不是都会走QPI总线，跨numa node？</strong></li>
-<li><strong>PS在哪些cpu上跑也影响着通信的效率。尝试找到每个PS跑在哪几个cpu上</strong></li>
-</ol>
-<h3 id="实验过程"><a href="#实验过程" class="headerlink" title="实验过程"></a>实验过程</h3><h4 id="k8s中cpuset的探索"><a href="#k8s中cpuset的探索" class="headerlink" title="k8s中cpuset的探索"></a>k8s中cpuset的探索</h4><p>为了找到PS具体使用的是哪几个cpu，尝试探索k8s对cpuset的使用。</p>
-<p>k8s中，容器 cpuset 中的 CPU 数量与 pod 规格中指定的整数型 CPU limit 相等。只要保证pod属于 Guaranteed QoS（即limits和requests相等）且cpu的资源值为大于等于1的整数值，则该pod就会被cpu manager（从 1.10 版本开始，作为 beta 特性默认开启）分配两个独占的cpu。</p>
-<span id="more"></span>
-
-<p>源码如下：</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// pkg/kubelet/cm/cpumanager/policy_static.go</span></span><br><span class="line"><span class="comment">// 判断一个pod是否为Guaranteed QoS，并且cpu申请值是否为整数</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">guaranteedCPUs</span><span class="params">(pod *v1.Pod, container *v1.Container)</span> <span class="title">int</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> v1qos.GetPodQOS(pod) != v1.PodQOSGuaranteed &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">    &#125;</span><br><span class="line">    cpuQuantity := container.Resources.Requests[v1.ResourceCPU]</span><br><span class="line">    <span class="keyword">if</span> cpuQuantity.Value()*<span class="number">1000</span> != cpuQuantity.MilliValue() &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// Safe downcast to do for all systems with &lt; 2.1 billion CPUs.</span></span><br><span class="line">    <span class="comment">// Per the language spec, `int` is guaranteed to be at least 32 bits wide.</span></span><br><span class="line">    <span class="comment">// https://golang.org/ref/spec#Numeric_types</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">int</span>(cpuQuantity.Value())</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// pkg/kubelet/cm/cpumanager/cpu_manager.go</span></span><br><span class="line"><span class="comment">// 同步cpuset的状态，</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *manager)</span> <span class="title">reconcileState</span><span class="params">()</span> <span class="params">(success []reconciledContainer, failure []reconciledContainer)</span></span> &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    klog.V(<span class="number">4</span>).Infof(<span class="string">&quot;[cpumanager] reconcileState: updating container (pod: %s, container: %s, container id: %s, cpuset: \&quot;%v\&quot;)&quot;</span>, pod.Name, container.Name, containerID, cset)</span><br><span class="line">    err = m.updateContainerCPUSet(containerID, cset)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        klog.Errorf(<span class="string">&quot;[cpumanager] reconcileState: failed to update container (pod: %s, container: %s, container id: %s, cpuset: \&quot;%v\&quot;, error: %v)&quot;</span>, pod.Name, container.Name, containerID, cset, err)</span><br><span class="line">        failure = <span class="built_in">append</span>(failure, reconciledContainer&#123;pod.Name, container.Name, containerID&#125;)</span><br><span class="line">        <span class="keyword">continue</span></span><br><span class="line">    &#125;</span><br><span class="line">    success = <span class="built_in">append</span>(success, reconciledContainer&#123;pod.Name, container.Name, containerID&#125;)</span><br><span class="line">    <span class="comment">// ... </span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *manager)</span> <span class="title">updateContainerCPUSet</span><span class="params">(containerID <span class="keyword">string</span>, cpus cpuset.CPUSet)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    <span class="comment">// <span class="doctag">TODO:</span> Consider adding a `ResourceConfigForContainer` helper in</span></span><br><span class="line">    <span class="comment">// helpers_linux.go similar to what exists for pods.</span></span><br><span class="line">    <span class="comment">// It would be better to pass the full container resources here instead of</span></span><br><span class="line">    <span class="comment">// this patch-like partial resources.</span></span><br><span class="line">    <span class="keyword">return</span> m.containerRuntime.UpdateContainerResources(</span><br><span class="line">        containerID,</span><br><span class="line">        &amp;runtimeapi.LinuxContainerResources&#123;</span><br><span class="line">            CpusetCpus: cpus.String(),</span><br><span class="line">        &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>实验环境为167集群，共20个逻辑cpu，分布在两个numa node上。PS是处于Guaranteed QoS状态，而且cpu=2，<strong>但是通过<code>docker inspect</code>怎么看不到CpusetCpus字段被设置了？</strong>，直接去cgroups中查看PS对应的pod的<code>cpuset.cpus</code>的值是给的<code>0-19</code>，表示每个cpu都有可能用到，很奇怪。</p>
-<p>尝试通过docker直接绑定一组cpuset：<code>docker run --rm --cpuset-cpus 0-3 nginx:alpine</code>，查看<code>docker inspect [container-id]</code>，<code>CpusetCpus</code>字段是有设置的，查看cgroups中该容器对应的<code>cpuset.cpus</code>的值也是<code>0-3</code><br><img src="../../img/deep_learning/cpuset.png" alt="cpuset"></p>
-<p>查看<code>/var/lib/kubelet/config.yaml</code>里面给出的kubelet的启动参数中，<code>cpuManagerPolicy=none</code>，表示通过操作系统调度器CFS配额来提供Guaranteed Pod的cpu使用限制，而前面提到的满足条件的Pod会被分配独占cpu的策略是cpu manager提供的另一种<code>static</code>策略，而kubelet默认开启的是<code>none</code> 策略。</p>
-<p>单机n33，Resnet50：</p>
-<ol>
-<li>单作业 1 ps 1 worker：113 images/sec (gpu 7)<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># gpu rxpci txpci</span></span><br><span class="line"><span class="comment"># Idx  MB/s  MB/s</span></span><br><span class="line">    7  4863   414</span><br><span class="line">    7  6454   827</span><br><span class="line">    7  5580  2530</span><br></pre></td></tr></table></figure></li>
-<li>单作业 3 ps 1 worker：113 images/sec (gpu 7)</li>
-<li>单作业 3 ps 2 worker：103 images/sec (gpu 0 4)</li>
-<li>单作业 3 ps 3 worker：<ol>
-<li>3 * 93 images/sec (gpu 2 14 15) （一开始速度只有80不到，到2000 batches后稳定）<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># gpu rxpci txpci</span></span><br><span class="line"><span class="comment"># Idx  MB/s  MB/s</span></span><br><span class="line">   15  5172  2415</span><br><span class="line">    2  6131   978</span><br><span class="line">   14  4241   603</span><br><span class="line">   15  4032   141</span><br><span class="line">    2  2033   135</span><br><span class="line">   14  2284   584</span><br></pre></td></tr></table></figure></li>
-<li>3 * 96 images/sec (gpu 1 11 13)<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># gpu rxpci txpci</span></span><br><span class="line"><span class="comment"># Idx  MB/s  MB/s</span></span><br><span class="line">    1  5426  1395</span><br><span class="line">   11  5598   933</span><br><span class="line">   13  5745   596</span><br><span class="line">    1  2231   256</span><br><span class="line">   11  5812   784</span><br><span class="line">   13  6150  2869</span><br></pre></td></tr></table></figure></li>
-<li>3 * 84 images/sec (gpu 4 7 10)（速度从93降到83）<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># gpu rxpci txpci</span></span><br><span class="line"><span class="comment"># Idx  MB/s  MB/s</span></span><br><span class="line">    4    63   229</span><br><span class="line">    7   450     0</span><br><span class="line">   10   394   169</span><br><span class="line">    4  5789   669</span><br><span class="line">    7  1357   151</span><br><span class="line">   10  1593     0</span><br></pre></td></tr></table></figure></li>
-</ol>
-</li>
-<li>两作业3 ps 2 worker：96 images/sec （gpu 0 4 vs 10 14） <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">   <span class="comment"># gpu rxpci txpci</span></span><br><span class="line"><span class="comment"># Idx  MB/s  MB/s</span></span><br><span class="line">    0  6591  2638</span><br><span class="line">    4  5704   916</span><br><span class="line">   10  8900   725</span><br><span class="line">   14  5124   322</span><br></pre></td></tr></table></figure></li>
-</ol>
-]]></content>
-  </entry>
-  <entry>
     <title>Controller处理web请求的流程</title>
     <url>/2018/03/17/java_spring/Controller%E5%A4%84%E7%90%86web%E8%AF%B7%E6%B1%82%E7%9A%84%E6%B5%81%E7%A8%8B/</url>
     <content><![CDATA[<h2 id="Dispatcher-Servlet是怎样被调用的？"><a href="#Dispatcher-Servlet是怎样被调用的？" class="headerlink" title="Dispatcher Servlet是怎样被调用的？"></a>Dispatcher Servlet是怎样被调用的？</h2><p>我的<a href="https://konnase.github.io/2017/07/24/Spring%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86/">这篇博客</a>有讲到过程，再来分析一下Spring4.2.6的源代码</p>
@@ -635,20 +334,6 @@ sudo apt-get install -f
         <tag>spring</tag>
         <tag>controller</tag>
         <tag>dispatcherservlet</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>机器学习知识</title>
-    <url>/2018/10/11/deep_learning/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%9F%A5%E8%AF%86/</url>
-    <content><![CDATA[<h1 id="矩阵运算"><a href="#矩阵运算" class="headerlink" title="矩阵运算"></a>矩阵运算</h1><h2 id="曲面拟合"><a href="#曲面拟合" class="headerlink" title="曲面拟合"></a>曲面拟合</h2><p>形如二次多项式：<br>$f(x, y) = a_{20}x^2 + a_{02}y^2 + a_{11}xy + a_{10}x + a_{01}y + a_{00}$<br>使用最小二乘法计算系数矩阵a，即使得计算值和真实值之间的误差平方和最小</p>
-<p>得到矩阵形如：<br>$$\left[<br> \begin{matrix}<br>   x_1^2 &amp; y_1^2 &amp; x_1y_1 &amp; x_1 &amp; y_1 &amp; 1 \<br>   . &amp; . &amp; . &amp; .&amp; . &amp; .\<br>   . &amp; . &amp; . &amp; .&amp; . &amp; . \<br>   . &amp; . &amp; . &amp; .&amp; . &amp; . \<br>   x_m^2 &amp; y_1^2 &amp; x_my_m &amp; x_m &amp; y_m &amp; 1<br>  \end{matrix}<br>  \right]<br>  \left[<br> \begin{matrix}<br>   a_{20}  \<br>   a_{02} \<br>   a_{11}  \<br>   a_{10}  \<br>   a_{01} \<br>   a_{00}<br>  \end{matrix}<br>  \right] =<br>  \left[<br> \begin{matrix}<br>   f(x_1, y_1)  \<br>   . \<br>   .  \<br>   .  \<br>   f(x_m, y_m)<br>  \end{matrix}<br>  \right]$$</p>
-<span id="more"></span>
-
-<p>由<br>$$<br>A.a = y<br>$$<br>$$<br>A^T.A.a = A^T.y<br>$$<br>$$<br>a = (A^T.A)^{-1}.A^T.y<br>$$<br>即可求出系数矩阵a</p>
-<h2 id="非负最小二乘（NNLS）"><a href="#非负最小二乘（NNLS）" class="headerlink" title="非负最小二乘（NNLS）"></a>非负最小二乘（NNLS）</h2><p>解$argmin_x ||A.x - b||_2$问题<br>调用scipy.optimize.nnls(A, b)，即可求得使上式结果最小的x。对上一节提到的多项式问题，这里的x就是待求的系数矩阵a，而A矩阵就是多项式构造的矩阵，b就是函数结果f。</p>
-]]></content>
-      <tags>
-        <tag>machine learnig</tag>
       </tags>
   </entry>
   <entry>
@@ -1097,6 +782,9 @@ sudo apt-get install -f
 
 <h2 id="Spark"><a href="#Spark" class="headerlink" title="Spark"></a>Spark</h2><p>Hadoop第一代产品使用HDFS，处理MapReduce作业的时候设计频繁的HDFS读写操作，如下图：<br><img src="/img/spark1.png" alt="mapreduce"><br>而Spark使用内存替代了使用HDFS保存中间结果，使用弹性分布数据集（RDD），使得分布式对象集合可以跨集群在内存中访问和保存，大大减少了作业加载数据的时间开销。当有数据丢失时，RDD会跟踪并重新计算得到丢失的数据。Spark的性能是MapReduce的40倍</p>
 ]]></content>
+      <categories>
+        <category>Resource Management</category>
+      </categories>
       <tags>
         <tag>scheduling</tag>
       </tags>
@@ -1331,7 +1019,7 @@ sudo apt-get install glusterfs-server
 </ul>
 ]]></content>
       <categories>
-        <category>System</category>
+        <category>Operating System</category>
       </categories>
       <tags>
         <tag>Operating System</tag>
@@ -1716,6 +1404,339 @@ sudo apt-get install glusterfs-server
         <tag>zookeeper</tag>
         <tag>calico</tag>
         <tag>docker registry</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Mxnet</title>
+    <url>/2018/09/16/machine_learning/Mxnet/</url>
+    <content><![CDATA[<h1 id="Mxnet训练流程"><a href="#Mxnet训练流程" class="headerlink" title="Mxnet训练流程"></a>Mxnet训练流程</h1><ul>
+<li><p>定义好symbol：符号式编程，生成描述计算的计算图，Symbol API 这个包主要是用于提供神经网络的图和自动求导。使用c++写好的Symbol类，可进行加减乘除等符号运算。</p>
+</li>
+<li><p>写好dataiter：如果是分布式训练，需要将训练数据平均切分到每台训练的机器上</p>
+</li>
+<li><p>初始化参数：cpu or gpu、学习率、优化器参数、针对不同网络设置参数初始化方法、验证度量(evaluation metrics)、loss function、callbacks</p>
+</li>
+<li><p>模型训练：</p>
+<ul>
+<li>创建Module: <figure class="highlight python"><table><tr><td class="code"><pre><span class="line">mod = mx.mod.Module(symbol=net,</span><br><span class="line">    context=mx.cpu(),</span><br><span class="line">    data_names=[<span class="string">&#x27;data&#x27;</span>],</span><br><span class="line">    label_names=[<span class="string">&#x27;softmax_label&#x27;</span>])</span><br></pre></td></tr></table></figure></li>
+<li>mod.fit():<ul>
+<li>mod.bind(): 分配内存，为计算做准备</li>
+<li>mod.inst_prams(): 初始化module参数</li>
+<li>mod.init_optimizer(): 初始化优化器，默认sgd</li>
+<li>mod.metri.create(): 创建evaluation metric</li>
+<li>mod.forward(): 前向传播计算</li>
+<li>mod.update_metric(): 更新预测精度</li>
+<li>mod.backward(): 反向传播，更新计算梯度</li>
+<li>mod.update(): 更新参数</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<span id="more"></span>
+
+<h2 id="Mxnet参数服务器架构"><a href="#Mxnet参数服务器架构" class="headerlink" title="Mxnet参数服务器架构"></a>Mxnet参数服务器架构</h2><ul>
+<li>server节点可以跟其他server节点通信，每个server负责自己分到的参数，server group共同维持所有参数的更新</li>
+<li>worker节点之间没有通信，只跟<strong>自己对应的server</strong>进行通信</li>
+<li>每个worker group有一个task scheduler，负责向worker分配任务，并且监控worker的运行情况。当有新的worker加入或者退出，task scheduler 负责重新分配任务。</li>
+</ul>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p><a href="https://www.cnblogs.com/heguanyou/p/7868596.html">MXnet之ps-lite及parameter server原理</a></p>
+]]></content>
+      <tags>
+        <tag>mxnet</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>NCCL</title>
+    <url>/2019/09/26/machine_learning/NCCL/</url>
+    <content><![CDATA[<h1 id="NCCL"><a href="#NCCL" class="headerlink" title="NCCL"></a>NCCL</h1><h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><p>NVIDIA Collective Communication Library是一个GPU拓扑感知的，提供了多GPU collective通信的库。</p>
+<p>NCCL只能支持到8张GPU的深度学习训练（<a href="https://docs.nvidia.com/deeplearning/sdk/introduction/index.html#introduction">参见</a>）</p>
+<p>开发者文档<a href="https://devblogs.nvidia.com/scaling-deep-learning-training-nccl/">nccl2.3</a></p>
+<p>在<a href="https://devblogs.nvidia.com/massively-scale-deep-learning-training-nccl-2-4/">nccl2.4介绍文档</a>中提到NCCL的All Reduce操作被用于百度ring-all-reduce和Horovod这两个使用ring的分布式训练框架中来获取GPU之间的full bandwidth。但同时提到ring的缺点是随着GPU数目的增长，延迟也成线性增加。<strong>为什么延迟会呈线性增加？</strong>，很简单，因为每个GPU每次发送完一个chunk就必须等下一个chunk从另一张GPU发过来，整个过程（包括reduce scatter和all gather）总共需要发送2(n-1)次，则延时为2(n-1)的倍数。见<a href="https://images.nvidia.com/events/sc15/pdfs/NCCL-Woolley.pdf">NCCL collective示意图</a></p>
+<span id="more"></span>
+
+
+<h2 id="性能测试"><a href="#性能测试" class="headerlink" title="性能测试"></a>性能测试</h2><p>编译NVIDIA官方<a href="https://github.com/NVIDIA/nccl-tests">nccl-tests</a>，在8张Tesla V100 GPU机器上测试，GPU机器的拓扑如下：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">root@9a417caaf03b:~/nccl-tests<span class="comment"># nvidia-smi topo -m</span></span><br><span class="line">	GPU0	GPU1	GPU2	GPU3	GPU4	GPU5	GPU6	GPU7	CPU Affinity</span><br><span class="line">GPU0	 X 	NV1	NV1	NV2	SYS	SYS	NV2	SYS	0-95</span><br><span class="line">GPU1	NV1	 X 	NV2	NV1	SYS	SYS	SYS	NV2	0-95</span><br><span class="line">GPU2	NV1	NV2	 X 	NV2	NV1	SYS	SYS	SYS	0-95</span><br><span class="line">GPU3	NV2	NV1	NV2	 X 	SYS	NV1	SYS	SYS	0-95</span><br><span class="line">GPU4	SYS	SYS	NV1	SYS	 X 	NV2	NV1	NV2	0-95</span><br><span class="line">GPU5	SYS	SYS	SYS	NV1	NV2	 X 	NV2	NV1	0-95</span><br><span class="line">GPU6	NV2	SYS	SYS	SYS	NV1	NV2	 X 	NV1	0-95</span><br><span class="line">GPU7	SYS	NV2	SYS	SYS	NV2	NV1	NV1	 X 	0-95</span><br><span class="line"></span><br><span class="line">Legend:</span><br><span class="line"></span><br><span class="line">  X    = Self</span><br><span class="line">  SYS  = Connection traversing PCIe as well as the SMP interconnect between NUMA nodes (e.g., QPI/UPI)</span><br><span class="line">  NODE = Connection traversing PCIe as well as the interconnect between PCIe Host Bridges within a NUMA node</span><br><span class="line">  PHB  = Connection traversing PCIe as well as a PCIe Host Bridge (typically the CPU)</span><br><span class="line">  PXB  = Connection traversing multiple PCIe switches (without traversing the PCIe Host Bridge)</span><br><span class="line">  PIX  = Connection traversing a single PCIe switch</span><br><span class="line">  NV<span class="comment">#  = Connection traversing a bonded set of # NVLinks</span></span><br></pre></td></tr></table></figure>
+<p>执行nccl-tests里面的<code>all_reduce_perf</code>性能测试，如下：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">root@9a417caaf03b:~/nccl-tests<span class="comment"># ./build/all_reduce_perf -b 8 -e 128M -f 2 -g 8</span></span><br><span class="line"><span class="comment"># nThread 1 nGpus 8 minBytes 8 maxBytes 134217728 step: 2(factor) warmup iters: 5 iters: 20 validation: 1</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Using devices</span></span><br><span class="line"><span class="comment">#   Rank  0 Pid    746 on 9a417caaf03b device  0 [0x4f] Tesla V100-SXM2-16GB</span></span><br><span class="line"><span class="comment">#   Rank  1 Pid    746 on 9a417caaf03b device  1 [0x50] Tesla V100-SXM2-16GB</span></span><br><span class="line"><span class="comment">#   Rank  2 Pid    746 on 9a417caaf03b device  2 [0x5f] Tesla V100-SXM2-16GB</span></span><br><span class="line"><span class="comment">#   Rank  3 Pid    746 on 9a417caaf03b device  3 [0x60] Tesla V100-SXM2-16GB</span></span><br><span class="line"><span class="comment">#   Rank  4 Pid    746 on 9a417caaf03b device  4 [0xb1] Tesla V100-SXM2-16GB</span></span><br><span class="line"><span class="comment">#   Rank  5 Pid    746 on 9a417caaf03b device  5 [0xb2] Tesla V100-SXM2-16GB</span></span><br><span class="line"><span class="comment">#   Rank  6 Pid    746 on 9a417caaf03b device  6 [0xdb] Tesla V100-SXM2-16GB</span></span><br><span class="line"><span class="comment">#   Rank  7 Pid    746 on 9a417caaf03b device  7 [0xdc] Tesla V100-SXM2-16GB</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#                                                     out-of-place                       in-place</span></span><br><span class="line"><span class="comment">#       size         count    type   redop     time   algbw   busbw  error     time   algbw   busbw  error</span></span><br><span class="line"><span class="comment">#        (B)    (elements)                     (us)  (GB/s)  (GB/s)            (us)  (GB/s)  (GB/s)</span></span><br><span class="line">           8             2   <span class="built_in">float</span>     sum    48.46    0.00    0.00  1e-07    48.17    0.00    0.00  1e-07</span><br><span class="line">          16             4   <span class="built_in">float</span>     sum    48.61    0.00    0.00  6e-08    49.16    0.00    0.00  6e-08</span><br><span class="line">          32             8   <span class="built_in">float</span>     sum    48.48    0.00    0.00  6e-08    48.14    0.00    0.00  6e-08</span><br><span class="line">          64            16   <span class="built_in">float</span>     sum    48.92    0.00    0.00  6e-08    48.50    0.00    0.00  6e-08</span><br><span class="line">         128            32   <span class="built_in">float</span>     sum    48.13    0.00    0.00  6e-08    48.25    0.00    0.00  6e-08</span><br><span class="line">         256            64   <span class="built_in">float</span>     sum    48.47    0.01    0.01  6e-08    48.50    0.01    0.01  6e-08</span><br><span class="line">         512           128   <span class="built_in">float</span>     sum    48.56    0.01    0.02  6e-08    48.29    0.01    0.02  6e-08</span><br><span class="line">        1024           256   <span class="built_in">float</span>     sum    48.88    0.02    0.04  2e-07    48.83    0.02    0.04  2e-07</span><br><span class="line">        2048           512   <span class="built_in">float</span>     sum    49.40    0.04    0.07  2e-07    49.15    0.04    0.07  2e-07</span><br><span class="line">        4096          1024   <span class="built_in">float</span>     sum    49.13    0.08    0.15  2e-07    48.97    0.08    0.15  2e-07</span><br><span class="line">        8192          2048   <span class="built_in">float</span>     sum    49.14    0.17    0.29  2e-07    49.25    0.17    0.29  2e-07</span><br><span class="line">       16384          4096   <span class="built_in">float</span>     sum    50.35    0.33    0.57  2e-07    49.77    0.33    0.58  2e-07</span><br><span class="line">       32768          8192   <span class="built_in">float</span>     sum    51.06    0.64    1.12  2e-07    50.78    0.65    1.13  2e-07</span><br><span class="line">       65536         16384   <span class="built_in">float</span>     sum    52.78    1.24    2.17  2e-07    52.64    1.24    2.18  2e-07</span><br><span class="line">      131072         32768   <span class="built_in">float</span>     sum    56.56    2.32    4.06  2e-07    55.63    2.36    4.12  2e-07</span><br><span class="line">      262144         65536   <span class="built_in">float</span>     sum    60.26    4.35    7.61  2e-07    59.48    4.41    7.71  2e-07</span><br><span class="line">      524288        131072   <span class="built_in">float</span>     sum    61.48    8.53   14.92  2e-07    61.34    8.55   14.96  2e-07</span><br><span class="line">     1048576        262144   <span class="built_in">float</span>     sum    89.27   11.75   20.56  2e-07    88.45   11.85   20.75  2e-07</span><br><span class="line">     2097152        524288   <span class="built_in">float</span>     sum    119.6   17.53   30.68  2e-07    116.7   17.97   31.45  2e-07</span><br><span class="line">     4194304       1048576   <span class="built_in">float</span>     sum    147.4   28.45   49.79  2e-07    145.1   28.91   50.59  2e-07</span><br><span class="line">     8388608       2097152   <span class="built_in">float</span>     sum    203.8   41.16   72.03  2e-07    204.0   41.12   71.97  2e-07</span><br><span class="line">    16777216       4194304   <span class="built_in">float</span>     sum    324.1   51.77   90.59  2e-07    325.7   51.51   90.14  2e-07</span><br><span class="line">    33554432       8388608   <span class="built_in">float</span>     sum    550.8   60.92  106.62  2e-07    553.3   60.64  106.12  2e-07</span><br><span class="line">    67108864      16777216   <span class="built_in">float</span>     sum    992.7   67.60  118.30  2e-07    995.0   67.45  118.04  2e-07</span><br><span class="line">   134217728      33554432   <span class="built_in">float</span>     sum   1818.8   73.80  129.14  2e-07   1821.9   73.67  128.92  2e-07</span><br><span class="line"><span class="comment"># Out of bounds values : 0 OK</span></span><br><span class="line"><span class="comment"># Avg bus bandwidth    : 25.9598</span></span><br><span class="line"><span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p><code>algbw = S/t</code>，<code>S</code>表示数据量，<code>t</code>表示操作完<code>S</code>数据量所用时间。这里操作可以使all reduce、all gather等<code>collective operation</code>。以128MB数据测试结果为例：<code>algbw = 134217728/(1818.8*10^(-6))/1000^3 = 73.80  GB/s</code>。</p>
+</li>
+<li><p><code>busbw = algbw * 2(n-1)/n</code>，<code>n</code>表示<code>collective operation</code>中节点的个数，在这里即为<code>./build/all_reduce_perf -b 8 -e 128M -f 2 -g 8</code>参数<code>-g</code>的值，即GPU的数目。</p>
+</li>
+</ul>
+<h2 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h2><h3 id="ncclAllReduce是如何进行GPU间通信的？"><a href="#ncclAllReduce是如何进行GPU间通信的？" class="headerlink" title="ncclAllReduce是如何进行GPU间通信的？"></a>ncclAllReduce是如何进行GPU间通信的？</h3><p>按照ring的形式还是tree的形式？查看<a href="http://on-demand.gputechconf.com/gtc/2017/presentation/s7155-jeaugey-nccl.pdf">gtc 2017 nccl 2.0 report</a>，其中描述了nccl使用ring的形式在GPU之间交换数据，如下图：<br><img src="/img/deep_learning/nccl-move-data-using-ring.jpg"><br>同时，nccl 2.0在单线程调用多device时增加了手动调用的verb ncclGroupStart/ncclGroupEnd<br><img src="/img/deep_learning/nccl2.0-group-device-call.jpg"><br>可以看看知乎上的一个回答，介绍<a href="https://www.zhihu.com/question/63219175">nccl的设计和实验</a></p>
+<p>在nccl 2.4中引入了double binary trees，见<a href="https://devblogs.nvidia.com/massively-scale-deep-learning-training-nccl-2-4/">nccl2.4介绍文档</a>，从效果来看延迟改善了不少，如下图：<br><img src="/img/deep_learning/Summit-Latency.png"><br>double binary trees有待进一步研究</p>
+<h3 id="ncclAllReduce是如何构造一条带宽最大的环？"><a href="#ncclAllReduce是如何构造一条带宽最大的环？" class="headerlink" title="ncclAllReduce是如何构造一条带宽最大的环？"></a>ncclAllReduce是如何构造一条带宽最大的环？</h3><p>nccl 2.4及以前版本中有一个环境变量<code>NCCL_RINGS</code>可以用来覆盖NCCL构造的GPU环，见<a href="https://docs.nvidia.com/deeplearning/sdk/nccl-developer-guide/docs/env.html#nccl-rings">NCCL_RINGS</a></p>
+<p>nccl 2.5之后可以通过设置<a href="https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/env.html#nccl-algo"><code>NCCL_ALGO</code></a>环境变量可以指定nccl使用collective operation 的算法，默认为<code>Tree,Ring,Collnet</code>，猜测这是按照优先级排列的。</p>
+]]></content>
+      <tags>
+        <tag>deep learnig</tag>
+        <tag>all reduce</tag>
+        <tag>NCCL</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Tensorflow</title>
+    <url>/2018/12/20/machine_learning/Tensorflow/</url>
+    <content><![CDATA[<h1 id="1-模型"><a href="#1-模型" class="headerlink" title="1. 模型"></a>1. 模型</h1><h2 id="1-1-Graph-and-Session"><a href="#1-1-Graph-and-Session" class="headerlink" title="1.1. Graph and Session"></a>1.1. Graph and Session</h2><p>在分布式参数服务器架构训练中，<code>tf.train.replica_device_setter(ps_tasks=3)</code>可以用来指定将tf.Variable的放置位置，比如：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">with</span> tf.device(tf.train.replica_device_setter(ps_tasks=<span class="number">3</span>)):</span><br><span class="line">  <span class="comment"># tf.Variable objects are, by default, placed on tasks in &quot;/job:ps&quot; in a</span></span><br><span class="line">  <span class="comment"># round-robin fashion. And only Variable ops are placed on ps tasks</span></span><br><span class="line">  w_0 = tf.Variable(...)  <span class="comment"># placed on &quot;/job:ps/task:0&quot;</span></span><br><span class="line">  b_0 = tf.Variable(...)  <span class="comment"># placed on &quot;/job:ps/task:1&quot;</span></span><br><span class="line">  w_1 = tf.Variable(...)  <span class="comment"># placed on &quot;/job:ps/task:2&quot;</span></span><br><span class="line">  b_1 = tf.Variable(...)  <span class="comment"># placed on &quot;/job:ps/task:0&quot;</span></span><br><span class="line"></span><br><span class="line">  input_data = tf.placeholder(tf.float32)     <span class="comment"># placed on &quot;/job:worker&quot;</span></span><br><span class="line">  layer_0 = tf.matmul(input_data, w_0) + b_0  <span class="comment"># placed on &quot;/job:worker&quot;</span></span><br><span class="line">  layer_1 = tf.matmul(layer_0, w_1) + b_1     <span class="comment"># placed on &quot;/job:worker&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># or place worker</span></span><br><span class="line"><span class="keyword">with</span> tf.device(tf.train.replica_device_setter( </span><br><span class="line">                       worker_device=<span class="string">&#x27;/job:worker/task:&#x27;</span>+task_idx, </span><br><span class="line">                       clustercluster=cluster)):</span><br><span class="line">        <span class="comment"># build your model here as if you only were using a single machine</span></span><br><span class="line">        <span class="keyword">with</span> tf.Session(server.target):</span><br><span class="line">            <span class="comment"># train your model here </span></span><br></pre></td></tr></table></figure>
+<p>tf.Variable 对象默认是放在ps上的，也只有Varibale是放在ps上的</p>
+<p>ps上面只是存储了模型的参数，多个ps会将模型的参数拆分之后分别进行存储，workers计算参数更新之后，会将相应的参数发送到对应的ps上去。</p>
+<p><code>tf.train.replica_device_setter</code>会返回一个device function，用于<code>with tf.device(device_function)</code>：在Operation对象构造时自动给Operation对象</p>
+<span id="more"></span>
+
+<h3 id="1-1-1-概念"><a href="#1-1-1-概念" class="headerlink" title="1.1.1. 概念"></a>1.1.1. 概念</h3><ul>
+<li>client：编写代码的程序，client里面构造了tf.Graph，并构建tf.Session来启动训练</li>
+<li>tf.Session：Tensorflow使用tf.Session类来表示client程序（通常为Python）与c++运行时之间的连接。<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Create a default in-process session.</span></span><br><span class="line"><span class="keyword">with</span> tf.Session() <span class="keyword">as</span> sess:</span><br><span class="line">    <span class="comment"># ...</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Create a remote session.</span></span><br><span class="line"><span class="keyword">with</span> tf.Session(<span class="string">&quot;grpc://example.org:2222&quot;</span>):</span><br><span class="line">    <span class="comment"># ...</span></span><br></pre></td></tr></table></figure></li>
+<li>cluster：对于一个cluster，由tf.train.ClusterSpec指定，里面包含了一些Server，Server又可以分为两种job（ps和worker），每个job可以有多个tasks</li>
+</ul>
+<h2 id="1-2-数据并行"><a href="#1-2-数据并行" class="headerlink" title="1.2. 数据并行"></a>1.2. 数据并行</h2><p>数据并行分为图内复制和图间复制，</p>
+<h3 id="1-2-1-in-graph-replication"><a href="#1-2-1-in-graph-replication" class="headerlink" title="1.2.1. in-graph replication"></a>1.2.1. in-graph replication</h3><p>图内复制中所有的Operation都在一张tf.Graph中；用一个客户端来生成Graph， 把所有tf.Operation分配到所有的ps和worker上。一般是单机多卡的训练。</p>
+<h3 id="1-2-2-between-graph-replication"><a href="#1-2-2-between-graph-replication" class="headerlink" title="1.2.2. between-graph replication"></a>1.2.2. between-graph replication</h3><p>每个/job/worker的task都有独立的client，参数通过tf.trian.replica_device_setter复制到task中，而每个worker上都会有模型计算部分的副本</p>
+<p>框架  代码过程<br>参数更新的时候的通信</p>
+]]></content>
+      <tags>
+        <tag>deep learnig</tag>
+        <tag>tensorflow</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>分布式深度学习资源调度</title>
+    <url>/2018/09/14/machine_learning/deep_learning_scheduling/</url>
+    <content><![CDATA[<h2 id="分布式机器学习相关会议"><a href="#分布式机器学习相关会议" class="headerlink" title="分布式机器学习相关会议"></a>分布式机器学习相关会议</h2><ul>
+<li>各大机器学习会议上（NIPS， ICML，ICLR）</li>
+<li>各大系统会议上（SOSP，OSDI，ATC，EuroSys，SoCC）</li>
+<li>应用对应的顶级会议上（CVPR，KDD）</li>
+</ul>
+<h2 id="常用的深度学习数据集"><a href="#常用的深度学习数据集" class="headerlink" title="常用的深度学习数据集"></a>常用的深度学习数据集</h2><ul>
+<li>ImageNet：15 million 带标签的高分辨率224*224的RGB图像，共22,000catagories，1.2TB</li>
+<li>ImageNet 2012: 1.2 million 带标签的高分辨率224*224的RGB图像，共1,000个分类，138GB；50,000张测试图像，1,000个分类</li>
+<li>MNIST：输入是28*28是的二值图，输出是0-9这是个数字，60,000 训练图像，10,000测试图像</li>
+<li>Cifar-10：由60,000张32*32的RGB彩色图片构成，共10个分类。50,000张训练，10,000张测试（交叉验证）</li>
+</ul>
+<h2 id="现有的一些分布式深度学习平台"><a href="#现有的一些分布式深度学习平台" class="headerlink" title="现有的一些分布式深度学习平台"></a>现有的一些分布式深度学习平台</h2><ul>
+<li>腾讯的Mariana</li>
+<li>Google的DistBelif</li>
+<li>微软的Adam</li>
+</ul>
+<span id="more"></span>
+
+<h2 id="分布式机器学习的研究领域"><a href="#分布式机器学习的研究领域" class="headerlink" title="分布式机器学习的研究领域"></a>分布式机器学习的研究领域</h2><h3 id="从统计、优化理论、优化算法角度来做"><a href="#从统计、优化理论、优化算法角度来做" class="headerlink" title="从统计、优化理论、优化算法角度来做"></a>从统计、优化理论、优化算法角度来做</h3><p>关注以下问题：通过分布式并行或其他方法加速训练后，这个新算法还能保证收敛到之前相同的最优值（或者一个满意的最优值）吗？在分布式环境下，收敛能有多快，比非分布式训练快多少？收敛的有多接近，和单机上跑出来的最优解一样吗？收敛需要什么假设？<em>应该怎么设计训练过程</em>（比如，怎么抽样数据、怎么更新参数）从而保证能接近某个最优解，同时还保证加速？</p>
+<h3 id="从机器学习的模型角度"><a href="#从机器学习的模型角度" class="headerlink" title="从机器学习的模型角度"></a>从机器学习的模型角度</h3><p>修改原有的模型；提出新的模型；</p>
+<h3 id="优化方向"><a href="#优化方向" class="headerlink" title="优化方向"></a>优化方向</h3><ul>
+<li><p>异步训练：参数服务器架构；减小通信开销（计算开销&lt;&lt;通信开销）</p>
+</li>
+<li><p>数据并行：将数据分成很多小块，加快训练模型；要求数据之间没有依赖性</p>
+</li>
+<li><p>模型并行：如何划分模型？模型之间的关联性要考虑</p>
+<p>Petuum和Tensorflow既支持数据并行也支持模型并行</p>
+<ul>
+<li>将CNN中的不同层放到不同的device(CPU or GPU)上这样拆分使得参数被分配到多个device上，对参数量巨大的模型就可以提供很好的支持</li>
+<li>将CNN中某一层拆开放到不同的device上实现难度较大</li>
+</ul>
+</li>
+<li><p>对反向传播算法的重调度：使计算时间和通信时间尽可能重叠</p>
+</li>
+<li><p>模型更新：对于全连接层，反向传播的时候，下一层计算的$\Delta w$</p>
+</li>
+</ul>
+<h3 id="并行收敛算法满足的假设"><a href="#并行收敛算法满足的假设" class="headerlink" title="并行收敛算法满足的假设"></a>并行收敛算法满足的假设</h3><ul>
+<li>训练程序的计算任务集中在参数更新函数上</li>
+<li>每个iteration，数据之间没有依赖性</li>
+<li>每个iteration开始之前，每个计算节点需要比较容易的拿到模型参数；每个节点计算完成之后，需要比较容易的将梯度收集起来应用于参数更新:<br>$ \theta(t+1) = \theta(t) - \alpha * \Delta(\theta(t),D_p(t)) $</li>
+</ul>
+<p>前两个条件容易满足，但第三个条件在多机环境下涉及网络通讯，如何保证参数共享以及梯度同步成了保证第三个条件要解决的核心问题。</p>
+<h3 id="All-reduce并行算法"><a href="#All-reduce并行算法" class="headerlink" title="All reduce并行算法"></a>All reduce并行算法</h3><p>设数据量为 X，N GPUs，如果使用一个main gpu来做参数更新并把更新之后的参数再发送会其他worker，则此过程交换的参数为<code>2*X*(N-1)</code></p>
+<p>这是 Baidu Silicon Valley AI Lab在GTC 2017上提出了allreduce的实现算法，一些分析如下：</p>
+<h4 id="Multi-Tower-Scaling"><a href="#Multi-Tower-Scaling" class="headerlink" title="Multi-Tower Scaling"></a>Multi-Tower Scaling</h4><p><a href="http://on-demand.gputechconf.com/gtc/2017/presentation/s7543-andrew-gibiansky-effectively-scakukbg-deep-learning-frameworks.pdf">Effectively scaling deep learning framework</a>提到分布式训练中网络开销巨大，计算节点之间传递的参数数目太多，如果网络带宽不大，传输开销很大，影响扩展性。</p>
+<p>下图指出使用一个main gpu来做参数同步的话，在他们的benchmark中，使用Titan X Maxwell GPU计算单个gpu发来的参数耗时在300ms左右，如果N的数目巨大，这将成为巨大的瓶颈。同时，通信开销在(N-1)/3 s，表明通信开销也是随N的数目线性增长。<br><img src="/img/communication_overhead.png" alt="communication overhead"><br>下图指出随着N的数目的增大，花在通信上的开销的比列越来越大<br><img src="/img/communication_overhead_1.png" alt="communication overhead"><br>遂提出了ring all reduce算法来解决高communication overhead的问题</p>
+<h5 id="采用allreduce方式后"><a href="#采用allreduce方式后" class="headerlink" title="采用allreduce方式后"></a>采用allreduce方式后</h5><p>  <img src="/img/pscl_fig_2_allreduce.png" alt="allreduce"><br>  <img src="/img/pscl_fig_4_allreduce.png" alt="allreduce"><br>  <img src="/img/pscl_fig_5_allreduce.png" alt="allreduce"></p>
+<p>  Process 1-4上面分别由4个chunk</p>
+<ul>
+<li>scatter reduce: 执行完N-1步之后，每个Process上都会有一个完整的chunk（比如Process 4上包含了c_11, c_21, c_31和c_41，即所有进程的chunk 1）</li>
+<li>all gather: 然后将完整的chunk overwrite到其他不含有完整chunk的Process上</li>
+</ul>
+<p>  每个GPU会迭代2(N-1)次，并在每次迭代中发送 X/N 大小的数据。则完成一次reduce过程交换的参数量为<code>2*X*(N-1)/N</code></p>
+<h5 id="Scaling-with-tensorflow"><a href="#Scaling-with-tensorflow" class="headerlink" title="Scaling with tensorflow"></a>Scaling with tensorflow</h5><p>  下图指出，Baidu在tensorflow的训练流图中的back prop 和weight update之间增加了ring allreduce，使用MPI实现GPUs之间的参数传递</p>
+<p>  <img src="/img/scaling_with_tensorflow.png" alt="scaling with tensorflow"></p>
+<p>  结果是使用40个GPUs，训练速度几乎呈线性增长</p>
+<h2 id="分布式深度学习调度"><a href="#分布式深度学习调度" class="headerlink" title="分布式深度学习调度"></a>分布式深度学习调度</h2><h3 id="多任务调度"><a href="#多任务调度" class="headerlink" title="多任务调度"></a>多任务调度</h3><p>深度学习作业都是运行时间较长的作业，所以一般一个timeslot都会比较大，比如可能40 min或者1 hour</p>
+<h3 id="深度学习集群的异构性"><a href="#深度学习集群的异构性" class="headerlink" title="深度学习集群的异构性"></a>深度学习集群的异构性</h3><p>每个深度学习集群包括多个infiniband区域，每个infiniband又由多个机架（rack）组成。不同的机架上可能会安装有不同的加速设备（比如GPU、TPU、FPGA等）。这些加速设备可能会有一个PCIe接口，更进一步，可能会使用不同供应商特制的连接技术进行交互。这些设备或是直接与CPU连接，或是通过PCIe交换机与CPU连接。<br>资源管理系统使用configuration set来描述设备类型、一个server上的设备拓扑和一个infiniband区域内的网络拓扑，scheduler使用bitmap获取设备资源用量以及表达资源请求量。</p>
+<h4 id="单个训练作业的性能"><a href="#单个训练作业的性能" class="headerlink" title="单个训练作业的性能"></a>单个训练作业的性能</h4><p>单个job，如果拥有多个GPU，将job打包的越紧密，训练效果会越好。不过有些模型（如inception V3）可以忍受较为松散的packing</p>
+<h4 id="多个训练作业间的干扰"><a href="#多个训练作业间的干扰" class="headerlink" title="多个训练作业间的干扰"></a>多个训练作业间的干扰</h4><p>深度学习作业依赖于GPU做计算加速，但是它还是要通过PCIe总线与CPU频繁的通信。因此，在同一server上的多个jobs之间会存在干扰。不同jobs放置的越近，干扰越大，则性能下降得更多<br><img src="/img/inter_job_inference.png" alt="inter_job_inference"></p>
+<h4 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h4><p>job scheduler利用资源抽象视图，在调度的时候考虑数据本地性和设备拓扑结构。集群空闲时，将jobs分散到集群中来避免干扰；集群高负荷时，将jobs pack得更紧凑，来给多GPU的jobs腾出空间</p>
+<h3 id="CPU的重要性"><a href="#CPU的重要性" class="headerlink" title="CPU的重要性"></a>CPU的重要性</h3><p>在GPU训练中，CPU也扮演者重要的角色，下图说明CPU对训练性能的影响<br><img src="/img/cpu_demand_to_reach_max_perf.png" alt="cpu_demand_to_reach_max_perf"></p>
+<p>像Tensorflow会将GPU上的计算和CPU上的数据处理overlap起来，这样使得：如果GPU分配的好，即计算很快，那么CPU的用量将会很高</p>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a href="https://zhuanlan.zhihu.com/p/30976469">张昊的知乎专栏</a></li>
+<li>[technologies behind distributed deep learning allreduce]distributed(<a href="https://preferredresearch.jp/2018/07/10/technologies-behind--deep-learning-allreduce/">https://preferredresearch.jp/2018/07/10/technologies-behind--deep-learning-allreduce/</a>)</li>
+<li><a href="https://www.sigops.org/src/srcsosp2017/sosp17src-final35.pdf">All you need to know about scheduling deep learning jobs</a></li>
+<li><a href="https://dl.acm.org/citation.cfm?id=3275445">Scheduling CPU for GPU-based Deep Learning Jobs</a></li>
+</ul>
+]]></content>
+      <tags>
+        <tag>deep learnig</tag>
+        <tag>scheduling</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>神经网络相关</title>
+    <url>/2019/01/13/machine_learning/neural-network/</url>
+    <content><![CDATA[<h2 id="神经网络相关内容"><a href="#神经网络相关内容" class="headerlink" title="神经网络相关内容"></a>神经网络相关内容</h2><h3 id="神经网络"><a href="#神经网络" class="headerlink" title="神经网络"></a>神经网络</h3><ul>
+<li>多层神经网络需要非线性映射。如果全连接层没有非线性部分，只有线性部分，那么计算之后，线性的多层神经网络其实可以转换成一层的神经网络。故加入非线性层，多层神经网络才有意义。</li>
+<li>为防止使用sigmoid激活函数可能导致的梯度消失问题，激活函数一般取relu函数</li>
+<li>每个神经元都是由输入图片（或者语音等）和该神经元所在层的前面所有层的连接矩阵（如卷积核）决定的，所以一个神经元其实就是一个变量，而连接矩阵是一组固定的权值，输入图片的不同会使该神经元输出不同的值。因此模型才能预测不同的图片所属的不同分类。我们保存的模型其实主要就是模型的连接矩阵，这也是神经网络训练过程中需要学习的</li>
+</ul>
+<h3 id="提高验证准确性的方法"><a href="#提高验证准确性的方法" class="headerlink" title="提高验证准确性的方法"></a>提高验证准确性的方法</h3><ul>
+<li>增加数据集：Adding more data augmentations often reduces the gap between training and validation accuracy. Data augmentation could be reduced in epochs closer to the end.</li>
+<li>初始学习率设置大一点：Start with a large learning rate and keep it large for a long time. For example, in CIFAR10, you could keep the learning rate at 0.1 for the first 200 epochs and then reduce it to 0.01.</li>
+<li>batch size不能太大：Do not use a batch size that is too large, especially batch size &gt;&gt; number of classes.<ul>
+<li>batch_size增大，会使训练速度加快，不过太大会导致learning rate不好调，因为lr和batch size之间不是线性关系</li>
+<li>batch_size太小，模型训练的慢</li>
+</ul>
+</li>
+</ul>
+<span id="more"></span>
+
+<h3 id="Data-Augmentation"><a href="#Data-Augmentation" class="headerlink" title="Data Augmentation"></a>Data Augmentation</h3><p>人工增加训练集的大小，包括反射(image reflection)、平移(translation)、旋转(rotation)、加噪声等方法从已有的数据中创造一批新的数据</p>
+<h3 id="Batch-Normalization"><a href="#Batch-Normalization" class="headerlink" title="Batch Normalization"></a>Batch Normalization</h3><p>CNN网络在训练的过程中，前一层的参数变化影响着后面层的变化（因为前面层的输出是后面的输入），而且这种影响会随着网络深度的增加而不断放大。在CNN训练时，绝大多数都采用mini-batch使用随机梯度下降算法进行训练，那么随着输入数据的不断变化，以及网络中参数不断调整，网络的各层输入数据的分布则会不断变化，那么各层在训练的过程中就需要不断的改变以适应这种新的数据分布，从而造成网络训练困难，难以拟合的问题。 </p>
+<p>BatchNorm的目的是将每一层的输入数据进行归一化(normalization)，使得每一层的数据分布是稳定的–均值0方差1，增加两个可学习的参数 β 和 γ ，对数据进行缩放和平移，从而达到加速训练的目的</p>
+<h3 id="momentum"><a href="#momentum" class="headerlink" title="momentum"></a>momentum</h3><p>用来加速训练过程的。引入momentum后，采用如下公式：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">v = mu * v - learning_rate * dw</span><br><span class="line">w = w + v</span><br></pre></td></tr></table></figure>
+<p>v初始为0，mu是一个超参数，一般设置为0.9。这样理解：如果上一次v和这一次的负梯度方向是相同的，则w下降的幅度会加大，从而使收敛的速度加快；反之，w下降的幅度会减小，收敛的速度减慢。</p>
+<h3 id="Softmax函数"><a href="#Softmax函数" class="headerlink" title="Softmax函数"></a>Softmax函数</h3><p>即归一化指数函数，Softmax函数将向量等比例压缩到[0,1]之间，且保证所有元素之和为1。在多分类问题中用作输出层。<br>$$ softmax(i) = \frac{e^i}{\sum_{j}e^j} $$</p>
+<p>向量里面的每个元素都可能取到，只是取到的概率由softmax函数求出的值给出。</p>
+<p>在做反向传播的时候，也很方便，只需将softmax算出来的类别向量对应的真正结果的那一维减一就可以了。比如通过若干层的计算，最后得到的某个训练样本的向量的分数是[ 1, 5, 3 ],那softmax计算出来的概率就是$[\frac{e^1}{e^1 + e^3 + e^5},\frac{e^5}{e^1 + e^3 + e^5},\frac{e^3}{e^1 + e^3 + e^5}]=[ 0.015, 0.866, 0.117 ]$，如果这个样本正确的分类是第二个的话，那么计算出来的偏导就是$[ 0.015, 0.866 - 1, 0.117 ] = [ 0.015, -0.134, 0.117 ]$，然后根据这个偏导做反向传播，更新参数值。</p>
+<h3 id="resnet模型"><a href="#resnet模型" class="headerlink" title="resnet模型"></a>resnet模型</h3><p><img src="/img/resnet_params.png"></p>
+<h3 id="反向传播是一张图片处理完成之后就开始还是等待一个batch处理完之后开始？"><a href="#反向传播是一张图片处理完成之后就开始还是等待一个batch处理完之后开始？" class="headerlink" title="反向传播是一张图片处理完成之后就开始还是等待一个batch处理完之后开始？"></a>反向传播是一张图片处理完成之后就开始还是等待一个batch处理完之后开始？</h3><p><strong>答案是等待一个batch处理完之后开始。</strong>从Mxnet代码可以看出：module.forward_backward方法里就两句话：self.forward(batch) 和self.backward。</p>
+<h3 id="反向传播使用多少个loss？"><a href="#反向传播使用多少个loss？" class="headerlink" title="反向传播使用多少个loss？"></a>反向传播使用多少个loss？</h3><p>一个batch处理完之后做backward，先拿到forward时产生的batch_size个loss，如果选择sgd来做梯度下降，那么sgd选择多少个loss做backward？<strong>答案是会将batch_size个loss平均之后做backward</strong>，因为这里使用的sgd是mini-batch sgd，即一个mini-batch完成前向处理后，将loss平均之后做backward，而不是只使用其中一个loss做backward。</p>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a href="https://blog.csdn.net/lhanchao/article/details/70308092">深度学习–Batch Normalization 算法介绍</a></li>
+<li><a href="https://blog.csdn.net/superCally/article/details/54234115">Softmax的理解和应用</a></li>
+</ul>
+]]></content>
+      <tags>
+        <tag>deep learning</tag>
+        <tag>neural network</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>分布式深度学习系统</title>
+    <url>/2018/08/01/machine_learning/%E5%88%86%E5%B8%83%E5%BC%8F%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%B3%BB%E7%BB%9F/</url>
+    <content><![CDATA[<h2 id="分布式深度学习系统"><a href="#分布式深度学习系统" class="headerlink" title="分布式深度学习系统"></a>分布式深度学习系统</h2><ul>
+<li>模型(model)、参数(parameter)、训练数据(data)都需要分布式并行处理</li>
+<li>迭代次数=数据集大小/batchsize，也即batch的数目；每轮迭代前，worker会从ps pull最新的参数</li>
+<li>一轮迭代过后，即训练完一个batch后，做反向传播、参数更新</li>
+</ul>
+<h3 id="《More-Effective-Distributed-ML-via-a-Stale-Synchronous-Parallel-Parameter-Server》（NIPS’13）"><a href="#《More-Effective-Distributed-ML-via-a-Stale-Synchronous-Parallel-Parameter-Server》（NIPS’13）" class="headerlink" title="《More Effective Distributed ML via a Stale Synchronous Parallel Parameter Server》（NIPS’13）"></a>《More Effective Distributed ML via a Stale Synchronous Parallel Parameter Server》（NIPS’13）</h3><p>本文基于Parameter Server模型提出SSP(Stale Synchronous Parallel)模型，解决异步训练中会出现同步问题。主要思路是在每个worker本地建立一个cache，存储参数，worker从本地cache读取参数而不是向ps请求参数，这样减缓了worker等待参数更新的时间。而本地cache的参数与ps的同步则单独处理。</p>
+<p>SSP在同步和异步之间进行了折中，以兼顾quality和quantity。即每个worker在迭代的时候都有一个clock counter，记录当前迭代到哪一步了，给定一个阈值s，SSP满足以下规则：</p>
+<ul>
+<li>最快worker和最慢worker之间相差的迭代步不能超过s，否则最快的迭代步将强制等待最慢的worker。</li>
+<li>一个clock为c的worker提交一个更新的时候，这个更新的时间戳就是c。</li>
+<li>当一个clock为c的worker从cache读取一个更新的时候，它读取的参数更新最坏也是<code>c-s-1</code>时间戳之前所有的参数。</li>
+<li>一个worker读取的更新总会比自己产生的所有结果更新。</li>
+</ul>
+<p>当s=0时，就是完全同步；当s等于无穷大时，就是完全异步。</p>
+<span id="more"></span>
+
+<h3 id="《Project-Adam-Building-an-Efficient-and-Scalable-Deep-Learning-Training-System》（OSDI‘14）"><a href="#《Project-Adam-Building-an-Efficient-and-Scalable-Deep-Learning-Training-System》（OSDI‘14）" class="headerlink" title="《Project Adam: Building an Efficient and Scalable Deep Learning Training System》（OSDI‘14）"></a>《Project Adam: Building an Efficient and Scalable Deep Learning Training System》（OSDI‘14）</h3><p>这是微软研究院的一份工作，主要是对深度神经网络训练图像识别任务的底层进行了优化，包括以下几点：</p>
+<ul>
+<li>数据预处理：提前完成图像的转换（包括平移、反射、旋转），将图像加载进内存。这样能减少数据预处理的时间</li>
+<li>模型训练：<ul>
+<li>多线程不加锁训练：因为DNN的池化层的带来的弹性性能，使得DNN可以忍受小的噪声，所以一些陈旧的权值(weight)不会影响最终的收敛</li>
+<li>处理数据本地性问题：实现了Windows Socket API，相当于一个全局内存地址，减少内存的拷贝，每次只需要给出一个数据的指针即可定位不同机器上的数据的位置</li>
+<li>优化浮点运算</li>
+<li>降低滞后机器的影响：为避免速度较快的机器上出现线程等待滞后机器上的数据，允许线程并行处理多个image；在判断训练epoch是否结束的时候，判断如果75%的模型副本（即workers）完成处理了就当作一个训练epoch结束了。</li>
+<li>减少worker与ps之间传递的参数的数目：对于全连接层，worker直接将激活函数和误差项发送给ps，让ps进行参数的更新。假设M是上一层神经元的个数，N是下一层神经元的个数，则最终worker和ps之间传递的参数的数目从M*N降到了k*(M+N)<br>对全局的参数服务器也进行了优化</li>
+</ul>
+</li>
+</ul>
+<p>实验结果显示Adam异步训练MNIST TOP-1准确率提升了0.24%，这是一个巨大的提升，并且推翻了在卷积领域公认的知识–异步会导致模型预测的准确度降低。同时，ImageNet 22K训练集上，使用4个image server，48个训练机器（分为16个模型副本，每个副本包含3台机器），和10个ps，共62台机器。较之前最好的结果（使用2000台机器训练一周得到Top-1准确率为13.6%），Adam 的Top-1准确率一天就超过了13.6%，训练完用时10天，准确率达到29.8%。</p>
+<p>很多技术值得借鉴，像数据预处理、减少内存拷贝、减少worker和ps之间传递的参数的数目等，这些技术都能很好的减少模型收敛的时间。</p>
+<h3 id="并行计算"><a href="#并行计算" class="headerlink" title="并行计算"></a>并行计算</h3><p>SSP模型是基于BSP(Bulk Synchronous Parallel)模型-整体同步模型的一个改进，是一个分布式存储的MIMD（多指令流多数据流）模型。BSP模型是每次迭代之后一个大同步，而SSP模型更像是一个流水线模型。</p>
+<h3 id="《STRADS-A-Distributed-Framework-for-Scheduled-Model-Parallel-Machine-Learning》（EuroSys’16）"><a href="#《STRADS-A-Distributed-Framework-for-Scheduled-Model-Parallel-Machine-Learning》（EuroSys’16）" class="headerlink" title="《STRADS: A Distributed Framework for Scheduled Model Parallel Machine Learning》（EuroSys’16）"></a>《STRADS: A Distributed Framework for Scheduled Model Parallel Machine Learning》（EuroSys’16）</h3><p>提出了一种调度的模型并行化(Scheduled Model Parallelism)，即在将模型切分到不同的节点上之前，考虑模型之间的依赖（不考虑依赖可能导致错误），以及模型收敛的速率，使得模型收敛的速率更快。SchMP允许将模型并行算法分成控制组件和更新组件，控制组件负责依赖检查和设置优先权；更新组件在由控制组件规定的并行调度中执行迭代ML更新。</p>
+<h3 id="《Poseidon-An-Efficient-Communication-Architecture-for-Distributed-Deep-Learning-on-GPU-Clusters》（ATC’17）"><a href="#《Poseidon-An-Efficient-Communication-Architecture-for-Distributed-Deep-Learning-on-GPU-Clusters》（ATC’17）" class="headerlink" title="《Poseidon: An Efficient Communication Architecture for Distributed Deep Learning on GPU Clusters》（ATC’17）"></a>《Poseidon: An Efficient Communication Architecture for Distributed Deep Learning on GPU Clusters》（ATC’17）</h3><p>解决分布式GPU训练中的网络带宽问题</p>
+<p>文中提出分布式深度学习其中的两点限制：</p>
+<ul>
+<li>模型更新时可能会是一个很大的矩阵，在将模型更新发送到ps的时候会占满网络带宽</li>
+<li>由于DNN的迭代性质，会在训练完一个epoch之后进行参数更新。这样会带来通信的暴增，而其他时间没有通信<br>本文旨在减小每次更新时矩阵的大小；以及对矩阵进行划分，通过重新调度，使参数更新不发生在同一时刻</li>
+<li>DWBP（分布式无等待反向传播算法）用来做通信的负载均衡</li>
+<li>SACP（structure-aware communication protocol）用来最小化通信负载<ul>
+<li>每两个worker之间建立p2p连接</li>
+<li>SFB(sufficient factor broadcast)利用p2p连接在worker之间交换parameters<ul>
+<li>这一点和Adam里面减少worker与ps之间传递的参数的数目的措施有点类似，不过Adam是worker和ps之间交换</li>
+<li>设p个worker，k为batch size，Adam总的通信开销为p*k*(M+N)+p*M*N</li>
+<li>SFB的通信开销为$(p-1)^2<em>k</em>(M+N)$</li>
+</ul>
+</li>
+<li>SACP<br>同时支持CPU和GPU训练</li>
+</ul>
+</li>
+</ul>
+<h3 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h3><p><a href="https://zhuanlan.zhihu.com/p/30976469">张昊的知乎专栏</a><br><a href="http://jcf94.com/2017/12/20/2017-12-20-distributeddl/">http://jcf94.com/2017/12/20/2017-12-20-distributeddl/</a></p>
+]]></content>
+      <tags>
+        <tag>deep learnig</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>参数服务器架构</title>
+    <url>/2020/01/03/machine_learning/%E5%8F%82%E6%95%B0%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%9E%B6%E6%9E%84/</url>
+    <content><![CDATA[<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="实验目标"><a href="#实验目标" class="headerlink" title="实验目标"></a>实验目标</h3><ol>
+<li><strong>搞清楚ps架构通信的时候是不是都会走QPI总线，跨numa node？</strong></li>
+<li><strong>PS在哪些cpu上跑也影响着通信的效率。尝试找到每个PS跑在哪几个cpu上</strong></li>
+</ol>
+<h3 id="实验过程"><a href="#实验过程" class="headerlink" title="实验过程"></a>实验过程</h3><h4 id="k8s中cpuset的探索"><a href="#k8s中cpuset的探索" class="headerlink" title="k8s中cpuset的探索"></a>k8s中cpuset的探索</h4><p>为了找到PS具体使用的是哪几个cpu，尝试探索k8s对cpuset的使用。</p>
+<p>k8s中，容器 cpuset 中的 CPU 数量与 pod 规格中指定的整数型 CPU limit 相等。只要保证pod属于 Guaranteed QoS（即limits和requests相等）且cpu的资源值为大于等于1的整数值，则该pod就会被cpu manager（从 1.10 版本开始，作为 beta 特性默认开启）分配两个独占的cpu。</p>
+<span id="more"></span>
+
+<p>源码如下：</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// pkg/kubelet/cm/cpumanager/policy_static.go</span></span><br><span class="line"><span class="comment">// 判断一个pod是否为Guaranteed QoS，并且cpu申请值是否为整数</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">guaranteedCPUs</span><span class="params">(pod *v1.Pod, container *v1.Container)</span> <span class="title">int</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> v1qos.GetPodQOS(pod) != v1.PodQOSGuaranteed &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">    &#125;</span><br><span class="line">    cpuQuantity := container.Resources.Requests[v1.ResourceCPU]</span><br><span class="line">    <span class="keyword">if</span> cpuQuantity.Value()*<span class="number">1000</span> != cpuQuantity.MilliValue() &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// Safe downcast to do for all systems with &lt; 2.1 billion CPUs.</span></span><br><span class="line">    <span class="comment">// Per the language spec, `int` is guaranteed to be at least 32 bits wide.</span></span><br><span class="line">    <span class="comment">// https://golang.org/ref/spec#Numeric_types</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">int</span>(cpuQuantity.Value())</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// pkg/kubelet/cm/cpumanager/cpu_manager.go</span></span><br><span class="line"><span class="comment">// 同步cpuset的状态，</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *manager)</span> <span class="title">reconcileState</span><span class="params">()</span> <span class="params">(success []reconciledContainer, failure []reconciledContainer)</span></span> &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    klog.V(<span class="number">4</span>).Infof(<span class="string">&quot;[cpumanager] reconcileState: updating container (pod: %s, container: %s, container id: %s, cpuset: \&quot;%v\&quot;)&quot;</span>, pod.Name, container.Name, containerID, cset)</span><br><span class="line">    err = m.updateContainerCPUSet(containerID, cset)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        klog.Errorf(<span class="string">&quot;[cpumanager] reconcileState: failed to update container (pod: %s, container: %s, container id: %s, cpuset: \&quot;%v\&quot;, error: %v)&quot;</span>, pod.Name, container.Name, containerID, cset, err)</span><br><span class="line">        failure = <span class="built_in">append</span>(failure, reconciledContainer&#123;pod.Name, container.Name, containerID&#125;)</span><br><span class="line">        <span class="keyword">continue</span></span><br><span class="line">    &#125;</span><br><span class="line">    success = <span class="built_in">append</span>(success, reconciledContainer&#123;pod.Name, container.Name, containerID&#125;)</span><br><span class="line">    <span class="comment">// ... </span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *manager)</span> <span class="title">updateContainerCPUSet</span><span class="params">(containerID <span class="keyword">string</span>, cpus cpuset.CPUSet)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    <span class="comment">// <span class="doctag">TODO:</span> Consider adding a `ResourceConfigForContainer` helper in</span></span><br><span class="line">    <span class="comment">// helpers_linux.go similar to what exists for pods.</span></span><br><span class="line">    <span class="comment">// It would be better to pass the full container resources here instead of</span></span><br><span class="line">    <span class="comment">// this patch-like partial resources.</span></span><br><span class="line">    <span class="keyword">return</span> m.containerRuntime.UpdateContainerResources(</span><br><span class="line">        containerID,</span><br><span class="line">        &amp;runtimeapi.LinuxContainerResources&#123;</span><br><span class="line">            CpusetCpus: cpus.String(),</span><br><span class="line">        &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>实验环境为167集群，共20个逻辑cpu，分布在两个numa node上。PS是处于Guaranteed QoS状态，而且cpu=2，<strong>但是通过 <code>docker inspect</code>怎么看不到CpusetCpus字段被设置了？</strong>，直接去cgroups中查看PS对应的pod的 <code>cpuset.cpus</code>的值是给的 <code>0-19</code>，表示每个cpu都有可能用到，很奇怪。</p>
+<p>尝试通过docker直接绑定一组cpuset：<code>docker run --rm --cpuset-cpus 0-3 nginx:alpine</code>，查看 <code>docker inspect [container-id]</code>，<code>CpusetCpus</code>字段是有设置的，查看cgroups中该容器对应的 <code>cpuset.cpus</code>的值也是 <code>0-3</code><br><img src="/img/deep_learning/cpuset.png" alt="cpuset"></p>
+<p>查看 <code>/var/lib/kubelet/config.yaml</code>里面给出的kubelet的启动参数中，<code>cpuManagerPolicy=none</code>，表示通过操作系统调度器CFS配额来提供Guaranteed Pod的cpu使用限制，而前面提到的满足条件的Pod会被分配独占cpu的策略是cpu manager提供的另一种 <code>static</code>策略，而kubelet默认开启的是 <code>none</code> 策略。</p>
+<p>单机n33，Resnet50：</p>
+<ol>
+<li><p>单作业 1 ps 1 worker：113 images/sec (gpu 7)</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># gpu rxpci txpci</span></span><br><span class="line"><span class="comment"># Idx  MB/s  MB/s</span></span><br><span class="line">    7  4863   414</span><br><span class="line">    7  6454   827</span><br><span class="line">    7  5580  2530</span><br></pre></td></tr></table></figure></li>
+<li><p>单作业 3 ps 1 worker：113 images/sec (gpu 7)</p>
+</li>
+<li><p>单作业 3 ps 2 worker：103 images/sec (gpu 0 4)</p>
+</li>
+<li><p>单作业 3 ps 3 worker：</p>
+<ol>
+<li>3 * 93 images/sec (gpu 2 14 15) （一开始速度只有80不到，到2000 batches后稳定）</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># gpu rxpci txpci</span></span><br><span class="line"><span class="comment"># Idx  MB/s  MB/s</span></span><br><span class="line">   15  5172  2415</span><br><span class="line">    2  6131   978</span><br><span class="line">   14  4241   603</span><br><span class="line">   15  4032   141</span><br><span class="line">    2  2033   135</span><br><span class="line">   14  2284   584</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li>3 * 96 images/sec (gpu 1 11 13)</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># gpu rxpci txpci</span></span><br><span class="line"><span class="comment"># Idx  MB/s  MB/s</span></span><br><span class="line">    1  5426  1395</span><br><span class="line">   11  5598   933</span><br><span class="line">   13  5745   596</span><br><span class="line">    1  2231   256</span><br><span class="line">   11  5812   784</span><br><span class="line">   13  6150  2869</span><br></pre></td></tr></table></figure>
+<ol>
+<li>3 * 84 images/sec (gpu 4 7 10)（速度从93降到83）</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># gpu rxpci txpci</span></span><br><span class="line"><span class="comment"># Idx  MB/s  MB/s</span></span><br><span class="line">    4    63   229</span><br><span class="line">    7   450     0</span><br><span class="line">   10   394   169</span><br><span class="line">    4  5789   669</span><br><span class="line">    7  1357   151</span><br><span class="line">   10  1593     0</span><br></pre></td></tr></table></figure></li>
+<li><p>两作业3 ps 2 worker：96 images/sec （gpu 0 4 vs 10 14）</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># gpu rxpci txpci</span></span><br><span class="line"><span class="comment"># Idx  MB/s  MB/s</span></span><br><span class="line">    0  6591  2638</span><br><span class="line">    4  5704   916</span><br><span class="line">   10  8900   725</span><br><span class="line">   14  5124   322</span><br></pre></td></tr></table></figure></li>
+</ol>
+]]></content>
+  </entry>
+  <entry>
+    <title>机器学习知识</title>
+    <url>/2018/10/11/machine_learning/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%9F%A5%E8%AF%86/</url>
+    <content><![CDATA[<h1 id="矩阵运算"><a href="#矩阵运算" class="headerlink" title="矩阵运算"></a>矩阵运算</h1><h2 id="曲面拟合"><a href="#曲面拟合" class="headerlink" title="曲面拟合"></a>曲面拟合</h2><p>形如二次多项式：<br>$f(x, y) = a_{20}x^2 + a_{02}y^2 + a_{11}xy + a_{10}x + a_{01}y + a_{00}$<br>使用最小二乘法计算系数矩阵a，即使得计算值和真实值之间的误差平方和最小</p>
+<p>得到矩阵形如：<br>$$\left[<br> \begin{matrix}<br>   x_1^2 &amp; y_1^2 &amp; x_1y_1 &amp; x_1 &amp; y_1 &amp; 1 \<br>   . &amp; . &amp; . &amp; .&amp; . &amp; .\<br>   . &amp; . &amp; . &amp; .&amp; . &amp; . \<br>   . &amp; . &amp; . &amp; .&amp; . &amp; . \<br>   x_m^2 &amp; y_1^2 &amp; x_my_m &amp; x_m &amp; y_m &amp; 1<br>  \end{matrix}<br>  \right]<br>  \left[<br> \begin{matrix}<br>   a_{20}  \<br>   a_{02} \<br>   a_{11}  \<br>   a_{10}  \<br>   a_{01} \<br>   a_{00}<br>  \end{matrix}<br>  \right] =<br>  \left[<br> \begin{matrix}<br>   f(x_1, y_1)  \<br>   . \<br>   .  \<br>   .  \<br>   f(x_m, y_m)<br>  \end{matrix}<br>  \right]$$</p>
+<span id="more"></span>
+
+<p>由<br>$$<br>A.a = y<br>$$<br>$$<br>A^T.A.a = A^T.y<br>$$<br>$$<br>a = (A^T.A)^{-1}.A^T.y<br>$$<br>即可求出系数矩阵a</p>
+<h2 id="非负最小二乘（NNLS）"><a href="#非负最小二乘（NNLS）" class="headerlink" title="非负最小二乘（NNLS）"></a>非负最小二乘（NNLS）</h2><p>解$argmin_x ||A.x - b||_2$问题<br>调用scipy.optimize.nnls(A, b)，即可求得使上式结果最小的x。对上一节提到的多项式问题，这里的x就是待求的系数矩阵a，而A矩阵就是多项式构造的矩阵，b就是函数结果f。</p>
+]]></content>
+      <tags>
+        <tag>machine learnig</tag>
       </tags>
   </entry>
 </search>
