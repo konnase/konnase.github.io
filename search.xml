@@ -1442,6 +1442,9 @@ sudo apt-get install glusterfs-server
 </ul>
 <h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p><a href="https://www.cnblogs.com/heguanyou/p/7868596.html">MXnet之ps-lite及parameter server原理</a></p>
 ]]></content>
+      <categories>
+        <category>Machine Learning</category>
+      </categories>
       <tags>
         <tag>mxnet</tag>
       </tags>
@@ -1472,6 +1475,9 @@ sudo apt-get install glusterfs-server
 <h3 id="ncclAllReduce是如何构造一条带宽最大的环？"><a href="#ncclAllReduce是如何构造一条带宽最大的环？" class="headerlink" title="ncclAllReduce是如何构造一条带宽最大的环？"></a>ncclAllReduce是如何构造一条带宽最大的环？</h3><p>nccl 2.4及以前版本中有一个环境变量<code>NCCL_RINGS</code>可以用来覆盖NCCL构造的GPU环，见<a href="https://docs.nvidia.com/deeplearning/sdk/nccl-developer-guide/docs/env.html#nccl-rings">NCCL_RINGS</a></p>
 <p>nccl 2.5之后可以通过设置<a href="https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/env.html#nccl-algo"><code>NCCL_ALGO</code></a>环境变量可以指定nccl使用collective operation 的算法，默认为<code>Tree,Ring,Collnet</code>，猜测这是按照优先级排列的。</p>
 ]]></content>
+      <categories>
+        <category>Machine Learning</category>
+      </categories>
       <tags>
         <tag>deep learnig</tag>
         <tag>all reduce</tag>
@@ -1498,6 +1504,9 @@ sudo apt-get install glusterfs-server
 <h3 id="1-2-2-between-graph-replication"><a href="#1-2-2-between-graph-replication" class="headerlink" title="1.2.2. between-graph replication"></a>1.2.2. between-graph replication</h3><p>每个/job/worker的task都有独立的client，参数通过tf.trian.replica_device_setter复制到task中，而每个worker上都会有模型计算部分的副本</p>
 <p>框架  代码过程<br>参数更新的时候的通信</p>
 ]]></content>
+      <categories>
+        <category>Machine Learning</category>
+      </categories>
       <tags>
         <tag>deep learnig</tag>
         <tag>tensorflow</tag>
@@ -1577,6 +1586,9 @@ sudo apt-get install glusterfs-server
 <li><a href="https://dl.acm.org/citation.cfm?id=3275445">Scheduling CPU for GPU-based Deep Learning Jobs</a></li>
 </ul>
 ]]></content>
+      <categories>
+        <category>Machine Learning</category>
+      </categories>
       <tags>
         <tag>deep learnig</tag>
         <tag>scheduling</tag>
@@ -1618,6 +1630,9 @@ sudo apt-get install glusterfs-server
 <li><a href="https://blog.csdn.net/superCally/article/details/54234115">Softmax的理解和应用</a></li>
 </ul>
 ]]></content>
+      <categories>
+        <category>Machine Learning</category>
+      </categories>
       <tags>
         <tag>deep learning</tag>
         <tag>neural network</tag>
@@ -1678,6 +1693,9 @@ sudo apt-get install glusterfs-server
 </ul>
 <h3 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h3><p><a href="https://zhuanlan.zhihu.com/p/30976469">张昊的知乎专栏</a><br><a href="http://jcf94.com/2017/12/20/2017-12-20-distributeddl/">http://jcf94.com/2017/12/20/2017-12-20-distributeddl/</a></p>
 ]]></content>
+      <categories>
+        <category>Machine Learning</category>
+      </categories>
       <tags>
         <tag>deep learnig</tag>
       </tags>
@@ -1735,6 +1753,9 @@ sudo apt-get install glusterfs-server
 <p>由<br>$$<br>A.a = y<br>$$<br>$$<br>A^T.A.a = A^T.y<br>$$<br>$$<br>a = (A^T.A)^{-1}.A^T.y<br>$$<br>即可求出系数矩阵a</p>
 <h2 id="非负最小二乘（NNLS）"><a href="#非负最小二乘（NNLS）" class="headerlink" title="非负最小二乘（NNLS）"></a>非负最小二乘（NNLS）</h2><p>解$argmin_x ||A.x - b||_2$问题<br>调用scipy.optimize.nnls(A, b)，即可求得使上式结果最小的x。对上一节提到的多项式问题，这里的x就是待求的系数矩阵a，而A矩阵就是多项式构造的矩阵，b就是函数结果f。</p>
 ]]></content>
+      <categories>
+        <category>Machine Learning</category>
+      </categories>
       <tags>
         <tag>machine learnig</tag>
       </tags>
