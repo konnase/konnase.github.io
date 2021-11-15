@@ -221,7 +221,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-11-15 10:30:12" itemprop="dateModified" datetime="2021-11-15T10:30:12+08:00">2021-11-15</time>
+                <time title="Modified: 2021-11-15 10:33:48" itemprop="dateModified" datetime="2021-11-15T10:33:48+08:00">2021-11-15</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -256,17 +256,14 @@
 <h2 id="什么是操作系统？"><a href="#什么是操作系统？" class="headerlink" title="什么是操作系统？"></a>什么是操作系统？</h2><p>总体而言，操作系统有两个职责：一是对硬件进行管理和抽象，二是为应用提供服务并进行管理。硬件和应用的新变化和新需求（新的硬件加入、应用对时延的要求等）驱动着操作系统不断演进。</p>
 <h2 id="操作系统简史"><a href="#操作系统简史" class="headerlink" title="操作系统简史"></a>操作系统简史</h2><p>随着1946年世界公认的第一台通用计算机ENIAC诞生后，人们一直在思考如何管理计算机上的程序。GM-NAA I/O作为第一个操作系统具备了批处理的特性。从OS/360到UNIX，操作系统演进步入了分时与多任务操作系统阶段，UNIX中首次引入Shell，并通过管道等IPC方式将不同人物连接起来。UNIX和C语言的成功为两位作者赢得了1983年图灵奖。1991年，目前世界上最成功的、适用范围最广的开源操作系统诞生了，它的父亲是一位来自芬兰的年轻程序员Linus Torvalds。80年代，凭借着从施乐借鉴（剽窃）来的图形用户界面（GUI ）操作系统的概念，乔布斯和盖茨将Macintosh和Windows操作系统成功应用到个人计算机中。现代操作系统一步步演进为当下我们在使用的各种计算机。人类的智慧勾勒出一部操作系统捡屎~</p>
 <h2 id="操作系统接口"><a href="#操作系统接口" class="headerlink" title="操作系统接口"></a>操作系统接口</h2><p>系统调用接口 – 向内核请求服务。POSIX接口 – 为能同时在不同UNIX操作系统上运行的软件定义的一套标准的操作系统API，自由软件先驱RMS起的名字。领域应用接口：各个应用领域定义的应用开发接口，如汽车领域的AUTOSAR等。</p>
-<p>&lt;–more&gt;</p>
-<h1 id="第二章-–-硬件结构"><a href="#第二章-–-硬件结构" class="headerlink" title="第二章 – 硬件结构"></a>第二章 – 硬件结构</h1><p>1945年，冯诺依曼结构的提出，对计算机的设计、研究和发展影响至今。冯诺依曼结构分为三个主要部分：中央处理单元（CPU）；存储器（memory）；输入输出（I/O）。</p>
-<h2 id="CPU与指令集架构（ISA）"><a href="#CPU与指令集架构（ISA）" class="headerlink" title="CPU与指令集架构（ISA）"></a>CPU与指令集架构（ISA）</h2><ul>
-<li><p>指令集：包含一系列不同功能的指令。</p>
-</li>
-<li><p>特权级：AArch64中有EL0~3共四种特权级。应用程序运行在EL0，操作系统运行在EL1。有三种场景会发生EL0到EL1的特权级切换：系统调用、异常和中断。前两种是同步的CPU特权级切换，由正在执行的指令导致；第三种是异步的CPU特权级切换，不是由应用程序中的指令导致。</p>
-</li>
-<li><p>寄存器：CPU用来暂存指令、数据和地址的小型存储体。EL1特权级下有两个页表基地址寄存器，用于存储应用程序的第0级页表页的起始地址，在发生应用程序上下文切换时，内核会立即配置内存管理单元（MMU）并使用新的应用程序的页表更新该寄存器。</p>
-</li>
-</ul>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/10/22/system_management/%E7%8E%B0%E4%BB%A3%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86%E4%B8%8E%E5%AE%9E%E7%8E%B01/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
