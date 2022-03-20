@@ -190,6 +190,84 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://konnase.github.io/2018/11/14/java_spring/Spring%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%862/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Konnase Lee">
+      <meta itemprop="description" content="There is no ending to learn">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Konnase Lee">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2018/11/14/java_spring/Spring%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%862/" class="post-title-link" itemprop="url">Spring相关知识2</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-11-14 19:43:48" itemprop="dateCreated datePublished" datetime="2018-11-14T19:43:48+08:00">2018-11-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2021-11-15 19:43:30" itemprop="dateModified" datetime="2021-11-15T19:43:30+08:00">2021-11-15</time>
+              </span>
+
+          
+            <span id="/2018/11/14/java_spring/Spring%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%862/" class="post-meta-item leancloud_visitors" data-flag-title="Spring相关知识2" title="Views">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="JPA-和-Mybatis"><a href="#JPA-和-Mybatis" class="headerlink" title="JPA 和 Mybatis"></a>JPA 和 Mybatis</h1><p>jpa是一套ORM规范或接口（注意Mybatis没有实现jpa），默认使用Hibernate作为ORM实现，所以一般使用Spring Data JPA即会使用Hibernate。jpa的查询语言是面向对象的而不是面向数据库的。Hibernate是一个ORM框架，它对JDBC进行了非常轻量级的对象封装，将POJO与数据库表建立映射关系，可以自动生成sql语句，使得Java程序员可以从繁琐的sql代码中解脱出来</p>
+<p>DAO（数据库访问对象），在jpa里面一般叫做Repository，比如UserRepository；在Mybatis里面一般叫Mapper，比如UserMapper</p>
+<p>操作数据库的对象：Hibernate中叫session，jpa中叫entityManager，Mybatis中叫SqlSession</p>
+<h1 id="Mybatis"><a href="#Mybatis" class="headerlink" title="Mybatis"></a>Mybatis</h1><p>SqlSessionFactory负责创建SqlSession，其作用域应该设置为整个应用，生命周期为应用运行时；SqlSession的实例不是线程安全的，因此不能被共享，所以其作用域是请求或者方法作用域，绝不能将SqlSession实例的引用放在一个类的静态域中，甚至一个类的实例变量都不行。如果处理一个Http请求，打开一个SqlSession，处理完成之后应立即关闭SqlSession，可以放到finally语句中执行</p>
+<p>Mybatis支持动态Sql查询，即根据sql语句中前半部分的结果决定是否执行后半部分的查询或者条件<br>@Mapper注解：我猜这个注解在该mapper被调用时会自动创建一个SqlSession，执行完之后关闭这个SqlSession</p>
+<h1 id="Spring-data-jpa"><a href="#Spring-data-jpa" class="headerlink" title="Spring data jpa"></a>Spring data jpa</h1><p>按照Spring Data JPA的规则自动生成sql语句，无需任何sql语句即可实现CRUD</p>
+<p>比如findByNameAndPassword(String name, String password)方法，spring识别findBy作为: “select * from XXX”，sql语句的where部分则是: “where name = :name and password = :password”<br>参考： <a target="_blank" rel="noopener" href="https://docs.spring.io/spring-data/jpa/docs/current/reference/html/">https://docs.spring.io/spring-data/jpa/docs/current/reference/html/</a></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="https://konnase.github.io/2018/10/11/machine_learning/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%9F%A5%E8%AF%86/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1045,103 +1123,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="https://konnase.github.io/2018/05/11/resource_scheduling/Yarn/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Konnase Lee">
-      <meta itemprop="description" content="There is no ending to learn">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Konnase Lee">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2018/05/11/resource_scheduling/Yarn/" class="post-title-link" itemprop="url">Yarn</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2018-05-11 16:05:57" itemprop="dateCreated datePublished" datetime="2018-05-11T16:05:57+08:00">2018-05-11</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-11-15 19:45:11" itemprop="dateModified" datetime="2021-11-15T19:45:11+08:00">2021-11-15</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Resource-Management/" itemprop="url" rel="index"><span itemprop="name">Resource Management</span></a>
-                </span>
-            </span>
-
-          
-            <span id="/2018/05/11/resource_scheduling/Yarn/" class="post-meta-item leancloud_visitors" data-flag-title="Yarn" title="Views">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-eye"></i>
-              </span>
-              <span class="post-meta-item-text">Views: </span>
-              <span class="leancloud-visitors-count"></span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="Yarn"><a href="#Yarn" class="headerlink" title="Yarn"></a>Yarn</h1><ul>
-<li>编程框架和资源管理器解耦</li>
-<li>以container为单位调度资源<h2 id="ResourceManager"><a href="#ResourceManager" class="headerlink" title="ResourceManager"></a>ResourceManager</h2></li>
-<li>跟踪资源使用量和节点的活跃度</li>
-<li>仲裁租户间的资源竞争</li>
-<li>与客户端的接口，接受客户端提交的应用</li>
-<li>AMService，与AM通信–接受AM资源请求并资源container给AM</li>
-<li>如果应用不合作了，RM可以让NM强制关掉应用所开启的所有containers</li>
-<li>RM崩溃并重启时会从持久化存储中加载其崩溃前存储的状态，并杀掉所有的容器并启动新的AM。正在尝试使RM重启时，AM可以继续运行</li>
-</ul>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2018/05/11/resource_scheduling/Yarn/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1211,7 +1192,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">42</span>
+          <span class="site-state-item-count">43</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -1262,7 +1243,7 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2021</span>
+  <span itemprop="copyrightYear">2022</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>

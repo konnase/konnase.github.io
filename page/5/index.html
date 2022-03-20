@@ -190,6 +190,110 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://konnase.github.io/2017/07/24/java_spring/Spring%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Konnase Lee">
+      <meta itemprop="description" content="There is no ending to learn">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Konnase Lee">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2017/07/24/java_spring/Spring%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86/" class="post-title-link" itemprop="url">Spring相关知识</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2017-07-24 11:50:56" itemprop="dateCreated datePublished" datetime="2017-07-24T11:50:56+08:00">2017-07-24</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2021-11-15 19:43:24" itemprop="dateModified" datetime="2021-11-15T19:43:24+08:00">2021-11-15</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2017/07/24/java_spring/Spring%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86/" class="post-meta-item leancloud_visitors" data-flag-title="Spring相关知识" title="Views">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="传统MVC控制器与RESTful-Web-Service控制器的不同"><a href="#传统MVC控制器与RESTful-Web-Service控制器的不同" class="headerlink" title="传统MVC控制器与RESTful Web Service控制器的不同"></a>传统MVC控制器与RESTful Web Service控制器的不同</h2><p> 传统MVC控制器返回的是一个数据的视图（Model），而RESTful Web Service控制器返回的是Json格式的对象</p>
+<h2 id="Spring的模块"><a href="#Spring的模块" class="headerlink" title="Spring的模块"></a>Spring的模块</h2><p><img src="/img/spring-overview.png" alt="image"></p>
+<ul>
+<li>上图中每个小单元都至少对应一个jar包，提供相应的API供使用。使用Maven工具管理Spring项目时，这些需要用到的jar包集中在用户目录下的.m2文件夹下，而不是包含在项目中。</li>
+<li> 7个模块<blockquote>
+<ol>
+<li>Spring Core：核心容器的主要组件是BeanFactory，BeanFactory使用的是IoC模式</li>
+<li>Spring Context：向Spring框架提供上下文信息的一个配置文件</li>
+<li>Spring AOP：面向切面的编程</li>
+<li>Spring DAO：数据访问层的设计机制，DAO模式是业务逻辑层和持久存储层之间的抽象层，避免持久化代码和业务逻辑混合在一起。</li>
+<li>Spring ORM：对象/关系映射（Object/Relation Mapping），指的是自动将java对象状态映射到关系数据库中的数据上。</li>
+<li>Spring Web：为基于Web的应用程序提供上下文</li>
+<li>Spring MVC：控制器将接收请求，执行更新模型的操作，然后通知视图关于模型更改的消息，依据请求的状态以及请求的控制器，可以决定显示哪个视图。</li>
+</ol>
+</blockquote>
+</li>
+</ul>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2017/07/24/java_spring/Spring%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="https://konnase.github.io/2017/07/23/system_management/win10-ubuntu%E5%AD%90%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%AD%A6%E4%B9%A0%E5%BF%83%E5%BE%97/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -442,7 +546,7 @@ sudo apt-get install glusterfs-server
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">42</span>
+          <span class="site-state-item-count">43</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -493,7 +597,7 @@ sudo apt-get install glusterfs-server
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2021</span>
+  <span itemprop="copyrightYear">2022</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
