@@ -4,6 +4,7 @@ p: resource_scheduling/Yarn
 date: 2018-05-11 16:05:57
 tags: [yarn, scheduling]
 categories: Resource Management
+typora-root-url: ../../../source
 ---
 
 # Yarn

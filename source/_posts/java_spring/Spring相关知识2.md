@@ -4,6 +4,7 @@ p: java_spring/Spring相关知识2
 date: 2018-11-14 19:43:48
 tags: [spring, jpa]
 catagories: java
+typora-root-url: ../../../source
 ---
 
 # JPA 和 Mybatis

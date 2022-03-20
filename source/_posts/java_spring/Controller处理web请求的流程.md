@@ -4,6 +4,7 @@ p: java_spring/Controller处理web请求的流程
 date: 2018-03-17 15:57:39
 tags: [spring, controller, dispatcherservlet]
 categories: java
+typora-root-url: ../../../source
 ---
 
 ## Dispatcher Servlet是怎样被调用的？

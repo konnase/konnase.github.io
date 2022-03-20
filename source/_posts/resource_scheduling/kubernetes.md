@@ -3,6 +3,7 @@ title: kubernetes
 p: resource_scheduling/kubernetes
 date: 2018-09-10 20:26:35
 tags: [kubernetes]
+typora-root-url: ../../../source
 ---
 
 # 设计架构
@@ -16,7 +17,8 @@ k8s的有两步调度策略
   - ImageLocalityPriority：根据主机上是否已具备Pod运行的环境来打分，得分计算：不存在所需镜像，返回0分，存在镜像，镜像越大得分越高
   - LeastRequestedPriority：计算Pods需要的CPU和内存在当前节点可用资源的百分比，具有最小百分比的节点就是最优，得分计算公式：cpu((capacity – sum(requested)) \* 10 / capacity) + memory((capacity – sum(requested)) \* 10 / capacity) / 2
 
-  <!--more-->
+
+<!--more-->
 
 ## Serviceaccount
 一个角色拥有指定的资源权限（可以访问k8s里面的哪些资源，如pods、sercices等）和功能权限（CRUD），通过将RoleBinding将一个role绑定到某个serviceaccount上，即可让资源可通过serviceaccount来访问。关系图如下：

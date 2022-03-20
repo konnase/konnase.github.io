@@ -4,13 +4,15 @@ p: system_management/win10-ubuntu子系统的学习心得
 date: 2017-07-23 15:08:48
 tags: [ubuntu in win10,configuraton]
 categories: System
+typora-root-url: ../../../source
 ---
 
 ## Ubuntu子系统的文件存放位置
 
 > 网上搜索说在C:\Users\lqp19\AppData\Local\lxss目录下面，但本机上没有这个目录
-<!--more-->
-![image](/img/p1.PNG)
+> ![image](/img/p1.PNG)
+>
+> <!--more-->
 
 ## 配置文件
 

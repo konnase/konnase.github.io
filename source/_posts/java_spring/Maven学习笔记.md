@@ -4,17 +4,19 @@ p: java_spring/Maven学习笔记
 date: 2017-11-05 12:59:16
 tags: [maven,spring]
 categories: java
+typora-root-url: ../../../source
 ---
 
 ## TheNEXUS Maven By Example
 
 ### Question
 1. 5.6节提到的依赖中设置scope为provided：This tells Maven that the JAR is “provided” by the container and thus should not be included in the WAR. 是什么意思？
-<!--more-->
 2. 第六章结合了Weather Module和Web Module，其中，在Web Module中加入了Weather的依赖，并添加了WeatherService服务，该服务中的retrieveFormat方法同Main中的start方法完成相同的工作。Web Module中新增WeatherServlet，里面的doGet方法完成实现对http请求的处理，请求天气数据并返回结果到页面展示。
 3. 当Maven执行一个有子模块的project的时候，Maven首先加载parent POM，然后定位所有的子模块。然后将所有的POM交给Maven Reactor，负责分析模块之间的依赖，确保以相应的顺序编译和安装相互依赖的模块。
 4. 第六章运行 mvn jetty:run的时候，提示找不到simple-weather-08-SNAPSHOT.jar这个包。而且Yahoo的weather.yahooapis.com网站访问不了。
 5. web.xml和weather-servlet.xml都是自动加载的吗？
+
+<!--more-->
 
 ### 第七章对象关系
 ![image](/img/multimodule-web-spring_projects.png)

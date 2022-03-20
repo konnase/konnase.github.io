@@ -4,6 +4,7 @@ p: resource_scheduling/kubernetes-搭建
 date: 2018-07-09 14:19:40
 tags: [kubernetes]
 categories: Resource Management
+typora-root-url: ../../../source
 ---
 
 # 使用kubeadm安装kubernetes

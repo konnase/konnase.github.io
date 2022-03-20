@@ -3,6 +3,7 @@ title: elasticsearch configuration
 p: system_management/elasticsearch-configuration
 date: 2018-05-30 13:43:48
 tags: [elasticsearch]
+typora-root-url: ../../../source
 ---
 
 ## DC上配置elasticsearch
@@ -26,6 +27,9 @@ tags: [elasticsearch]
 - 执行`sysctl -w vm.max_map_count=262144`将机器的`vm.max_map_count`调高一些
 - DC上创建service，id为`menya/crawl-mesos-project/elsearch/esmaster`，网络类型选择`VirtualNetwork`，指定镜像并根据官方镜像说明，传入一些环境变量
 - 运行service
+
+<!--more-->
+
 ### 配置node-data
 - 在n138上，新建/etc/elasticsearch/elasticsearch.yml
 ```yaml

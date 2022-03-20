@@ -4,13 +4,11 @@ p: java_spring/Spring相关知识
 date: 2017-07-24 11:50:56
 tags: [spring,annotation,spring mvc]
 categories: java
+typora-root-url: ../../../source
 ---
 
 ## 传统MVC控制器与RESTful Web Service控制器的不同
  传统MVC控制器返回的是一个数据的视图（Model），而RESTful Web Service控制器返回的是Json格式的对象
-
-<!--more-->
----
 
 ## Spring的模块
 
@@ -25,6 +23,8 @@ categories: java
 > 5. Spring ORM：对象/关系映射（Object/Relation Mapping），指的是自动将java对象状态映射到关系数据库中的数据上。
 > 6. Spring Web：为基于Web的应用程序提供上下文
 > 7. Spring MVC：控制器将接收请求，执行更新模型的操作，然后通知视图关于模型更改的消息，依据请求的状态以及请求的控制器，可以决定显示哪个视图。
+
+<!--more-->
 
 
 ## Spring的注解

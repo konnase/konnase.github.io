@@ -3,16 +3,19 @@ title: shadowsocks 搭建
 date: 2018-01-04 14:03:41
 tags: [shadowsocks, switchyomege, chrome]
 categories: System
+typora-root-url: ../../source
 ---
 ## switchyOmega+shadowsocks+chrome科学上网
 
 使用ssr客户端，配置服务器信息后代理规则选择全局
 ![image](/img/proxy_rule.png)
-<!--more-->
 系统代理设置为直连模式
 ![image](/img/system_proxy.png)
 打开选项设置，确保本地为1080
 ![image](/img/localport.png)
+
+<!--more-->
+
 进入chrome，安装SwitchyOmega（安装方法请另行搜索）。修改proxy情景模式（也可新建一个情景模式），代理协议http，服务器127.0.0.1，端口1080（注意此处与ssr客户端设置的端口保持一致）
 ![image](/img/changesituation.png)
 点击应用选项

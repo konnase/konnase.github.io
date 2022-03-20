@@ -12,6 +12,8 @@ categories: Resource Management
 - cgroups 也是通过 VFS 把功能暴露给用户态的，cgroups 与 VFS 之间的衔接部分称之为 cgroups 文件系统。VFS本身就是用 c 语言实现的一套面向对象的接口。
 - Linux中，用户可以使用mount命令挂载 cgroups 文件系统
 
+<!--more-->
+
 ## cpu子系统和cpuacct子系统
 - cpu子系统用来做cpu资源隔离，而cpuacct子系统是用来做cpu资源统计的
 - cpu子系统通过cpu.shares来保证任务最少可以使用的cpu资源数目
